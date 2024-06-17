@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
 import SettingsModal from './components/SettingsModal';
-
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -30,7 +30,9 @@ const App: React.FC = () => {
         <Chat />
         {isSettingsOpen && <SettingsModal onClose={toggleSettingsModal} />}
       </main>
+      <SpeedInsights/>
     </div>
+    
   );
 };
 
