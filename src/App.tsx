@@ -3,7 +3,6 @@ import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
 import SettingsModal from './components/SettingsModal';
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import {FaRegFileCode} from 'react-icons/fa';
 const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
