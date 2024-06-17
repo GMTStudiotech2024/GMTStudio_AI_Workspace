@@ -81,7 +81,7 @@ const Chat: React.FC = () => {
         ]);
         setIsTyping(false);
       }
-    }, 50);
+    }, 45);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
