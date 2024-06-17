@@ -17,7 +17,7 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
           <div className="text-2xl font-bold flex items-center space-x-2">
-            <span>Mazs AI v0.1 </span>
+            <span className="">Mazs AI v0.1.a </span>
           </div>
           <button
             onClick={toggleSettingsModal}
