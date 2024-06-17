@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import {FaRegFileCode} from 'react-icons/fa';
 interface SettingsModalProps {
   onClose: () => void;
 }
@@ -16,7 +16,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-darkGrey p-6 rounded shadow-lg w-96">
-        <h2 className="text-xl mb-4">Settings</h2>
+        <h2 className="text-xl mb-4"><FaRegFileCode /></h2>
         <div className="mb-4">
           <label className="block mb-2">Theme Color</label>
           <select value={themeColor} onChange={(e) => setThemeColor(e.target.value)} className="w-full bg-mediumGrey p-2 rounded">
