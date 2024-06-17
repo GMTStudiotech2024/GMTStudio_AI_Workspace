@@ -7,7 +7,7 @@ interface Message {
 }
 
 const keywordResponses: { [keyword: string]: string } = {
- hello:'Hello ! Is there  anything I can help with ? You can type --help to see what I can do !',
+ hello:'Hello ! Is there  anything I can help with ? You can type help to see what I can do !',
  hi:'Hi ? Anything wrong ? You can type --help see what I can do !',
 name:'I am the AI who works in GMTStudio, They called me MAZS AI',
 date:'Since I cannot access to the internet, I dont know the time, so I am guessing, maybe 13 o clock, right ?',
@@ -18,7 +18,7 @@ Health:"I am not a doctor, but i can give you some adivse :) for example, if you
 music:"since I don't have ears, i don't know music",
 
 
-  "--help": 'I can help you with the following things : \n\n 1.  Say hi to you \n 2.  tell you about the team or studio or company which created me  \n 3.  tell you basic information \n 4.  err.... dont know but maybe talk to you \n 5. I can hack into your computer and use your file as my data ! just kidding I cant, but I will do it if our developer are smart enough. \n 6. You can type some command like --GMTStudio and --About to see more ! ',
+  "help": 'I can help you with the following things : \n\n 1.  Say hi to you \n 2.  tell you about the team or studio or company which created me  \n 3.  tell you basic information \n 4.  err.... dont know but maybe talk to you \n 5. I can hack into your computer and use your file as my data ! just kidding I cant, but I will do it if our developer are smart enough. \n 6. You can type some command like --GMTStudio and --About to see more ! ',
   "--about":'About me ? Hmmm that is indead a great mystery, First, I am just one day old how dare you ask me that question ? and Yes I admit that I can answer that answer but My boss says no.',
   "--GMTStudio":'GMTStudio is a startup company based in the Taiwan. they are a group of 6 people plus one AI which is me, who are trying to make the technology better. ',
   "--developer mode":'🔐 Are you sure you want to open Developer Mode ? (type --confirm  to Open) ',
