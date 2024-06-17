@@ -14,12 +14,11 @@ const App: React.FC = () => {
   return (
     <div className="flex h-screen bg-background text-white overflow-hidden">
       <Sidebar />
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col overflow-hidden">
         <header className="flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
-        <div className="text-2xl font-bold flex items-center space-x-2">
-        <span>Mazs AI 0.1v</span>
-        </div>
-
+          <div className="text-2xl font-bold flex items-center space-x-2">
+            <span>Mazs AI v0.1 </span>
+          </div>
           <button
             onClick={toggleSettingsModal}
             className="bg-primary p-2 rounded"
@@ -32,7 +31,6 @@ const App: React.FC = () => {
       </main>
       <SpeedInsights/>
     </div>
-    
   );
 };
 
