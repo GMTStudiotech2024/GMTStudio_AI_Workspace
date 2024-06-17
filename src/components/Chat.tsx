@@ -12,7 +12,7 @@ const keywordResponses: { [keyword: string]: string } = {
 name:'I am the AI who works in GMTStudio, They called me MAZS AI',
 date:'Since I cannot access to the internet, I dont know the time, so I am guessing, maybe 13 o clock, right ?',
 code:'well I am built with code, so I dont know how i can help you with and help you edit you code, this is irony isnt it? ',
-Ai :"AI ? that is the things you are using right now, basically I am a computer, I dont know what you want me to do, I am not a witch or harry potter!",
+Ai:"AI ? that is the things you are using right now, basically I am a computer, I dont know what you want me to do, I am not a witch or harry potter!",
 technology:"this is a words created by humans , which i don't actually know about it ",
 Health:"I am not a doctor, but i can give you some adivse :) for example, if you have headach, you have cancer, your nose are stuck, you have cancer! your hands made a loud noise, not cancer but you have broken your bones ",
 music:"since I don't have ears, i don't know music",
