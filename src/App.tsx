@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
-import SettingsModal from './components/SettingsModal';
+import UpdateInfoModal from './components/SettingsModal';  // Adjust import to match the correct path
 import { SpeedInsights } from "@vercel/speed-insights/react";
+
 const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -16,7 +17,7 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
           <div className="text-2xl font-bold flex items-center space-x-2">
-            <span className="">Mazs AI v0.1.a </span>
+            <span>Mazs AI v0.1.b</span>
           </div>
           <button
             onClick={toggleSettingsModal}
@@ -26,9 +27,16 @@ const App: React.FC = () => {
           </button>
         </header>
         <Chat />
-        {isSettingsOpen && <SettingsModal onClose={toggleSettingsModal} />}
+        {isSettingsOpen && (
+          <UpdateInfoModal
+            onClose={toggleSettingsModal}
+            title="Latest Updates"
+            version="v0.1.b"
+            description="We expanded the training data from 200 words to 250 words, which make him a bit smarter"
+          />
+        )}
       </main>
-      <SpeedInsights/>
+      <SpeedInsights />
     </div>
   );
 };
