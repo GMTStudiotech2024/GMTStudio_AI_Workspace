@@ -8,7 +8,7 @@ interface Message {
 
 const keywordResponses: { [keyword: string]: string } = {
  hello:'Hello ! Is there  anything I can help with ? You can type help to see what I can do !',
- hi:'Hi ? Anything wrong ? You can type --help see what I can do !',
+ hi:'Hi ! Anything wrong ? You can type --help see what I can do !',
 name:'I am the AI who works in GMTStudio, They called me MAZS AI',
 date:'Since I cannot access to the internet, I dont know the time, so I am guessing, maybe 13 o clock, right ?',
 code:'well I am built with code, so I dont know how i can help you with and help you edit you code, this is irony isnt it? ',
@@ -16,8 +16,11 @@ Ai:"AI ? that is the things you are using right now, basically I am a computer, 
 technology:"this is a words created by humans , which i don't actually know about it ",
 Health:"I am not a doctor, but i can give you some adivse :) for example, if you have headach, you have cancer, your nose are stuck, you have cancer! your hands made a loud noise, not cancer but you have broken your bones ",
 music:"since I don't have ears, i don't know music",
-
-
+token : "Um, that is a great question, for me 10 token is about 10000 US, but you, my friend, can use this freely, ( I am going to store our chat history! ",
+no:"Why so mean? I am just a computer",
+fuck:"Hey Hey Hey, stop it, go inside the fridge and chill the fuck out!",
+"Can you ":"I don't have the ability to can",
+"weather": "it's nine p.m. ",
   "help": 'I can help you with the following things : \n\n 1.  Say hi to you \n 2.  tell you about the team or studio or company which created me  \n 3.  tell you basic information \n 4.  err.... dont know but maybe talk to you \n 5. I can hack into your computer and use your file as my data ! just kidding I cant, but I will do it if our developer are smart enough. \n 6. You can type some command like --GMTStudio and --About to see more ! ',
   "--about":'About me ? Hmmm that is indead a great mystery, First, I am just one day old how dare you ask me that question ? and Yes I admit that I can answer that answer but My boss says no.',
   "--GMTStudio":'GMTStudio is a startup company based in the Taiwan. they are a group of 6 people plus one AI which is me, who are trying to make the technology better. ',
