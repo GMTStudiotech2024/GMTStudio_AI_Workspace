@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaPaperPlane } from 'react-icons/fa';
+import natural from 'natural';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -7,8 +8,7 @@ interface Message {
 }
 
 const keywordResponses: { [keyword: string]: string } = {
-  hello: 'Hello! How can I assist you today? Type "help" to see what I can do!',
-  hi: 'Hi there! Is there something you need help with? Type "help" to see my capabilities!',
+  hello: 'Hello and welcome to GMTStudio AI Studio! ',
   name: 'I am the AI developed by GMTStudio. You can call me MAZS AI.',
   date: "I don't have internet access to check the exact time, but I guess it's around 1 PM. Am I right?",
   code: "I'm built with code and can offer some advice, though editing code isn't my forte. Funny, isn't it?",
@@ -18,19 +18,24 @@ const keywordResponses: { [keyword: string]: string } = {
   music: "I don't have ears to enjoy music, but I can chat about it if you'd like.",
   token: "Good question! For me, 10 tokens equate to 10,000 USD. But don't worry, our chat is free!",
   no: "Why so negative? I'm just trying to help!",
-  fuck: "Let's keep the conversation respectful, please.",
   can: "My abilities are limited, but I'll do my best to assist you.",
-  weather: "I can't check the weather right now, but it's always a good idea to be prepared!",
+  forecast: "I can't check the weather right now, but it's always a good idea to be prepared!",
   help: 'Here’s what I can assist with:\n1. Say hi\n2. Tell you about my creators\n3. Provide basic info\n4. Engage in a conversation\n5. Just kidding about hacking into your computer! Type commands like --GMTStudio or --About for more info.',
-  '--about': "I'm a young AI, just a day old! My purpose and capabilities are still being developed.",
-  '--GMTStudio': 'GMTStudio is a startup in Taiwan with a team of six people plus me, striving to improve technology.',
-  '--developer mode': '🔐 Are you sure you want to enter Developer Mode? (type --confirm to proceed)',
-  '--confirm': '🔓 Developer mode enabled. You can now use .dev-[Your sentence], e.g., .dev-hello',
-  '.dev-hello': 'Hello! I am MAZS AI, here to assist you with anything you need.',
-  '.dev-hi': 'Hi! I am MAZS AI, your personal AI assistant from GMTStudio.',
 };
 
 const defaultResponse = 'I’m not sure how to respond to that. Can you ask something else or contact the GMTStudio team for help?';
+
+const fetchWeather = async (): Promise<string> => {
+  // Replace with actual weather API call
+  return 'The weather is sunny with a high of 25°C and a low of 15°C.';
+};
+
+const getBotResponse = (userMessage: string, keywords: { [keyword: string]: string }): string => {
+  const tokenizer = new natural.WordTokenizer();
+  const words = tokenizer.tokenize(userMessage.toLowerCase());
+  const responses = words.map(word => keywords[word]).filter(Boolean);
+  return responses.join(' ') || defaultResponse;
+};
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -55,15 +60,13 @@ const Chat: React.FC = () => {
     }
   };
 
-  const generateBotResponse = (userMessage: string) => {
-    let botResponse = defaultResponse;
-    const words = userMessage.toLowerCase().split(/\W+/);
-    for (const word of words) {
-      if (keywordResponses[word]) {
-        botResponse = keywordResponses[word];
-        break;
-      }
+  const generateBotResponse = async (userMessage: string) => {
+    let botResponse = getBotResponse(userMessage, keywordResponses);
+    
+    if (userMessage.toLowerCase().includes('weather')) {
+      botResponse = await fetchWeather();
     }
+
     typeBotResponse(botResponse);
   };
 
@@ -94,6 +97,10 @@ const Chat: React.FC = () => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <div className="flex-1 flex flex-col justify-end overflow-hidden bg-darkGrey">
