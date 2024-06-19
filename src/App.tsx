@@ -32,7 +32,7 @@ const App: React.FC = () => {
             onClose={toggleSettingsModal}
             title="Latest Updates"
             version="v0.1.c"
-            description="We expanded the training data from 250 to 275 words, which make him a bit smarter"
+            description="We expanded the training data from 250 to 500 words, which make him a bit smarter"
           />
         )}
       </main>
