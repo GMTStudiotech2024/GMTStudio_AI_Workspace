@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaPaperPlane } from 'react-icons/fa';
 
 interface Message {
@@ -33,7 +33,7 @@ const keywordResponses: { [keyword: string]: string } = {
   can: "My abilities are limited, but I'll do my best to assist you.",
   forecast: "I can't check the weather right now, but it's always a good idea to be prepared!",
   help: 'Here’s what I can assist with:\n1. Say hi\n2. Tell you about my creators\n3. Provide basic info\n4. Engage in a conversation\n5. Just kidding about hacking into your computer! Type commands like --GMTStudio or --About for more info.',
-  GMTStudio: "GMTStudio is a group of people who are passionate about technology and design the tools and application that can enhance you life. We are a community of coders and developers.",
+  GMTStudio: "GMTStudio is a group of people who are passionate about technology and design tools and applications that can enhance your life. We are a community of coders and developers.",
   "What did they do?": "They created a website that allows you to connect to future technology.",
 };
 
@@ -57,7 +57,7 @@ const Chat: React.FC = () => {
       setMessages([...messages, newMessage]);
       setInputValue("");
       setIsTyping(true);
-      generateBotResponse(inputValue);
+      generateBotResponse(newMessage.text);
     }
   };
 
@@ -69,9 +69,11 @@ const Chat: React.FC = () => {
 
   const generateBotResponse = async (userMessage: string) => {
     let botResponse = defaultResponse;
-    const words = userMessage.toLowerCase().split(/\W+/);
+    const lowerCaseMessage = userMessage.toLowerCase();
+    const words = lowerCaseMessage.split(/\W+/);
     const matchedResponses = new Set<string>();
 
+    // Detect keywords and synonyms
     for (const word of words) {
       const keyword = synonymResponses[word] || word;
       if (keywordResponses[keyword]) {
@@ -79,13 +81,47 @@ const Chat: React.FC = () => {
       }
     }
 
+    // Advanced pattern matching
+    if (/what is your name\??/.test(lowerCaseMessage)) {
+      matchedResponses.add(keywordResponses['name']);
+    }
+    if (/what is the date|time\??/.test(lowerCaseMessage)) {
+      matchedResponses.add(keywordResponses['date']);
+    }
+    if (/weather/.test(lowerCaseMessage)) {
+      matchedResponses.add(await fetchWeather());
+    }
+    if (/help/.test(lowerCaseMessage)) {
+      matchedResponses.add(keywordResponses['help']);
+    }
+
     if (matchedResponses.size > 0) {
       botResponse = Array.from(matchedResponses).join(' ');
-    } else if (userMessage.toLowerCase().includes('weather')) {
-      botResponse = await fetchWeather();
+    }
+
+    // Contextual responses
+    if (lowerCaseMessage.includes('thank you') || lowerCaseMessage.includes('thanks')) {
+      botResponse = 'You’re welcome! Is there anything else I can help with?';
+    }
+
+    // Custom commands handling
+    if (lowerCaseMessage.startsWith('--')) {
+      const command = lowerCaseMessage.slice(2);
+      botResponse = handleCustomCommands(command);
     }
 
     typeBotResponse(botResponse);
+  };
+
+  const handleCustomCommands = (command: string): string => {
+    switch (command) {
+      case 'GMTStudio':
+        return "GMTStudio is a group of people who are passionate about technology and design tools and applications that can enhance your life. We are a community of coders and developers.";
+      case 'About':
+        return "This chat bot is developed by GMTStudio to assist with general queries and provide basic information.";
+      default:
+        return defaultResponse;
+    }
   };
 
   const typeBotResponse = (text: string) => {
@@ -115,6 +151,10 @@ const Chat: React.FC = () => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <div className="flex-1 flex flex-col justify-end overflow-hidden bg-darkGrey">
