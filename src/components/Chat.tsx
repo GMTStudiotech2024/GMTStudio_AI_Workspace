@@ -35,7 +35,6 @@ const keywordResponses: { [keyword: string]: string } = {
   help: 'Here’s what I can assist with:\n1. Say hi\n2. Tell you about my creators\n3. Provide basic info\n4. Engage in a conversation\n5. Just kidding about hacking into your computer! Type commands like --GMTStudio or --About for more info.',
   GMTStudio: "GMTStudio is a group of people who are passionate about technology and design the tools and application that can enhance you life. We are a community of coders and developers.",
   "What did they do?": "They created a website that allows you to connect to future technology.",
-  
 };
 
 const defaultResponse = 'I’m not sure how to respond to that. Can you ask something else or contact the GMTStudio team for help?';
