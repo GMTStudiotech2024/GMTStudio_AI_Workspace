@@ -115,7 +115,7 @@ const Chat: React.FC = () => {
   return (
     <div className={`flex flex-col h-screen ${darkMode ? 'bg-black text-gray-100' : 'bg-white text-gray-900'}`}>
       <div className="flex justify-between p-4">
-        <h1 className="text-2xl font-bold">🖥️</h1>
+        <h1 className="text-2xl font-bold">Mazs AI</h1>
         <button onClick={() => setDarkMode(!darkMode)} className="p-2">
           {darkMode ? <FaSun className="text-yellow-500" /> : <FaMoon className="text-gray-700" />}
         </button>
