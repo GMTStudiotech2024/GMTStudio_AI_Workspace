@@ -1,0 +1,46 @@
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-50%);
+    }
+  }
+  
+  .message {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .sidebar {
+    animation: slideIn 0.5s ease-in-out;
+  }
+  
+  .typing-indicator-dots span {
+    animation: bounce 1s infinite;
+  }
+  
+  /* Media Queries for Sidebar */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+    }
+  }
+  

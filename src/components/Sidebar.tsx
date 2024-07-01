@@ -1,138 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { FaBars, FaTrash } from 'react-icons/fa';
-import logo from '../assets/GMTStudio-AI_studio.png';
+import React, { useState } from 'react';
+import { FaPlus, FaChevronDown, FaSearch, FaTimes } from 'react-icons/fa';
+import './animations.css';
 
-interface Chat {
-  id: number;
+interface ChatItem {
+  id: string;
   title: string;
   lastMessage: string;
+  timestamp: string;  // Add timestamp to the ChatItem interface
 }
 
-const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+interface SidebarProps {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+}
 
-  // Load chat history from localStorage
-  useEffect(() => {
-    const storedChats = localStorage.getItem('chatHistory');
-    if (storedChats) {
-      setChatHistory(JSON.parse(storedChats));
-    }
-  }, []);
-
-  // Save chat history to localStorage
-  const saveChatHistory = (chats: Chat[]) => {
-    localStorage.setItem('chatHistory', JSON.stringify(chats));
-  };
+const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }) => {
+  const [chats, setChats] = useState<ChatItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const addNewChat = () => {
-    const newChatTitle = prompt('Enter the chat title:');
-    if (newChatTitle) {
-      const newChat: Chat = {
-        id: chatHistory.length > 0 ? chatHistory[chatHistory.length - 1].id + 1 : 1,
-        title: newChatTitle,
-        lastMessage: '',
-      };
-      const updatedChatHistory = [...chatHistory, newChat];
-      setChatHistory(updatedChatHistory);
-      saveChatHistory(updatedChatHistory);
-    }
+    const currentTimestamp = new Date().toLocaleString();  // Get the current timestamp
+    const newChat = {
+      id: Date.now().toString(),
+      title: 'New chat',
+      lastMessage: 'No messages yet',
+      timestamp: currentTimestamp  // Set the timestamp for the new chat
+    };
+    setChats([...chats, newChat]);
   };
 
-  const deleteChat = (id: number) => {
-    const updatedChatHistory = chatHistory.filter(chat => chat.id !== id);
-    setChatHistory(updatedChatHistory);
-    saveChatHistory(updatedChatHistory);
-  };
+  const filteredChats = chats.filter(chat => 
+    chat.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <>
-      <div className="w-64 bg-background p-4 flex flex-col lg:flex border-b border-mediumGrey">
-        <div className="flex items-center space-x-2 mb-10 border-b-mediumGrey pb-4">
-          <img src={logo} alt="GMT Studio AI Dev" className="max-w-12" />
-          <div className="text-2xl font-bold">GMTStudio AI Workspace</div>
+    <div>
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-200 ease-in-out md:relative md:translate-x-0 bg-gray-900 text-white w-64 h-screen sidebar`}>
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-xl font-bold">GMTStudio AI Studio</h1>
+          <button onClick={addNewChat} className="p-2">
+            <FaPlus />
+          </button>
+          <button onClick={toggleSidebar} className="p-2 md:hidden">
+            <FaTimes />
+          </button>
         </div>
-
-        <button onClick={addNewChat} className="bg-white p-2 mb-5 rounded-xl text-black">+ New Chat</button>
-
-        <div className="w-45 mb-4">
-          <div className="relative w-full min-w-[200px] h-10">
-            <input
-              className="peer w-full h-full bg-transparent text-white font-sans font-normal outline outline-0 focus:outline-0 disabled:bg-white disabled:border-0 transition-all placeholder-shown:border placeholder-shown:border-white placeholder-shown:border-t-white border focus:border-2 border-t-transparent focus:border-t-transparent text-sm px-3 py-2.5 rounded-[7px] border-white focus:border-white"
-              placeholder=" "
-            />
-            <label className="flex w-full h-full select-none pointer-events-none absolute left-0 font-normal !overflow-visible truncate peer-placeholder-shown:text-white leading-tight peer-focus:leading-tight peer-disabled:text-transparent peer-disabled:peer-placeholder-shown:text-white transition-all -top-1.5 peer-placeholder-shown:text-sm text-[11px] peer-focus:text-[11px] before:content[' '] before:block before:box-border before:w-2.5 before:h-1.5 before:mt-[6.5px] before:mr-1 peer-placeholder-shown:before:border-transparent before:rounded-tl-md before:border-t peer-focus:before:border-t-2 before:border-l peer-focus:before:border-l-2 before:pointer-events-none before:transition-all peer-disabled:before:border-transparent after:content[' '] after:block after:flex-grow after:box-border after:w-2.5 after:h-1.5 after:mt-[6.5px] after:ml-1 peer-placeholder-shown:after:border-transparent after:rounded-tr-md after:border-t peer-focus:after:border-t-2 after:border-r peer-focus:after:border-r-2 after:pointer-events-none after:transition-all peer-disabled:after:border-transparent peer-placeholder-shown:leading-[3.75] text-white peer-focus:text-white before:border-white peer-focus:before:!border-white after:border-white peer-focus:after:!border-white">
-              Search Chat History
-            </label>
-          </div>
+        <div className="relative p-4">
+          <input
+            type="text"
+            placeholder="Search chats..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-gray-800 text-white p-2 rounded"
+          />
+          <FaSearch className="absolute right-6 top-7 text-gray-500" />
         </div>
-
-        <div className="flex-1 overflow-auto">
-          {chatHistory.length > 0 ? (
-            <ul>
-              {chatHistory.map((chat) => (
-                <li key={chat.id} className="mb-4 p-2 border-b border-lightGrey cursor-pointer hover:bg-hoverGrey rounded-md flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="bg-primary w-10 h-10 flex items-center justify-center rounded-full text-white font-bold mr-3">
-                      {chat.title.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-white">{chat.title}</div>
-                      <div className="text-sm text-lightGrey">{chat.lastMessage}</div>
-                    </div>
-                  </div>
-                  <button onClick={() => deleteChat(chat.id)} className="text-red-500 hover:text-red-700">
-                    <FaTrash />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="text-lightGrey">No chats.</div>
-          )}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {filteredChats.map(chat => (
+            <div key={chat.id} className="flex items-center justify-between p-2 bg-gray-800 rounded-lg">
+              <div>
+                <h2 className="font-semibold">{chat.title}</h2>
+                <p className="text-sm text-gray-400">{chat.lastMessage}</p>
+                <p className="text-xs text-gray-500">{chat.timestamp}</p> {/* Display the timestamp */}
+              </div>
+              <button className="p-2">
+                <FaChevronDown />
+              </button>
+            </div>
+          ))}
         </div>
       </div>
-
-      <button className="lg:hidden p-4" onClick={() => setIsOpen(!isOpen)}>
-        <FaBars />
-      </button>
-
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
-          <div className="w-64 bg-darkGrey p-4 flex flex-col">
-            <div className="flex items-center space-x-2 mb-4">
-              <img src={logo} alt="GMT Studio AI Dev" className="w-10 h-10" />
-              <span className="text-2xl font-bold">GMT Studio AI Dev</span>
-            </div>
-            <button onClick={addNewChat} className="bg-primary p-2 mb-4 rounded-xl">+ New Chat</button>
-            <div className="flex-1 overflow-auto">
-              {chatHistory.length > 0 ? (
-                <ul>
-                  {chatHistory.map((chat) => (
-                    <li key={chat.id} className="mb-4 p-2 border-b border-lightGrey cursor-pointer hover:bg-hoverGrey rounded-md flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="bg-primary w-10 h-10 flex items-center justify-center rounded-full text-white font-bold mr-3">
-                          {chat.title.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-white">{chat.title}</div>
-                          <div className="text-sm text-lightGrey">{chat.lastMessage}</div>
-                        </div>
-                      </div>
-                      <button onClick={() => deleteChat(chat.id)} className="text-red-500 hover:text-red-700">
-                        <FaTrash />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="text-lightGrey">No chats.</div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 };
 
