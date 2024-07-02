@@ -1,46 +1,35 @@
-@keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideIn {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(0);
-    }
-  }
-  
-  @keyframes bounce {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-50%);
-    }
-  }
-  
-  .message {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-  
-  .sidebar {
-    animation: slideIn 0.5s ease-in-out;
-  }
-  
-  .typing-indicator-dots span {
-    animation: bounce 1s infinite;
-  }
-  
-  /* Media Queries for Sidebar */
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 100%;
-    }
-  }
-  
+/* animations.css */
+.sidebar {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar input[type="text"] {
+  padding-left: 2.5rem; /* Space for search icon */
+}
+
+.sidebar .p-4 {
+  padding: 1rem;
+}
+
+.sidebar .p-1 {
+  padding: 0.25rem;
+}
+
+.sidebar img {
+  border-radius: 50%;
+}
+
+.sidebar h2 {
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar .rotate-180 {
+  transform: rotate(180deg);
+}

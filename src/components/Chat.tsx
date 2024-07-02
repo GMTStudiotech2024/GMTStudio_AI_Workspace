@@ -14,6 +14,7 @@ interface Suggestion {
   icon: React.ReactNode;
 }
 
+
 const initialContext = {
   topic: '',
   quizState: { active: false, question: '', answer: '' },
@@ -28,7 +29,9 @@ const responses: { [key: string]: string } = {
   quiz_capitals: "Sure! Let's start a quiz. What is the capital of France?",
   python_script: "I can help you with Python scripts. For example, here's a script for sending daily email reports.",
   comfort_friend: "Here's a message to comfort a friend: 'I'm here for you, always.'",
-  plan_relaxing_day: "To plan a relaxing day, start with a good breakfast, a walk in nature, and some meditation."
+  plan_relaxing_day: "To plan a relaxing day, start with a good breakfast, a walk in nature, and some meditation.",
+  weather_today: "I'm not connected to the internet, but you can check your local weather forecast online.",
+  tell_joke: "Why don't scientists trust atoms? Because they make up everything!"
 };
 
 const patterns: { [key: string]: RegExp } = {
@@ -40,7 +43,9 @@ const patterns: { [key: string]: RegExp } = {
   python_script: /\b(python script for daily email reports)\b/i,
   comfort_friend: /\b(message to comfort a friend)\b/i,
   plan_relaxing_day: /\b(plan a relaxing day)\b/i,
-  my_name_is: /\b(my name is (\w+))\b/i
+  my_name_is: /\b(my name is (\w+))\b/i,
+  weather_today: /\b(weather today|current weather)\b/i,
+  tell_joke: /\b(tell me a joke|make me laugh)\b/i
 };
 
 const Chat: React.FC = () => {
@@ -201,10 +206,11 @@ const Chat: React.FC = () => {
           </div>
         ))}
         {isTyping && (
-          <div className="flex justify-start">
-            <div className="bg-gray-800 text-white rounded-lg p-3 max-w-xs flex items-center space-x-2 typing-indicator">
-              <FaRobot />
-              <div className="typing-indicator-dots flex space-x-1">
+          <div className="flex justify-start message">
+            <div className="flex flex-col max-w-xs items-start">
+              <div className="flex items-center space-x-2 rounded-lg p-3 bg-gray-800 text-white">
+                <FaRobot className="mt-1" />
+                <span>...</span>
                 <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></span>
                 <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
                 <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.7s' }}></span>
