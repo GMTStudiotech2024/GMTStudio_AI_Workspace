@@ -26,7 +26,7 @@ const App: React.FC = () => {
             <button onClick={toggleSidebar} className="md:hidden p-2">
               <FaBars />
             </button>
-            <span>Mazs AI v0.1.c</span>
+            <span>Mazs AI v0.1.5</span>
           </div>
           <button
             onClick={toggleSettingsModal}
