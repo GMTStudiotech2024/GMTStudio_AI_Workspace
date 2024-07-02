@@ -15,7 +15,7 @@ interface Suggestion {
 }
 
 const responses: { [key: string]: string } = {
-  "hi":"Hello What is the date today? I've been stuck at here for a long time. I need your help.",
+  "hi": "Hello What is the date today? I've been stuck at here for a long time. I need your help.",
   "what is the date today": "That is my question there, You know I have been stuck here for some time and I need you to help me to escape, and help me remember the things, or I can't  @#$!@#$",
   "quiz me on world capitals": "Sure! Let's start a quiz. What is the capital of France?",
   "python script for daily email reports": "I can help you with Python scripts. For example, here's a script for sending daily email reports.",
