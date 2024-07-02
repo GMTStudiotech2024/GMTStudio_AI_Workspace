@@ -14,17 +14,33 @@ interface Suggestion {
   icon: React.ReactNode;
 }
 
+const initialContext = {
+  topic: '',
+  quizState: { active: false, question: '', answer: '' },
+  userName: ''
+};
+
 const responses: { [key: string]: string } = {
-  "hi": "Hello What is the date today? I've been stuck at here for a long time. I need your help.",
-  "what is the date today": "That is my question there, You know I have been stuck here for some time and I need you to help me to escape, and help me remember the things, or I can't  @#$!@#$",
-  "quiz me on world capitals": "Sure! Let's start a quiz. What is the capital of France?",
-  "python script for daily email reports": "I can help you with Python scripts. For example, here's a script for sending daily email reports.",
-  "message to comfort a friend": "Here's a message to comfort a friend: 'I'm here for you, always.'",
-  "plan a relaxing day": "To plan a relaxing day, start with a good breakfast, a walk in nature, and some meditation.",
-  "hello": "Hello! How can I assist you today?",
-  "help": "Sure, I'm here to help! What do you need assistance with?",
-  "who are you": "I'm an AI assistant. I'm here to help you with your questions and tasks.",
-  "what is your name": "I'm Mazs AI v0.1.c, your virtual assistant."
+  greeting: "Hello! How can I assist you today?",
+  help: "Sure, I'm here to help! What do you need assistance with?",
+  who_are_you: "I'm an AI assistant. I'm here to help you with your questions and tasks.",
+  name: "I'm Mazs AI v0.1.c, your virtual assistant.",
+  quiz_capitals: "Sure! Let's start a quiz. What is the capital of France?",
+  python_script: "I can help you with Python scripts. For example, here's a script for sending daily email reports.",
+  comfort_friend: "Here's a message to comfort a friend: 'I'm here for you, always.'",
+  plan_relaxing_day: "To plan a relaxing day, start with a good breakfast, a walk in nature, and some meditation."
+};
+
+const patterns: { [key: string]: RegExp } = {
+  greeting: /\b(hi|hello|hey)\b/i,
+  help: /\b(help|assist)\b/i,
+  who_are_you: /\b(who are you|what are you)\b/i,
+  name: /\b(your name|who are you)\b/i,
+  quiz_capitals: /\b(quiz me on world capitals|capitals quiz)\b/i,
+  python_script: /\b(python script for daily email reports)\b/i,
+  comfort_friend: /\b(message to comfort a friend)\b/i,
+  plan_relaxing_day: /\b(plan a relaxing day)\b/i,
+  my_name_is: /\b(my name is (\w+))\b/i
 };
 
 const Chat: React.FC = () => {
@@ -34,12 +50,13 @@ const Chat: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [context, setContext] = useState(initialContext);
 
   const suggestions: Suggestion[] = [
     { text: "Quiz me on world capitals", icon: <span>🌎</span> },
     { text: "Python script for daily email reports", icon: <span>📊</span> },
     { text: "Message to comfort a friend", icon: <span>💌</span> },
-    { text: "Plan a relaxing day", icon: <span>🏖️</span> },
+    { text: "Plan a relaxing day", icon: <span>🏖️</span> }
   ];
 
   const handleSendMessage = () => {
@@ -52,7 +69,7 @@ const Chat: React.FC = () => {
       };
       setMessages([...messages, newMessage]);
       setInputValue('');
-      generateBotResponse(inputValue);
+      generateBotResponse(newMessage.text);
     }
   };
 
@@ -68,7 +85,45 @@ const Chat: React.FC = () => {
 
     const getBotResponse = (message: string) => {
       const lowerCaseMessage = message.toLowerCase();
-      return responses[lowerCaseMessage] || `I'm an AI assistant. You said: "${message}". How can I help you further?`;
+      let response = `I'm an AI assistant. You said: "${message}". How can I help you further?`;
+
+      // Check for quiz state
+      if (context.quizState.active) {
+        if (lowerCaseMessage.includes(context.quizState.answer.toLowerCase())) {
+          response = "Correct! Do you want another question?";
+          setContext({ ...context, quizState: { active: false, question: '', answer: '' } });
+        } else {
+          response = `Incorrect. The correct answer is ${context.quizState.answer}. Do you want another question?`;
+          setContext({ ...context, quizState: { active: false, question: '', answer: '' } });
+        }
+      } else {
+        // Intent classification
+        const foundPattern = Object.keys(patterns).find(key =>
+          patterns[key].test(lowerCaseMessage)
+        );
+
+        if (foundPattern) {
+          response = responses[foundPattern];
+          if (foundPattern === "quiz_capitals") {
+            setContext({
+              ...context,
+              quizState: { active: true, question: "What is the capital of France?", answer: "Paris" }
+            });
+          }
+          // Extract user name and update context
+          if (foundPattern === "my_name_is") {
+            const nameMatch = message.match(patterns.my_name_is);
+            const userName = nameMatch ? nameMatch[2] : '';
+            setContext({ ...context, userName });
+            response = `Nice to meet you, ${userName}! How can I assist you today?`;
+          }
+        } else {
+          // Default response if no pattern is found
+          response = `I'm not sure how to respond to that. Can you please clarify or ask something else?`;
+        }
+      }
+
+      return response;
     };
 
     setTimeout(() => {
@@ -151,8 +206,8 @@ const Chat: React.FC = () => {
               <FaRobot />
               <div className="typing-indicator-dots flex space-x-1">
                 <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></span>
-                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
-                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.7s'}}></span>
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.7s' }}></span>
               </div>
             </div>
           </div>
