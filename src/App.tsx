@@ -1,3 +1,4 @@
+// App.tsx
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
@@ -9,6 +10,7 @@ const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+
   const toggleSettingsModal = () => {
     setIsSettingsOpen(!isSettingsOpen);
   };
@@ -17,9 +19,16 @@ const App: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+
+
+
+
+
   return (
     <div className="flex h-screen bg-background text-white overflow-hidden">
-      <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <Sidebar 
+        isSidebarOpen={isSidebarOpen}
+  toggleSidebar={toggleSidebar} onSelectChat={() => {}}      />
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
           <div className="text-2xl font-bold flex items-center space-x-2">
