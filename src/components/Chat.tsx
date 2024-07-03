@@ -14,7 +14,6 @@ interface Suggestion {
   icon: React.ReactNode;
 }
 
-
 const initialContext = {
   topic: '',
   quizState: { active: false, question: '', answer: '' },
@@ -25,7 +24,7 @@ const responses: { [key: string]: string } = {
   greeting: "Hello! How can I assist you today?",
   help: "Sure, I'm here to help! What do you need assistance with?",
   who_are_you: "I'm an AI assistant. I'm here to help you with your questions and tasks.",
-  name: "I'm Mazs AI v0.1.c, your virtual assistant.",
+  name: "I'm Mazs AI v0.1.5, your virtual assistant.",
   quiz_capitals: "Sure! Let's start a quiz. What is the capital of France?",
   python_script: "I can help you with Python scripts. For example, here's a script for sending daily email reports.",
   comfort_friend: "Here's a message to comfort a friend: 'I'm here for you, always.'",
@@ -47,6 +46,20 @@ const patterns: { [key: string]: RegExp } = {
   weather_today: /\b(weather today|current weather)\b/i,
   tell_joke: /\b(tell me a joke|make me laugh)\b/i
 };
+
+const synonyms: { [key: string]: string[] } = {
+  hello: ['hi', 'hey', 'greetings'],
+  help: ['assist', 'aid', 'support'],
+  name: ['who are you', 'what are you'],
+  quiz: ['quiz me on world capitals', 'capitals quiz'],
+  python: ['python script for daily email reports'],
+  comfort: ['message to comfort a friend'],
+  relax: ['plan a relaxing day'],
+  weather: ['weather today', 'current weather'],
+  joke: ['tell me a joke', 'make me laugh']
+};
+
+const negatePattern = /\b(no|not|don't|never|none)\b/i;
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -85,14 +98,64 @@ const Chat: React.FC = () => {
     }
   };
 
+  const preprocessMessage = (message: string) => {
+    return message.toLowerCase().replace(/[^\w\s]/gi, '');
+  };
+
+  const stemWord = (word: string) => {
+    return word.replace(/(ing|ed|s)$/, '');
+  };
+
+  const lemmatizeWord = (word: string) => {
+    const lemmas: { [key: string]: string } = {
+      'am': 'be',
+      'are': 'be',
+      'is': 'be',
+      'was': 'be',
+      'were': 'be',
+      'being': 'be',
+      'has': 'have',
+      'have': 'have',
+      'had': 'have',
+      'having': 'have'
+    };
+    return lemmas[word] || word;
+  };
+
+  const handleNegation = (message: string) => {
+    if (negatePattern.test(message)) {
+      return message.split(' ').map(word => (negatePattern.test(word) ? 'not' : word)).join(' ');
+    }
+    return message;
+  };
+
+  const handleSynonyms = (message: string) => {
+    const words = message.split(' ');
+    return words.map(word => {
+      const synonymKey = Object.keys(synonyms).find(key =>
+        synonyms[key].includes(word)
+      );
+      return synonymKey || word;
+    }).join(' ');
+  };
+
+  const tokenizeAndProcess = (message: string) => {
+    const tokens = message.split(' ');
+    return tokens.map(token => lemmatizeWord(stemWord(token)));
+  };
+
   const generateBotResponse = (userMessage: string) => {
     setIsTyping(true);
 
     const getBotResponse = (message: string) => {
-      const lowerCaseMessage = message.toLowerCase();
+      const preprocessedMessage = preprocessMessage(message);
+      const withSynonyms = handleSynonyms(preprocessedMessage);
+      const withNegation = handleNegation(withSynonyms);
+      const tokens = tokenizeAndProcess(withNegation);
+      const lowerCaseMessage = tokens.join(' ');
+
       let response = `I'm an AI assistant. You said: "${message}". How can I help you further?`;
 
-      // Check for quiz state
       if (context.quizState.active) {
         if (lowerCaseMessage.includes(context.quizState.answer.toLowerCase())) {
           response = "Correct! Do you want another question?";
@@ -102,7 +165,6 @@ const Chat: React.FC = () => {
           setContext({ ...context, quizState: { active: false, question: '', answer: '' } });
         }
       } else {
-        // Intent classification
         const foundPattern = Object.keys(patterns).find(key =>
           patterns[key].test(lowerCaseMessage)
         );
@@ -115,7 +177,6 @@ const Chat: React.FC = () => {
               quizState: { active: true, question: "What is the capital of France?", answer: "Paris" }
             });
           }
-          // Extract user name and update context
           if (foundPattern === "my_name_is") {
             const nameMatch = message.match(patterns.my_name_is);
             const userName = nameMatch ? nameMatch[2] : '';
@@ -123,7 +184,6 @@ const Chat: React.FC = () => {
             response = `Nice to meet you, ${userName}! How can I assist you today?`;
           }
         } else {
-          // Default response if no pattern is found
           response = `I'm not sure how to respond to that. Can you please clarify or ask something else?`;
         }
       }
@@ -242,7 +302,7 @@ const Chat: React.FC = () => {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             className="flex-1 bg-transparent p-3 text-white focus:outline-none"
-            placeholder="Message MAZS AI..."
+            placeholder="Message Mazs AI..."
           />
           <button
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
