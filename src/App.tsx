@@ -49,7 +49,7 @@ const App: React.FC = () => {
           <UpdateInfoModal
             onClose={toggleSettingsModal}
             title="Latest Updates"
-            version="v0.1.c"
+            version="v0.1.5"
             description="We expanded the training data from 250 to 500 words, which make him a bit smarter"
           />
         )}
