@@ -295,38 +295,28 @@ const Chat: React.FC = () => {
             ))}
           </div>
         )}
-        <div className="flex items-center bg-gray-900 rounded-lg relative">
+        <div className="p-4 flex items-center border-t border-gray-700 relative">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 bg-transparent p-3 text-white focus:outline-none"
-            placeholder="Message Mazs AI..."
+            placeholder="Type a message..."
+            className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none"
           />
-          <button
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="p-3 text-gray-400 hover:text-white transition-colors duration-200"
-          >
-            <FaSmile />
-          </button>
-          <button
-            className="p-3 text-gray-400 hover:text-white transition-colors duration-200"
-          >
-            <FaMicrophone />
-          </button>
-          <button
-            className="p-3 text-gray-400 hover:text-white transition-colors duration-200"
-          >
-            <FaImage />
-          </button>
-          <button
-            onClick={handleSendMessage}
-            className="p-3 text-gray-400 hover:text-white transition-colors duration-200"
-          >
+          <button onClick={handleSendMessage} className="ml-2 p-2 rounded bg-blue-600 text-white">
             <FaPaperPlane />
           </button>
+          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="ml-2 p-2 rounded bg-gray-800 text-white">
+            <FaSmile />
+          </button>
           {showEmojiPicker && renderEmojiPicker()}
+          <button className="ml-2 p-2 rounded bg-gray-800 text-white">
+            <FaMicrophone />
+          </button>
+          <button className="ml-2 p-2 rounded bg-gray-800 text-white">
+            <FaImage />
+          </button>
         </div>
       </div>
     </div>
