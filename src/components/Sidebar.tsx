@@ -1,4 +1,3 @@
-// Sidebar.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { FaPlus, FaSearch, FaTimes, FaTrash, FaUser, FaPencilAlt, FaCog } from 'react-icons/fa';
 
@@ -26,6 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
   const [isAddingChat, setIsAddingChat] = useState(false);
   const [newChatTitle, setNewChatTitle] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'Personal' | 'Work'>('Personal');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -141,7 +141,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
               <p className="text-xs text-gray-400">Free Plan</p>
             </div>
           </div>
-          <button className="text-gray-400 hover:text-white">
+          <button 
+            onClick={() => setIsSettingsOpen(true)} // Open modal on click
+            className="text-gray-400 hover:text-white"
+          >
             <FaCog />
           </button>
         </div>
@@ -175,6 +178,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
             <div className="flex justify-end space-x-2">
               <button onClick={() => setIsAddingChat(false)} className="bg-gray-600 px-3 py-1 rounded">Cancel</button>
               <button onClick={addNewChat} className="bg-blue-500 px-3 py-1 rounded">Add</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSettingsOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-gray-800 p-6 rounded-lg w-96 space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold">Settings</h2>
+              <button onClick={() => setIsSettingsOpen(false)} className="text-gray-400 hover:text-white">
+                <FaTimes />
+              </button>
+            </div>
+            {/* Add your settings content here */}
+            <div>
+              <p className="text-sm font-semibold">Current Version: v0.61.1</p>
+              {/* Add more settings options as needed */}
             </div>
           </div>
         </div>
