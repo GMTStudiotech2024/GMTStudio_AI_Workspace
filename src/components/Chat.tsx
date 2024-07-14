@@ -14,7 +14,17 @@ interface Suggestion {
   icon: React.ReactNode;
 }
 
-const initialContext = {
+interface Context {
+  topic: string;
+  quizState: {
+    active: boolean;
+    question: string;
+    answer: string;
+  };
+  userName: string;
+}
+
+const initialContext: Context = {
   topic: '',
   quizState: { active: false, question: '', answer: '' },
   userName: ''
@@ -124,7 +134,7 @@ const Chat: React.FC = () => {
   const [context, setContext] = useState(initialContext);
 
   const suggestions: Suggestion[] = [
-    { text: "who are you", icon: <span>🤔</span> },
+    { text: "Who are you", icon: <span>🤔</span> },
     { text: "Python script for daily email reports", icon: <span>📊</span> },
     { text: "Message to comfort a friend", icon: <span>💌</span> },
     { text: "Plan a relaxing day", icon: <span>🏖️</span> }
@@ -151,15 +161,15 @@ const Chat: React.FC = () => {
     }
   };
 
-  const preprocessMessage = (message: string) => {
+  const preprocessMessage = (message: string): string => {
     return message.toLowerCase().replace(/[^\w\s]/gi, '');
   };
 
-  const stemWord = (word: string) => {
+  const stemWord = (word: string): string => {
     return word.replace(/(ing|ed|s)$/, '');
   };
 
-  const lemmatizeWord = (word: string) => {
+  const lemmatizeWord = (word: string): string => {
     const lemmas: { [key: string]: string } = {
       'am': 'be',
       'are': 'be',
@@ -175,14 +185,14 @@ const Chat: React.FC = () => {
     return lemmas[word] || word;
   };
 
-  const handleNegation = (message: string) => {
+  const handleNegation = (message: string): string => {
     if (negatePattern.test(message)) {
       return message.split(' ').map(word => (negatePattern.test(word) ? 'not' : word)).join(' ');
     }
     return message;
   };
 
-  const handleSynonyms = (message: string) => {
+  const handleSynonyms = (message: string): string => {
     const words = message.split(' ');
     return words.map(word => {
       const synonymKey = Object.keys(synonyms).find(key =>
@@ -192,7 +202,7 @@ const Chat: React.FC = () => {
     }).join(' ');
   };
 
-  const tokenizeAndProcess = (message: string) => {
+  const tokenizeAndProcess = (message: string): string[] => {
     const tokens = message.split(' ');
     return tokens.map(token => lemmatizeWord(stemWord(token)));
   };
@@ -200,14 +210,12 @@ const Chat: React.FC = () => {
   const generateBotResponse = (userMessage: string) => {
     setIsTyping(true);
 
-    const getBotResponse = (message: string) => {
+    const getBotResponse = (message: string): string => {
       const preprocessedMessage = preprocessMessage(message);
       const withSynonyms = handleSynonyms(preprocessedMessage);
       const withNegation = handleNegation(withSynonyms);
       const tokens = tokenizeAndProcess(withNegation);
       const lowerCaseMessage = tokens.join(' ');
-
-      
 
       let response = `I'm an AI assistant. You said: "${message}". How can I help you further?`;
 
@@ -254,8 +262,8 @@ const Chat: React.FC = () => {
         timestamp: new Date()
       };
       setMessages(prevMessages => [...prevMessages, botResponse]);
-      setIsTyping(false); // Stop typing animation after response
-    }, 1000 + Math.random() * 1500); // Adjust timing as needed
+      setIsTyping(false);
+    }, 1000 + Math.random() * 1500);
   };
 
   const scrollToBottom = () => {
@@ -264,7 +272,7 @@ const Chat: React.FC = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  const formatTimestamp = (date: Date) => {
+  const formatTimestamp = (date: Date): string => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
