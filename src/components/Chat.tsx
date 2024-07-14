@@ -34,7 +34,7 @@ const responses: { [key: string]: string } = {
   greeting: "Hello! How can I assist you today?",
   help: "Sure, I'm here to help! What do you need assistance with?",
   who_are_you: "I'm Mazs AI v0.1.5, your virtual assistant. How can I help you?",
-  name: "I'm Mazs AI v0.1.5, your virtual assistant.",
+  name: "I'm Mazs AI v0.61.1, your virtual assistant.",
   quiz_capitals: "Sure! Let's start a quiz. What is the capital of France?",
   python_script: "I can help you with Python scripts. For example, here's a script for sending daily email reports.",
   comfort_friend: "Here's a message to comfort a friend: 'I'm here for you, always.'",
