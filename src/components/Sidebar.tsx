@@ -64,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
   return (
     <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-200 ease-in-out md:relative md:translate-x-0 bg-gray-900 text-white w-64 h-screen flex flex-col`}>
       <div className="flex items-center justify-between p-4 bg-gray-800">
-        <h1 className="text-xl font-bold">NextChat</h1>
+        <h1 className="text-xl font-bold">GMTStudio AI Studio</h1>
         <button onClick={toggleSidebar} className="p-2 md:hidden">
           <FaTimes />
         </button>
