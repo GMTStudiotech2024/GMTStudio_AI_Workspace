@@ -72,7 +72,7 @@ const responses: { [key: string]: string } = {
 const patterns: { [key: string]: RegExp } = {
   greeting: /\b(hi|hello|hey|hola)\b/i,
   help: /\b(help|assist)\b/i,
-  who_are_you: /\b(who are you|what are you|who is this)\b/i,
+  who_are_you: /\b(Who are you|what are you|who is this)\b/i,
   name: /\b(your name|who are you|what are you called)\b/i,
   quiz_capitals: /\b(quiz me on world capitals|capitals quiz)\b/i,
   python_script: /\b(python script for daily email reports|help with python)\b/i,
