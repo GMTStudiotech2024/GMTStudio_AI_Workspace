@@ -35,7 +35,7 @@ const App: React.FC = () => {
             <button onClick={toggleSidebar} className="md:hidden p-2">
               <FaBars />
             </button>
-            <span>Mazs AI v0.61.1</span>
+            <span>Mazs AI v0.61.2</span>
           </div>
           <button
             onClick={toggleSettingsModal}
@@ -49,8 +49,8 @@ const App: React.FC = () => {
           <UpdateInfoModal
             onClose={toggleSettingsModal}
             title="Latest Updates"
-            version="v0.61.1"
-            description="We expanded the training data from 250 to 500 words, which make him a bit smarter"
+            version="v0.61.2"
+            description="Update The Icon"
           />
         )}
       </main>
