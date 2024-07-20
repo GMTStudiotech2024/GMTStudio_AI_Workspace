@@ -194,7 +194,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
             </div>
             {/* Add your settings content here */}
             <div>
-              <p className="text-sm font-semibold">Current Version: v0.61.1</p>
+              <p className="text-sm font-semibold">Current Version: v0.61.2</p>
               {/* Add more settings options as needed */}
             </div>
           </div>
