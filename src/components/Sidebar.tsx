@@ -223,7 +223,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
         <SettingModal
           onClose={toggleSettingsModal}
           title="Latest Updates"
-          version="v0.61.2"
+          version="v0.62.0"
           description="Update The Icon"
         />
       )}
