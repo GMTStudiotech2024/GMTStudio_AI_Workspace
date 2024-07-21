@@ -11,10 +11,10 @@ interface UpdateInfoModalProps {
 const UpdateInfoModal: React.FC<UpdateInfoModalProps> = ({ onClose, title, version, description }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-gray-800 p-6 rounded-lg w-96 max-w-full mx-4 space-y-4 text-white animate-fade-in">
+      <div className="bg-gray-800 p-6 rounded-lg w-96 max-w-full mx-4 space-y-4 text-white">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white focus:outline-none focus:ring focus:ring-blue-300">
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
             <FaTimes />
           </button>
         </div>
@@ -34,7 +34,7 @@ const UpdateInfoModal: React.FC<UpdateInfoModalProps> = ({ onClose, title, versi
         <div className="pt-4">
           <button
             onClick={onClose}
-            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
           >
             Close
           </button>

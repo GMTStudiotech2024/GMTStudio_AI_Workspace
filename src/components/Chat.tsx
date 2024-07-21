@@ -365,7 +365,7 @@ const Chat: React.FC = () => {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type a message..."
-            className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none"
+            className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none relative"
           />
           <button onClick={handleSendMessage} className="ml-2 p-2 rounded bg-blue-600 text-white">
             <FaPaperPlane />
