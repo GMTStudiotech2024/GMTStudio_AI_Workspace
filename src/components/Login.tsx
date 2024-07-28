@@ -7,16 +7,23 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(username, password);
+    if (username === 'demo' && password === 'demo') {
+      onLogin(username, password);
+    } else {
+      setError('Invalid credentials. Please use "demo" as username and password.');
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6 text-white text-center">Login to Mazs AI</h2>
+        <p className="text-gray-400 text-sm mb-4 text-center">Use "demo" as username and password to try Mazs AI</p>
+        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
         <div className="mb-4">
           <label htmlFor="username" className="block text-white mb-2">Username</label>
           <input
