@@ -4,10 +4,14 @@ import Chat from './components/Chat';
 import UpdateInfoModal from './components/SettingsModal';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { FaBars } from 'react-icons/fa';
+import Login from './components/Login';
+import LandingPage from './components/LandingPage';
 
 const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLandingPage, setShowLandingPage] = useState(true);
 
   const toggleSettingsModal = () => {
     setIsSettingsOpen(!isSettingsOpen);
@@ -16,6 +20,28 @@ const App: React.FC = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  const handleLogin = (username: string, password: string) => {
+    // Here you would typically validate the credentials against a backend
+    // For this example, we'll just check if both fields are non-empty
+    if (username && password) {
+      setIsLoggedIn(true);
+    } else {
+      alert('Invalid credentials');
+    }
+  };
+
+  const handleGetStarted = () => {
+    setShowLandingPage(false);
+  };
+
+  if (showLandingPage) {
+    return <LandingPage onGetStarted={handleGetStarted} />;
+  }
+
+  if (!isLoggedIn) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   return (
     <div className="flex h-screen bg-background text-white overflow-hidden">

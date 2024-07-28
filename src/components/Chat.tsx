@@ -67,6 +67,7 @@ const responses: { [key: string]: string } = {
   music_recommendation: "I recommend listening to 'Bohemian Rhapsody' by Queen. It's a timeless classic.",
   art_recommendation: "I recommend looking into the works of Vincent van Gogh. 'Starry Night' is particularly famous.",
   movie_recommendation: "I recommend watching 'The Shawshank Redemption'. It's a great movie."
+  
 };
 
 const patterns: { [key: string]: RegExp } = {
