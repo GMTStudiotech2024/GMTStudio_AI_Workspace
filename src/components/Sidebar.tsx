@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaPlus, FaSearch, FaTimes, FaTrash, FaUser, FaPencilAlt, FaCog } from 'react-icons/fa';
 import SettingModal from './SettingsModal'; 
-
+     
 export interface ChatItem {
   id: string;
   title: string;
