@@ -9,3 +9,10 @@ export interface Message {
     text: string;
     icon: React.ReactNode;
   }
+  export interface ChatItem {
+    id: string;
+    title: string;
+    lastMessage: string;
+    category: 'Personal' | 'Work';
+    timestamp: Date;
+  }

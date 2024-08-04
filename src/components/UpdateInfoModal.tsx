@@ -1,47 +1,148 @@
-import React from 'react';
-import { FaTimes } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaPlus, FaSearch, FaTimes, FaTrash, FaUser, FaPencilAlt, FaCog, FaChevronLeft, FaChevronRight, FaHistory } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChatItem } from '../types';
 
-interface UpdateInfoModalProps {
-  onClose: () => void;
-  title: string;
-  version: string;
-  description: string;
+interface SidebarProps {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+  onSelectChat: (chat: ChatItem) => void;
+  onNewChat: () => void;
 }
 
-const UpdateInfoModal: React.FC<UpdateInfoModalProps> = ({ onClose, title, version, description }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelectChat, onNewChat }) => {
+  const [chats, setChats] = useState<ChatItem[]>(() => {
+    const savedChats = localStorage.getItem('chats');
+    return savedChats ? JSON.parse(savedChats) : [];
+  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<'All' | 'Personal' | 'Work'>('All');
+
+  useEffect(() => {
+    localStorage.setItem('chats', JSON.stringify(chats));
+  }, [chats]);
+
+  const handleDeleteChat = (chatId: string) => {
+    setChats(prevChats => prevChats.filter(chat => chat.id !== chatId));
+  };
+
+  const filteredChats = chats.filter(chat =>
+    chat.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (selectedCategory === 'All' || chat.category === selectedCategory)
+  );
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-gray-800 p-6 rounded-lg w-96 max-w-full mx-4 space-y-4 text-white">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            <FaTimes />
-          </button>
-        </div>
-        <div className="space-y-2">
-          <p className="font-semibold">Current Version: {version}</p>
-          <p>{description}</p>
-        </div>
-        <div className="space-y-2">
-          <h3 className="font-semibold">What's New:</h3>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Updated user interface for better usability</li>
-            <li>Improved performance for faster response times</li>
-            <li>Added new features to enhance productivity</li>
-            <li>Fixed various bugs and issues</li>
-          </ul>
-        </div>
-        <div className="pt-4">
-          <button
-            onClick={onClose}
-            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+    <AnimatePresence>
+      {isSidebarOpen && (
+        <motion.div
+          initial={{ x: '-100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '-100%' }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="fixed inset-y-0 left-0 z-50 w-72 bg-gray-900 text-white shadow-lg overflow-hidden flex flex-col"
+        >
+          <div className="flex items-center justify-between p-4 bg-gray-800">
+            <h1 className="text-xl font-bold">Mazs AI</h1>
+            <button onClick={toggleSidebar} className="p-2 rounded-full hover:bg-gray-700 transition-colors">
+              <FaChevronLeft />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4 space-y-4">
+              <button
+                onClick={onNewChat}
+                className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <FaPlus />
+                <span>New Chat</span>
+              </button>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search chats..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-gray-800 text-white p-2 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <FaSearch className="absolute left-3 top-3 text-gray-400" />
+              </div>
+
+              <div className="flex space-x-2">
+                {['All', 'Personal', 'Work'].map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category as 'All' | 'Personal' | 'Work')}
+                    className={`flex-1 p-2 rounded-lg ${selectedCategory === category ? 'bg-blue-600' : 'bg-gray-800'} hover:bg-blue-700 transition-colors`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                {filteredChats.map(chat => (
+                  <motion.div
+                    key={chat.id}
+                    whileHover={{ scale: 1.02 }}
+                    className="p-3 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors"
+                    onClick={() => onSelectChat(chat)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <FaHistory className="text-gray-400" />
+                        <div>
+                          <h3 className="font-semibold truncate">{chat.title}</h3>
+                          <p className="text-xs text-gray-400 truncate">{chat.lastMessage}</p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button onClick={(e) => { e.stopPropagation(); /* handleEditChat(chat.id) */ }} className="text-gray-400 hover:text-white">
+                          <FaPencilAlt size={14} />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteChat(chat.id); }} className="text-gray-400 hover:text-red-500">
+                          <FaTrash size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-gray-800 border-t border-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
+                  <FaUser className="text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">User</p>
+                  <p className="text-xs text-gray-400">Free Plan</p>
+                </div>
+              </div>
+              <button className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700 transition-colors">
+                <FaCog />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+      {!isSidebarOpen && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 transition-colors"
+          onClick={toggleSidebar}
+        >
+          <FaChevronRight />
+        </motion.button>
+      )}
+    </AnimatePresence>
   );
 };
 
-export default UpdateInfoModal;
+export default Sidebar;

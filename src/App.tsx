@@ -6,12 +6,14 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import { FaBars } from 'react-icons/fa';
 import Login from './components/Login';
 import LandingPage from './components/LandingPage';
+import { ChatItem } from './types';
 
 const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLandingPage, setShowLandingPage] = useState(true);
+  const [selectedChat, setSelectedChat] = useState<ChatItem | null>(null);
 
   const toggleSettingsModal = () => {
     setIsSettingsOpen(!isSettingsOpen);
@@ -22,8 +24,6 @@ const App: React.FC = () => {
   };
 
   const handleLogin = (username: string, password: string) => {
-    // Here you would typically validate the credentials against a backend
-    // For this example, we'll just check if both fields are non-empty
     if (username && password) {
       setIsLoggedIn(true);
     } else {
@@ -33,6 +33,14 @@ const App: React.FC = () => {
 
   const handleGetStarted = () => {
     setShowLandingPage(false);
+  };
+
+  const handleSelectChat = (chat: ChatItem) => {
+    setSelectedChat(chat);
+  };
+
+  const handleNewChat = () => {
+    setSelectedChat(null);
   };
 
   if (showLandingPage) {
@@ -48,7 +56,8 @@ const App: React.FC = () => {
       <Sidebar 
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
-        onSelectChat={() => {}}
+        onSelectChat={handleSelectChat}
+        onNewChat={handleNewChat}
       />
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
@@ -56,7 +65,7 @@ const App: React.FC = () => {
             <button onClick={toggleSidebar} className="md:hidden p-2">
               <FaBars />
             </button>
-            <span>Mazs AI v0.62.0</span>
+            <span className="pl-10">Mazs AI v0.62.0</span>
           </div>
           <button
             onClick={toggleSettingsModal}
@@ -65,7 +74,7 @@ const App: React.FC = () => {
             Settings
           </button>
         </header>
-        <Chat />
+        <Chat selectedChat={selectedChat} />
         {isSettingsOpen && (
           <UpdateInfoModal
             onClose={toggleSettingsModal}

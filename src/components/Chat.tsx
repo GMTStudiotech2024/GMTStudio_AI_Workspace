@@ -1,350 +1,368 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaRobot, FaUser, FaMicrophone, FaImage, FaSmile, FaMoon, FaSun } from 'react-icons/fa';
-import '../components/animations.css';
+import { FaPaperPlane, FaSmile, FaMicrophone, FaImage, FaSun, FaMoon } from 'react-icons/fa';
+import { Message, Suggestion } from '../types';
+import { motion } from 'framer-motion';
 
-interface Message {
-  id: string;
-  sender: 'user' | 'bot';
-  text: string;
-  timestamp: Date;
+interface ChatProps {
+  selectedChat: { title: string } | null;
 }
 
-interface Suggestion {
-  text: string;
-  icon: React.ReactNode;
-}
-
-interface Context {
-  topic: string;
-  quizState: {
-    active: boolean;
-    question: string;
-    answer: string;
-  };
-  userName: string;
-}
-
-const initialContext: Context = {
-  topic: '',
-  quizState: { active: false, question: '', answer: '' },
-  userName: ''
-};
-
-const responses: { [key: string]: string } = {
-  greeting: "Hello! How can I assist you today?",
-  help: "Sure, I'm here to help! What do you need assistance with?",
-  who_are_you: "I'm Mazs AI v0.61.1, your virtual assistant. How can I help you?",
-  name: "I'm Mazs AI v0.61.1, your virtual assistant.",
-  quiz_capitals: "Sure! Let's start a quiz. What is the capital of France?",
-  python_script: "I can help you with Python scripts. For example, here's a script for sending daily email reports.",
-  comfort_friend: "Here's a message to comfort a friend: 'I'm here for you, always.'",
-  plan_relaxing_day: "To plan a relaxing day, start with a good breakfast, a walk in nature, and some meditation.",
-  weather_today: "I'm not connected to the internet, but you can check your local weather forecast online.",
-  tell_joke: "Why don't scientists trust atoms? Because they make up everything!",
-  book_recommendation: "I recommend 'To Kill a Mockingbird' by Harper Lee. It's a classic!",
-  favorite_movie: "One of my favorite movies is 'Inception' directed by Christopher Nolan.",
-  news_update: "I'm not connected to the internet, but you can check the latest news on your preferred news website.",
-  health_tip: "Remember to stay hydrated, exercise regularly, and get enough sleep.",
-  motivational_quote: "Here's a motivational quote: 'The only way to do great work is to love what you do.' - Steve Jobs",
-  programming_help: "I can assist with programming questions. What do you need help with?",
-  math_problem: "Sure, I can help with math problems. What do you need assistance with?",
-  translate: "I can help translate text. What do you need translated and into which language?",
-  favorite_book: "One of my favorite books is '1984' by George Orwell.",
-  time_management: "To manage your time effectively, prioritize tasks, set clear goals, and take breaks.",
-  random_fact: "Did you know? Honey never spoils. Archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still edible.",
-  technology_trend: "A current technology trend is the rise of artificial intelligence and machine learning in various industries.",
-  history_question: "Sure, I can help with history questions. What do you need to know?",
-  cooking_recipe: "I can help with recipes. What dish are you interested in cooking?",
-  travel_recommendation: "I recommend visiting Kyoto, Japan. It's known for its beautiful temples, gardens, and traditional tea houses.",
-  workout_routine: "For a balanced workout routine, include cardio, strength training, and flexibility exercises.",
-  mental_health_tip: "Remember to take breaks, practice mindfulness, and seek support when needed.",
-  productivity_tip: "To boost productivity, break tasks into smaller steps and take regular breaks.",
-  fun_fact: "Fun fact: A group of flamingos is called a 'flamboyance'.",
-  science_fact: "Science fact: The speed of light is approximately 299,792 kilometers per second.",
-  space_fact: "Space fact: Jupiter is the largest planet in our solar system.",
-  animal_fact: "Animal fact: An octopus has three hearts and blue blood.",
-  geography_fact: "Geography fact: Australia is both a country and a continent.",
-  music_recommendation: "I recommend listening to 'Bohemian Rhapsody' by Queen. It's a timeless classic.",
-  art_recommendation: "I recommend looking into the works of Vincent van Gogh. 'Starry Night' is particularly famous.",
-  movie_recommendation: "I recommend watching 'The Shawshank Redemption'. It's a great movie."
-  
-};
-
-const patterns: { [key: string]: RegExp } = {
-  greeting: /\b(hi|hello|hey|hola)\b/i,
-  help: /\b(help|assist)\b/i,
-  who_are_you: /\b(Who are you|what are you|who is this)\b/i,
-  name: /\b(your name|who are you|what are you called)\b/i,
-  quiz_capitals: /\b(quiz me on world capitals|capitals quiz)\b/i,
-  python_script: /\b(python script for daily email reports|help with python)\b/i,
-  comfort_friend: /\b(message to comfort a friend|comforting message)\b/i,
-  plan_relaxing_day: /\b(plan a relaxing day|relaxing day plan)\b/i,
-  my_name_is: /\b(my name is (\w+))\b/i,
-  weather_today: /\b(weather today|current weather)\b/i,
-  tell_joke: /\b(tell me a joke|make me laugh)\b/i,
-  book_recommendation: /\b(recommend me a book|book recommendation)\b/i,
-  favorite_movie: /\b(favorite movie|movie you like)\b/i,
-  news_update: /\b(latest news|news update)\b/i,
-  health_tip: /\b(health tip|health advice)\b/i,
-  motivational_quote: /\b(motivational quote|inspire me)\b/i,
-  programming_help: /\b(programming help|code help|programming question)\b/i,
-  math_problem: /\b(math problem|help with math|solve this math)\b/i,
-  translate: /\b(translate|translation|translate this)\b/i,
-  favorite_book: /\b(favorite book|book you like)\b/i,
-  time_management: /\b(time management|manage time|time tips)\b/i,
-  random_fact: /\b(random fact|tell me a fact|interesting fact)\b/i,
-  technology_trend: /\b(technology trend|latest tech|tech update)\b/i,
-  history_question: /\b(history question|ask about history|history fact)\b/i,
-  cooking_recipe: /\b(cooking recipe|recipe for|how to cook)\b/i,
-  travel_recommendation: /\b(travel recommendation|place to visit|travel tip)\b/i,
-  workout_routine: /\b(workout routine|exercise plan|workout tips)\b/i,
-  mental_health_tip: /\b(mental health tip|mental well-being|mental health advice)\b/i,
-  productivity_tip: /\b(productivity tip|boost productivity|productivity advice)\b/i,
-  fun_fact: /\b(fun fact|interesting fact|did you know)\b/i,
-  science_fact: /\b(science fact|science information|science trivia)\b/i,
-  space_fact: /\b(space fact|space information|space trivia)\b/i,
-  animal_fact: /\b(animal fact|animal information|animal trivia)\b/i,
-  geography_fact: /\b(geography fact|geography information|geography trivia)\b/i,
-  music_recommendation: /\b(recommend me a song|music recommendation|song you like)\b/i,
-  art_recommendation: /\b(recommend me art|art recommendation|art you like)\b/i,
-  movie_recommendation: /\b(recommend me a movie|movie recommendation|movie you like)\b/i
-};
-
-
-const synonyms: { [key: string]: string[] } = {
-  hello: ['hi', 'hey', 'greetings','hola'],
-  help: ['assist', 'aid', 'support'],
-  name: ['who are you', 'what are you'],
-  quiz: ['quiz me on world capitals', 'capitals quiz'],
-  python: ['python script for daily email reports'],
-  comfort: ['message to comfort a friend'],
-  relax: ['plan a relaxing day'],
-  weather: ['weather today', 'current weather'],
-  joke: ['tell me a joke', 'make me laugh']
-};
-
-const negatePattern = /\b(no|not|don't|never|none)\b/i;
-
-const Chat: React.FC = () => {
+const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [context, setContext] = useState(initialContext);
 
   const suggestions: Suggestion[] = [
-    { text: "Who are you", icon: <span>🤔</span> },
-    { text: "Python script for daily email reports", icon: <span>📊</span> },
-    { text: "Message to comfort a friend", icon: <span>💌</span> },
-    { text: "Plan a relaxing day", icon: <span>🏖️</span> }
+    { text: "What's the weather like today?", icon: <FaSun /> },
+    { text: "Tell me a joke", icon: <FaSmile /> },
+    { text: "What's the latest news?", icon: <FaImage /> },
   ];
 
-  const handleSendMessage = () => {
-    if (inputValue.trim() !== '') {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        sender: 'user',
-        text: inputValue,
-        timestamp: new Date()
-      };
-      setMessages([...messages, newMessage]);
-      setInputValue('');
-      generateBotResponse(newMessage.text);
-    }
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  // Enhanced Neural Network implementation with advanced techniques
+  class EnhancedNeuralNetwork {
+    private layers: number[][];
+    private weights: number[][][];
+    private biases: number[][];
+    private learningRate: number;
+    private momentum: number;
+    private velocities: number[][][];
+    private dropoutRate: number;
+    private batchSize: number;
+    private optimizer: 'adam' | 'rmsprop' | 'sgd' = 'adam';
+    private adamParams: { beta1: number; beta2: number; epsilon: number };
+    private rmspropParams: { decay: number; epsilon: number };
+    private l2RegularizationRate: number;
+
+    constructor(
+      layerSizes: number[],
+      learningRate: number = 0.001,
+      momentum: number = 0.9,
+      dropoutRate: number = 0.5,
+      batchSize: number = 32,
+      optimizer: 'adam' | 'rmsprop' | 'sgd' = 'adam',
+      l2RegularizationRate: number = 0.01
+    ) {
+      this.layers = layerSizes.map(size => new Array(size).fill(0));
+      this.weights = [];
+      this.biases = [];
+      this.velocities = [];
+      this.learningRate = learningRate;
+      this.momentum = momentum;
+      this.dropoutRate = dropoutRate;
+      this.batchSize = batchSize;
+      this.optimizer = optimizer;
+      this.adamParams = { beta1: 0.9, beta2: 0.999, epsilon: 1e-8 };
+      this.rmspropParams = { decay: 0.9, epsilon: 1e-8 };
+      this.l2RegularizationRate = l2RegularizationRate;
+
+      for (let i = 1; i < layerSizes.length; i++) {
+        this.weights.push(Array.from({ length: layerSizes[i] }, () => 
+          Array(layerSizes[i-1]).fill(0).map(() => this.initializeWeight(layerSizes[i-1]))
+        ));
+        this.biases.push(Array(layerSizes[i]).fill(0));
+        this.velocities.push(Array.from({ length: layerSizes[i] }, () => 
+          Array(layerSizes[i-1]).fill(0)
+        ));
+      }
+    }
+
+    private initializeWeight(fanIn: number): number {
+      return Math.random() * Math.sqrt(2 / fanIn); // He initialization
+    }
+
+    private activation(x: number, type: string): number {
+      switch (type) {
+        case 'sigmoid': return 1 / (1 + Math.exp(-x));
+        case 'tanh': return Math.tanh(x);
+        case 'relu': return Math.max(0, x);
+        case 'leakyRelu': return x > 0 ? x : 0.01 * x;
+        case 'elu': return x >= 0 ? x : (Math.exp(x) - 1);
+        case 'swish': return x / (1 + Math.exp(-x));
+        default: return x;
+      }
+    }
+
+    private activationDerivative(x: number, type: string): number {
+      switch (type) {
+        case 'sigmoid': return x * (1 - x);
+        case 'tanh': return 1 - x * x;
+        case 'relu': return x > 0 ? 1 : 0;
+        case 'leakyRelu': return x > 0 ? 1 : 0.01;
+        case 'elu': return x >= 0 ? 1 : x + 1;
+        case 'swish': return x * (1 / (1 + Math.exp(-x))) + (1 / (1 + Math.exp(-x))) * (1 - x * (1 / (1 + Math.exp(-x))));
+        default: return 1;
+      }
+    }
+
+    private softmax(arr: number[]): number[] {
+      const expValues = arr.map(val => Math.exp(val - Math.max(...arr)));
+      const sumExpValues = expValues.reduce((a, b) => a + b, 0);
+      return expValues.map(val => val / sumExpValues);
+    }
+
+    private dropout(layer: number[]): number[] {
+      return layer.map(neuron => Math.random() > this.dropoutRate ? neuron / (1 - this.dropoutRate) : 0);
+    }
+
+    private forwardPropagation(input: number[], isTraining: boolean = true): number[] {
+      this.layers[0] = input;
+      for (let i = 1; i < this.layers.length; i++) {
+        for (let j = 0; j < this.layers[i].length; j++) {
+          let sum = this.biases[i-1][j];
+          for (let k = 0; k < this.layers[i-1].length; k++) {
+            sum += this.layers[i-1][k] * this.weights[i-1][j][k];
+          }
+          this.layers[i][j] = i === this.layers.length - 1 ? sum : this.activation(sum, ['tanh', 'relu', 'elu', 'leakyRelu', 'swish'][i % 5]);
+        }
+        if (isTraining && i < this.layers.length - 1) {
+          this.layers[i] = this.dropout(this.layers[i]);
+        }
+      }
+      this.layers[this.layers.length - 1] = this.softmax(this.layers[this.layers.length - 1]);
+      return this.layers[this.layers.length - 1];
+    }
+
+    private backPropagation(target: number[]): void {
+      const deltas: number[][] = new Array(this.layers.length).fill(0).map(() => []);
+      
+      for (let i = 0; i < this.layers[this.layers.length - 1].length; i++) {
+        deltas[this.layers.length - 1][i] = target[i] - this.layers[this.layers.length - 1][i];
+      }
+      
+      for (let i = this.layers.length - 2; i > 0; i--) {
+        for (let j = 0; j < this.layers[i].length; j++) {
+          let error = 0;
+          for (let k = 0; k < this.layers[i + 1].length; k++) {
+            error += deltas[i + 1][k] * this.weights[i][k][j];
+          }
+          deltas[i][j] = error * this.activationDerivative(this.layers[i][j], ['tanh', 'relu', 'elu', 'leakyRelu', 'swish'][i % 5]);
+        }
+      }
+      
+      for (let i = 1; i < this.layers.length; i++) {
+        for (let j = 0; j < this.layers[i].length; j++) {
+          for (let k = 0; k < this.layers[i - 1].length; k++) {
+            const gradient = deltas[i][j] * this.layers[i - 1][k];
+            this.updateWeight(i - 1, j, k, gradient);
+          }
+          this.biases[i - 1][j] += this.learningRate * deltas[i][j];
+        }
+      }
+    }
+
+    private updateWeight(layerIndex: number, neuronIndex: number, weightIndex: number, gradient: number): void {
+      switch (this.optimizer) {
+        case 'adam':
+          this.adamOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
+          break;
+        case 'rmsprop':
+          this.rmspropOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
+          break;
+        case 'sgd':
+          this.sgdOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
+          break;
+      }
+      this.weights[layerIndex][neuronIndex][weightIndex] -= this.l2RegularizationRate * this.weights[layerIndex][neuronIndex][weightIndex];
+    }
+
+    private adamOptimizer(layerIndex: number, neuronIndex: number, weightIndex: number, gradient: number): void {
+      const { beta1, beta2, epsilon } = this.adamParams;
+      const m = this.velocities[layerIndex][neuronIndex][weightIndex] = beta1 * this.velocities[layerIndex][neuronIndex][weightIndex] + (1 - beta1) * gradient;
+      const v = this.velocities[layerIndex][neuronIndex][weightIndex] = beta2 * this.velocities[layerIndex][neuronIndex][weightIndex] + (1 - beta2) * gradient * gradient;
+      const mHat = m / (1 - Math.pow(beta1, this.batchSize));
+      const vHat = v / (1 - Math.pow(beta2, this.batchSize));
+      this.weights[layerIndex][neuronIndex][weightIndex] += this.learningRate * mHat / (Math.sqrt(vHat) + epsilon);
+    }
+
+    private rmspropOptimizer(layerIndex: number, neuronIndex: number, weightIndex: number, gradient: number): void {
+      const { decay, epsilon } = this.rmspropParams;
+      const v = this.velocities[layerIndex][neuronIndex][weightIndex] = decay * this.velocities[layerIndex][neuronIndex][weightIndex] + (1 - decay) * gradient * gradient;
+      this.weights[layerIndex][neuronIndex][weightIndex] += this.learningRate * gradient / (Math.sqrt(v) + epsilon);
+    }
+
+    private sgdOptimizer(layerIndex: number, neuronIndex: number, weightIndex: number, gradient: number): void {
+      this.weights[layerIndex][neuronIndex][weightIndex] += this.learningRate * gradient;
+    }
+
+    train(inputs: number[][], targets: number[][], epochs: number): void {
+      for (let epoch = 0; epoch < epochs; epoch++) {
+        let totalLoss = 0;
+        for (let i = 0; i < inputs.length; i += this.batchSize) {
+          const batchInputs = inputs.slice(i, i + this.batchSize);
+          const batchTargets = targets.slice(i, i + this.batchSize);
+          for (let j = 0; j < batchInputs.length; j++) {
+            const output = this.forwardPropagation(batchInputs[j], true);
+            this.backPropagation(batchTargets[j]);
+            totalLoss += this.calculateLoss(output, batchTargets[j]);
+          }
+        }
+        if (epoch % 100 === 0) {
+          console.log(`Epoch ${epoch}, Loss: ${totalLoss / inputs.length}`);
+        }
+        this.learningRate *= 0.99; // Learning rate decay
+      }
+    }
+
+    predict(input: number[]): number {
+      const output = this.forwardPropagation(input, false);
+      return output.indexOf(Math.max(...output));
+    }
+
+    private calculateLoss(output: number[], target: number[]): number {
+      return output.reduce((sum, value, index) => sum - target[index] * Math.log(value), 0);
+    }
+  }
+
+  const neuralNetwork = new EnhancedNeuralNetwork([1000, 1280, 2560, 1280, 640, 320, 100], 0.005, 4.5, 2.5, 160, 'adam', 0.05);
+
+  const enhancedMachineLearning = (input: string): string => {
+    const keywords = [
+      'hello', 'hi', 'hey', 'greetings',
+      'how are you', 'how\'s it going', 'what\'s up',
+      'weather', 'temperature', 'forecast', 'sunny', 'rainy', 'cloudy',
+      'joke', 'funny', 'humor', 'laugh',
+      'news', 'current events', 'headlines', 'latest',
+      'bye', 'goodbye', 'see you', 'farewell',
+      'thanks', 'thank you', 'appreciate', 'grateful',
+      'help', 'assist', 'support', 'guidance',
+      'time', 'date', 'day', 'hour', 'minute',
+      'name', 'who are you', 'what are you', 'identity',
+      'music', 'song', 'artist', 'genre',
+      'movie', 'film', 'actor', 'director',
+      'book', 'author', 'read', 'literature',
+      'food', 'recipe', 'cuisine', 'restaurant',
+      'travel', 'vacation', 'destination', 'trip',
+      'sports', 'team', 'player', 'game',
+      'technology', 'gadget', 'innovation', 'app'
+    ];
+
+    const responses = [
+      'Hello! How can I assist you today?',
+      "I'm doing well, thank you for asking! How about you?",
+      "I'm afraid I don't have real-time weather data. You might want to check a reliable weather service for the most up-to-date information.",
+      "Here's a joke for you: Why don't scientists trust atoms? Because they make up everything!",
+      "I apologize, but I don't have access to current news. For the latest updates, please check a reputable news website.",
+      'Goodbye! It was a pleasure chatting with you. Have a great day!',
+      "You're welcome! I'm always here to help.",
+      "I'd be happy to help. What do you need assistance with?",
+      "I'm an AI assistant, so I don't track time, but you can check your device for the current time and date.",
+      "I'm an AI language model created by GMTStudio. It's nice to meet you!",
+      "Music is a universal language! What kind of music do you enjoy?",
+      "Movies are a great form of entertainment. Do you have a favorite film or genre?",
+      "Reading is a wonderful hobby. Is there a particular book or author you'd recommend?",
+      "Food is such a diverse topic! Do you have a favorite cuisine or dish?",
+      "Traveling can be very exciting! Do you have any dream destinations?",
+      "Sports can be thrilling to watch and play. Do you follow any particular teams or athletes?",
+      "Technology is advancing rapidly. Is there a recent innovation that has caught your attention?"
+    ];
+
+    const words = input.toLowerCase().split(/\s+/);
+    const inputVector = keywords.map(keyword => 
+      words.some(word => word.includes(keyword) || keyword.includes(word)) ? 1 : 0
+    );
+    const prediction = neuralNetwork.predict(inputVector);
+
+    let response = responses[prediction];
+    if (words.some(word => ['weather', 'temperature', 'forecast'].includes(word))) {
+      const timeWords = words.filter(word => ['today', 'tomorrow', 'week'].includes(word));
+      const conditionWords = words.filter(word => ['sunny', 'rainy', 'cloudy'].includes(word));
+      if (timeWords.length > 0 || conditionWords.length > 0) {
+        response += ` It seems you're asking about ${timeWords.join(' and ')} ${conditionWords.join(' and ')} weather. For the most accurate information, I recommend checking your local weather app.`;
+      }
+    }
+    if (words.includes('joke') && words.includes('another')) {
+      response += " Here's another one: Why did the scarecrow win an award? Because he was outstanding in his field!";
+    }
+    if (words.some(word => ['news', 'headlines', 'current'].includes(word)) && words.some(word => ['latest', 'recent', 'today'].includes(word))) {
+      response += " For the most recent news, I suggest visiting a trusted news website or using a news aggregator app that provides real-time updates.";
+    }
+
+    return response || "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
+  };
+
+  const handleSendMessage = async () => {
+    if (inputValue.trim() === '') return;
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      sender: 'user',
+      text: inputValue,
+      timestamp: new Date(),
+    };
+
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+    setInputValue('');
+    setIsTyping(true);
+
+    // Use the enhanced neural network to generate a response
+    setTimeout(() => {
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'bot',
+        text: enhancedMachineLearning(newMessage.text),
+        timestamp: new Date(),
+      };
+      setMessages(prevMessages => [...prevMessages, botResponse]);
+      setIsTyping(false);
+    }, 1000);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
       handleSendMessage();
     }
   };
 
-  const preprocessMessage = (message: string): string => {
-    return message.toLowerCase().replace(/[^\w\s]/gi, '');
-  };
-
-  const stemWord = (word: string): string => {
-    return word.replace(/(ing|ed|s)$/, '');
-  };
-
-  const lemmatizeWord = (word: string): string => {
-    const lemmas: { [key: string]: string } = {
-      'am': 'be',
-      'are': 'be',
-      'is': 'be',
-      'was': 'be',
-      'were': 'be',
-      'being': 'be',
-      'has': 'have',
-      'have': 'have',
-      'had': 'have',
-      'having': 'have'
-    };
-    return lemmas[word] || word;
-  };
-
-  const handleNegation = (message: string): string => {
-    if (negatePattern.test(message)) {
-      return message.split(' ').map(word => (negatePattern.test(word) ? 'not' : word)).join(' ');
-    }
-    return message;
-  };
-
-  const handleSynonyms = (message: string): string => {
-    const words = message.split(' ');
-    return words.map(word => {
-      const synonymKey = Object.keys(synonyms).find(key =>
-        synonyms[key].includes(word)
-      );
-      return synonymKey || word;
-    }).join(' ');
-  };
-
-  const tokenizeAndProcess = (message: string): string[] => {
-    const tokens = message.split(' ');
-    return tokens.map(token => lemmatizeWord(stemWord(token)));
-  };
-
-  const generateBotResponse = (userMessage: string) => {
-    setIsTyping(true);
-
-    const getBotResponse = (message: string): string => {
-      const preprocessedMessage = preprocessMessage(message);
-      const withSynonyms = handleSynonyms(preprocessedMessage);
-      const withNegation = handleNegation(withSynonyms);
-      const tokens = tokenizeAndProcess(withNegation);
-      const lowerCaseMessage = tokens.join(' ');
-
-      let response = `I'm an AI assistant. You said: "${message}". How can I help you further?`;
-
-      if (context.quizState.active) {
-        if (lowerCaseMessage.includes(context.quizState.answer.toLowerCase())) {
-          response = "Correct! Do you want another question?";
-          setContext({ ...context, quizState: { active: false, question: '', answer: '' } });
-        } else {
-          response = `Incorrect. The correct answer is ${context.quizState.answer}. Do you want another question?`;
-          setContext({ ...context, quizState: { active: false, question: '', answer: '' } });
-        }
-      } else {
-        const foundPattern = Object.keys(patterns).find(key =>
-          patterns[key].test(lowerCaseMessage)
-        );
-
-        if (foundPattern) {
-          response = responses[foundPattern];
-          if (foundPattern === "quiz_capitals") {
-            setContext({
-              ...context,
-              quizState: { active: true, question: "What is the capital of France?", answer: "Paris" }
-            });
-          }
-          if (foundPattern === "my_name_is") {
-            const nameMatch = message.match(patterns.my_name_is);
-            const userName = nameMatch ? nameMatch[2] : '';
-            setContext({ ...context, userName });
-            response = `Nice to meet you, ${userName}! How can I assist you today?`;
-          }
-        } else {
-          response = `I'm not sure how to respond to that. Can you please clarify or ask something else?`;
-        }
-      }
-
-      return response;
-    };
-
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: Date.now().toString(),
-        sender: 'bot',
-        text: getBotResponse(userMessage),
-        timestamp: new Date()
-      };
-      setMessages(prevMessages => [...prevMessages, botResponse]);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 1500);
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(scrollToBottom, [messages]);
-
-  const formatTimestamp = (date: Date): string => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const handleEmojiClick = (emoji: string) => {
-    setInputValue(prevValue => prevValue + emoji);
-    setShowEmojiPicker(false);
-  };
-
-  const renderEmojiPicker = () => (
-    <div className="absolute bottom-16 right-0 bg-gray-800 rounded-lg p-2 shadow-lg">
-      {['😊', '😂', '🤔', '👍', '❤️', '🎉'].map(emoji => (
-        <button
-          key={emoji}
-          onClick={() => handleEmojiClick(emoji)}
-          className="p-1 hover:bg-gray-700 rounded"
-        >
-          {emoji}
-        </button>
-      ))}
-    </div>
-  );
-
   return (
-    <div className={`flex flex-col h-screen ${darkMode ? 'bg-black text-gray-100' : 'bg-white text-gray-900'}`}>
-      <div className="flex justify-between p-4">
-        <h1 className="text-2xl font-bold">Mazs AI</h1>
-        <button onClick={() => setDarkMode(!darkMode)} className="p-2">
+    <div className={`flex flex-col h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
+      <div className="flex justify-between items-center p-4 border-b border-gray-700">
+        <h1 className="text-2xl font-bold pl-10">{selectedChat ? selectedChat.title : 'New Chat'}</h1>
+        <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-gray-700 transition-colors">
           {darkMode ? <FaSun className="text-yellow-500" /> : <FaMoon className="text-gray-700" />}
         </button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
-          <div
+          <motion.div
             key={message.id}
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} message`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`flex flex-col max-w-xs ${
-                message.sender === 'user' ? 'items-end' : 'items-start'
+              className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
+                message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-white'
               }`}
             >
-              <div
-                className={`flex items-start space-x-2 rounded-lg p-3 ${
-                  message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-white'
-                }`}
-              >
-                {message.sender === 'user' ? <FaUser className="mt-1" /> : <FaRobot className="mt-1" />}
-                <p className="break-words">{message.text}</p>
-              </div>
-              <span className="text-xs text-gray-500 mt-1">
-                {formatTimestamp(message.timestamp)}
-              </span>
+              {message.text}
             </div>
-          </div>
+          </motion.div>
         ))}
         {isTyping && (
-          <div className="flex justify-start message">
-            <div className="flex flex-col max-w-xs items-start">
-              <div className="flex items-center space-x-2 rounded-lg p-3 bg-gray-800 text-white">
-                <FaRobot className="mt-1" />
-                <span>...</span>
-                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></span>
-                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
-                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.7s' }}></span>
+          <div className="flex justify-start">
+            <div className="bg-gray-700 text-white p-3 rounded-lg">
+              <div className="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
               </div>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="border-t border-gray-800 p-4">
+      <div className="border-t border-gray-700 p-4">
         {messages.length === 0 && (
           <div className="flex flex-wrap justify-center gap-2 mb-4">
             {suggestions.map((suggestion, index) => (
@@ -359,26 +377,25 @@ const Chat: React.FC = () => {
             ))}
           </div>
         )}
-        <div className="p-4 flex items-center border-t border-gray-700 relative">
+        <div className="flex items-center space-x-2">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type a message..."
-            className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none relative"
+            className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button onClick={handleSendMessage} className="ml-2 p-2 rounded bg-blue-600 text-white">
+          <button onClick={handleSendMessage} className="p-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors">
             <FaPaperPlane />
           </button>
-          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="ml-2 p-2 rounded bg-gray-800 text-white">
+          <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
             <FaSmile />
           </button>
-          {showEmojiPicker && renderEmojiPicker()}
-          <button className="ml-2 p-2 rounded bg-gray-800 text-white">
+          <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
             <FaMicrophone />
           </button>
-          <button className="ml-2 p-2 rounded bg-gray-800 text-white">
+          <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
             <FaImage />
           </button>
         </div>
