@@ -220,7 +220,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   }
 
-  const neuralNetwork = new EnhancedNeuralNetwork([1000, 1280, 2560,1280 ,640, 320, 100], 0.0025, 0.5, 80, 'adam', 0.01);
+  const neuralNetwork = new EnhancedNeuralNetwork([10000, 12800, 25600,12800 ,6400, 3200, 1000], 0.0025, 0.5, 80, 'adam', 0.01);
 
   const enhancedMachineLearning = (input: string): string => {
     const keywords = [
