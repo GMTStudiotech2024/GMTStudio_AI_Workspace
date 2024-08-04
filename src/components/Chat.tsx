@@ -34,7 +34,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     private weights: number[][][];
     private biases: number[][];
     private learningRate: number;
-    private momentum: number;
     private velocities: number[][][];
     private dropoutRate: number;
     private batchSize: number;
@@ -46,7 +45,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     constructor(
       layerSizes: number[],
       learningRate: number = 0.001,
-      momentum: number = 0.9,
       dropoutRate: number = 0.5,
       batchSize: number = 32,
       optimizer: 'adam' | 'rmsprop' | 'sgd' = 'adam',
@@ -57,7 +55,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       this.biases = [];
       this.velocities = [];
       this.learningRate = learningRate;
-      this.momentum = momentum;
       this.dropoutRate = dropoutRate;
       this.batchSize = batchSize;
       this.optimizer = optimizer;
@@ -223,7 +220,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   }
 
-  const neuralNetwork = new EnhancedNeuralNetwork([500, 640, 1280,640, 320, 160, 50], 0.0025, 0.9, 0.5, 80, 'adam', 0.01);
+  const neuralNetwork = new EnhancedNeuralNetwork([500, 640, 1280,640, 320, 160, 50], 0.0025, 0.5, 80, 'adam', 0.01);
 
   const enhancedMachineLearning = (input: string): string => {
     const keywords = [
@@ -289,7 +286,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
     return response || "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
   };
-
   const handleSendMessage = async () => {
     if (inputValue.trim() === '') return;
 

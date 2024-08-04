@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaSearch, FaTimes, FaTrash, FaUser, FaPencilAlt, FaCog, FaChevronLeft, FaChevronRight, FaHistory } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaTrash, FaUser, FaPencilAlt, FaCog, FaChevronLeft, FaChevronRight, FaHistory } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChatItem } from '../types';
 
