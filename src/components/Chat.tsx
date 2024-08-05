@@ -354,22 +354,23 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   // Expanded Training Data (More Examples and Intents)
   const trainingData = [
     // Greetings
-    { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
-    { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
-    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
-    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
-    { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
+    { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
+    { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
+    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
+    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
+    { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
 
     // Farewells
-    { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
-    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
-    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
+    { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
+    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
+    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
 
     // Weather
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
 
-    // ... (Add more examples for jokes, news, help, etc.)
+    //questions
+    {input: [0, 0, 0, 0, 0, 0, 0, 0, 0,0, 1], target: [0, 0, 0, 0, 0,1, 0, 0, 0, 0]}, // "who are you" 
   ];
 
   // Train the neural network
@@ -393,7 +394,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'see you later',
       "what's the weather like?",
       "how's the weather?",
-      // ... (Add more keywords)
+      "who are you "
     ];
 
     const inputVector = keywords.map((keyword) =>
@@ -413,7 +414,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'Good evening! What can I do for you today?', // good evening
       'Goodbye! It was a pleasure chatting with you. Have a great day!', // Farewells
       "I'm afraid I don't have real-time weather data. You might want to check a reliable weather service for the most up-to-date information.", // Weather
-      // ... (Add more responses for other intents)
+      "I am Mazs AI, The AI made by GMTStudio, I was trained with 8 sentences, which make me not that smart.", // who are you
     ];
 
     return (
