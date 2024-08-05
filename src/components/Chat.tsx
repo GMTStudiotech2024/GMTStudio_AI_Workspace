@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaSmile, FaMicrophone, FaImage, FaSun, FaMoon, FaThumbsUp, FaThumbsDown } from 'react-icons/fa';
+import {
+  FaPaperPlane,
+  FaSmile,
+  FaMicrophone,
+  FaImage,
+  FaSun,
+  FaMoon,
+  FaThumbsUp,
+  FaThumbsDown,
+} from 'react-icons/fa';
 import { Message, Suggestion } from '../types'; // Assuming you have type definitions in types.ts
 import { motion } from 'framer-motion';
 
@@ -16,7 +25,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FaSun /> },
-    { text: "Tell me a joke", icon: <FaSmile /> },
+    { text: 'Tell me a joke', icon: <FaSmile /> },
     { text: "What's the latest news?", icon: <FaImage /> },
   ];
 
@@ -25,7 +34,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Enhanced Neural Network Class
@@ -53,7 +62,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       l2RegularizationRate: number = 0.01,
       activationFunctions: string[] = []
     ) {
-      this.layers = layerSizes.map(size => new Array(size).fill(0));
+      this.layers = layerSizes.map((size) => new Array(size).fill(0));
       this.weights = [];
       this.biases = [];
       this.velocities = [];
@@ -65,21 +74,30 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       this.adamParams = { beta1: 0.9, beta2: 0.999, epsilon: 1e-8 };
       this.rmspropParams = { decay: 0.9, epsilon: 1e-8 };
       this.l2RegularizationRate = l2RegularizationRate;
-      this.activationFunctions = activationFunctions.length === layerSizes.length - 1
-        ? activationFunctions
-        : new Array(layerSizes.length - 1).fill('relu');
+      this.activationFunctions =
+        activationFunctions.length === layerSizes.length - 1
+          ? activationFunctions
+          : new Array(layerSizes.length - 1).fill('relu');
 
       for (let i = 1; i < layerSizes.length; i++) {
-        this.weights.push(Array.from({ length: layerSizes[i] }, () =>
-          Array(layerSizes[i - 1]).fill(0).map(() => this.initializeWeight(layerSizes[i - 1], layerSizes[i]))
-        ));
+        this.weights.push(
+          Array.from({ length: layerSizes[i] }, () =>
+            Array(layerSizes[i - 1])
+              .fill(0)
+              .map(() => this.initializeWeight(layerSizes[i - 1], layerSizes[i]))
+          )
+        );
         this.biases.push(Array(layerSizes[i]).fill(0));
-        this.velocities.push(Array.from({ length: layerSizes[i] }, () =>
-          Array(layerSizes[i - 1]).fill(0)
-        ));
-        this.momentums.push(Array.from({ length: layerSizes[i] }, () =>
-          Array(layerSizes[i - 1]).fill(0)
-        ));
+        this.velocities.push(
+          Array.from({ length: layerSizes[i] }, () =>
+            Array(layerSizes[i - 1]).fill(0)
+          )
+        );
+        this.momentums.push(
+          Array.from({ length: layerSizes[i] }, () =>
+            Array(layerSizes[i - 1]).fill(0)
+          )
+        );
       }
     }
 
@@ -108,7 +126,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           return (
             0.5 *
             x *
-            (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))))
+            (1 +
+              Math.tanh(
+                Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))
+              ))
           );
         default:
           return x;
@@ -142,7 +163,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         case 'gelu': {
           const cdf =
             0.5 *
-            (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))));
+            (1 +
+              Math.tanh(
+                Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))
+              ));
           return cdf + x * this.activation(x, 'sigmoid') * (1 - cdf);
         }
         default:
@@ -158,7 +182,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
     private dropout(layer: number[]): number[] {
       return layer.map((neuron) =>
-        Math.random() > this.dropoutRate ? neuron / (1 - this.dropoutRate) : 0
+        Math.random() > this.dropoutRate
+          ? neuron / (1 - this.dropoutRate)
+          : 0
       );
     }
 
@@ -302,7 +328,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       const mHat = m / (1 - Math.pow(beta1, this.batchSize));
       const vHat = v / (1 - Math.pow(beta2, this.batchSize));
       const weightDecay =
-        this.l2RegularizationRate * this.weights[layerIndex][neuronIndex][weightIndex];
+        this.l2RegularizationRate *
+        this.weights[layerIndex][neuronIndex][weightIndex];
       this.weights[layerIndex][neuronIndex][weightIndex] +=
         this.learningRate *
         (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay);
@@ -353,32 +380,65 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   // Expanded Training Data (More Examples and Intents)
   const trainingData = [
     // Greetings
-    { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
-    { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
-    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
-    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
-    { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
+    {
+      input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }, // "hello"
+    {
+      input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+      target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }, // "hi"
+    {
+      input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+      target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    }, // "good morning"
+    {
+      input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+      target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    }, // "good evening"
+    {
+      input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+      target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }, // "hey there"
 
     // Farewells
-    { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
-    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
-    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
+    {
+      input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+      target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    }, // "goodbye"
+    {
+      input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    }, // "bye"
+    {
+      input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+      target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    }, // "see you later"
 
     // Weather
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
+    {
+      input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    }, // "what's the weather like?"
+    {
+      input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    }, // "how's the weather?"
   ];
 
   // Train the neural network
-  const epochs = 1000; // Increased number of epochs
+  const epochs = 1500; // Increased number of epochs
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
     epochs
   );
 
-  // Enhanced Machine Learning Function with Context
-  const enhancedMachineLearning = (input: string, chatHistory: Message[]): string => {
+  // Enhanced Machine Learning Function with Word Combination and Context
+  const enhancedMachineLearning = (
+    input: string,
+    chatHistory: Message[]
+  ): string => {
     const keywords = [
       'hello',
       'hi',
@@ -403,25 +463,62 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
     const predictedClass = neuralNetwork.predict(inputVector);
 
-    // Contextual Responses based on Chat History
+    // Contextual Responses with Word Combination
     const responses = {
-      0: 'Hello! How can I assist you today?',
-      1: 'Good morning! What can I do for you today?',
-      2: 'Good evening! What can I do for you today?',
-      3: 'Goodbye! It was a pleasure chatting with you. Have a great day!',
-      4: "I'm afraid I don't have real-time weather data. You might want to check a reliable weather service for the most up-to-date information.",
+      0: [
+        'Hello! I wonder how you are doing today?',
+        'Hi there! Do you need any help?',
+        'Hey there! How can I assist you?',
+        'How can I assist you today?',
+        'What can I do for you?',
+      ],
+      1: [
+        'Good morning! How can I assist you today?',
+        'Good morning to you! What are you up to?',
+        'What a lovely morning! What can I do for you today?',
+        'What can I do for you today?',
+      ],
+      2: [
+        'Good evening! How was your day?',
+        'Good evening to you! What can I do for you today?',
+        'Hope you had a good day! What can I do for you today?',
+        'What can I do for you this evening?',
+      ],
+      3: [
+        'Goodbye! Have a great day!',
+        'See you later! ',
+        'Talk to you soon! ',
+        'Have a great day!',
+        'It was a pleasure chatting with you. bye!',
+      ],
+      4: [
+        "I'm afraid I don't have real-time weather data.",
+        "I'm not able to provide weather information.",
+        "You might want to check a reliable weather service for the most up-to-date information.",
+      ],
       // Add more responses based on predicted classes
     };
+
+    // Choose a random response from the array for the predicted class
+    const randomResponseIndex = Math.floor(
+      Math.random() * responses[predictedClass as keyof typeof responses].length
+    );
+    let response =
+      responses[predictedClass as keyof typeof responses][randomResponseIndex];
 
     // Example of using chat history for context
     if (predictedClass === 0 && chatHistory.length > 0) {
       const lastUserMessage = chatHistory[chatHistory.length - 1].text;
       if (lastUserMessage.includes('weather')) {
-        return "We were just talking about the weather! Anything else you'd like to know?";
+        response =
+          "We were just talking about the weather! Anything else you'd like to know?";
       }
     }
 
-    return responses[predictedClass as keyof typeof responses] || "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
+    return (
+      response ||
+      "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?"
+    );
   };
 
   const handleSendMessage = async () => {
@@ -482,14 +579,17 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   // Function to handle feedback
   const handleFeedback = (messageId: string, feedback: 'good' | 'bad') => {
     // 1. Find the message in the messages array
-    const messageIndex = messages.findIndex((message) => message.id === messageId);
+    const messageIndex = messages.findIndex(
+      (message) => message.id === messageId
+    );
 
     if (messageIndex !== -1) {
       // 2. Get the input vector associated with the message
       const inputVector = messages[messageIndex - 1].inputVector; // Assuming you store the input vector with the user message
 
       // 3. Adjust the target vector based on feedback
-      if (inputVector) { // Check if inputVector is defined
+      if (inputVector) {
+        // Check if inputVector is defined
         const targetVector = trainingData.find(
           (data) => data.input.toString() === inputVector.toString()
         )?.target;
