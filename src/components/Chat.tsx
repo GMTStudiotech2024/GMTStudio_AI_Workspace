@@ -8,6 +8,7 @@ import {
   FaMoon,
   FaThumbsUp,
   FaThumbsDown,
+  FaTrashAlt, // Import the trash icon
 } from 'react-icons/fa';
 import { Message, Suggestion } from '../types'; // Assuming you have type definitions in types.ts
 import { motion } from 'framer-motion';
@@ -369,7 +370,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   // Initialize the neural network
   const neuralNetwork = new EnhancedNeuralNetwork(
-    [10, 10, 10], // Example network architecture
+    [10, 15, 10], // Example network architecture
     0.001, // Example learning rate
     0.3, // Example dropout rate
     64, // Example batch size
@@ -427,7 +428,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   ];
 
   // Train the neural network
-  const epochs = 1500; // Increased number of epochs
+  const epochs = 1000; // Increased number of epochs
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
@@ -614,6 +615,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
+  // Function to clear the chat
+  const handleClearChat = () => {
+    setMessages([]);
+  };
+
   return (
     <div
       className={`flex flex-col h-screen ${
@@ -624,16 +630,26 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         <h1 className="text-2xl font-bold pl-10">
           {selectedChat ? selectedChat.title : 'New Chat'}
         </h1>
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-        >
-          {darkMode ? (
-            <FaSun className="text-yellow-500" />
-          ) : (
-            <FaMoon className="text-gray-700" />
-          )}
-        </button>
+        <div className="flex items-center">
+          {/* Clear Chat Button */}
+          <button
+            onClick={handleClearChat}
+            className="p-2 rounded-full hover:bg-gray-700 transition-colors mr-2"
+          >
+            <FaTrashAlt className="text-red-500" />
+          </button>
+          {/* Dark Mode Button */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+          >
+            {darkMode ? (
+              <FaSun className="text-yellow-500" />
+            ) : (
+              <FaMoon className="text-gray-700" />
+            )}
+          </button>
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
