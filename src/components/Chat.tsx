@@ -372,7 +372,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   ];
 
   // Train the neural network
-  const epochs = 5000; // Increased number of epochs
+  const epochs = 3000; // Increased number of epochs
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
@@ -392,7 +392,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'see you later',
       "what's the weather like?",
       "how's the weather?",
-      "who are you "
     ];
 
     const inputVector = keywords.map((keyword) =>
@@ -412,7 +411,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'Good evening! What can I do for you today?', // good evening
       'Goodbye! It was a pleasure chatting with you. Have a great day!', // Farewells
       "I'm afraid I don't have real-time weather data. You might want to check a reliable weather service for the most up-to-date information.", // Weather
-      "I am Mazs AI, The AI made by GMTStudio, I was trained with 8 sentences, which make me not that smart.", // who are you
     ];
 
     return (
