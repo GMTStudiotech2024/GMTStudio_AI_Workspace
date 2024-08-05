@@ -343,7 +343,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   // Initialize the neural network
   const neuralNetwork = new EnhancedNeuralNetwork(
-    [10,10, 10], // Example network architecture
+    [10,10, 10,10], // Example network architecture
     0.001, // Example learning rate
     0.3, // Example dropout rate
     64, // Example batch size
@@ -372,7 +372,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   ];
 
   // Train the neural network
-  const epochs = 3000; // Increased number of epochs
+  const epochs = 4000; // Increased number of epochs
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
