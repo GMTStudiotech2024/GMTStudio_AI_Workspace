@@ -370,15 +370,15 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   ];
 
   // Train the neural network
-  const epochs = 3500; // Increased number of epochs
+  const epochs = 1000; // Increased number of epochs
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
     epochs
   );
 
-  // Enhanced Machine Learning Function
-  const enhancedMachineLearning = (input: string): string => {
+  // Enhanced Machine Learning Function with Context
+  const enhancedMachineLearning = (input: string, chatHistory: Message[]): string => {
     const keywords = [
       'hello',
       'hi',
@@ -403,18 +403,25 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
     const predictedClass = neuralNetwork.predict(inputVector);
 
-    const responses = [
-      'Hello! How can I assist you today?', // hello
-      'Good morning! What can I do for you today?', // good morning
-      'Good evening! What can I do for you today?', // good evening
-      'Goodbye! It was a pleasure chatting with you. Have a great day!', // Farewells
-      "I'm afraid I don't have real-time weather data. You might want to check a reliable weather service for the most up-to-date information.", // Weather
-    ];
+    // Contextual Responses based on Chat History
+    const responses = {
+      0: 'Hello! How can I assist you today?',
+      1: 'Good morning! What can I do for you today?',
+      2: 'Good evening! What can I do for you today?',
+      3: 'Goodbye! It was a pleasure chatting with you. Have a great day!',
+      4: "I'm afraid I don't have real-time weather data. You might want to check a reliable weather service for the most up-to-date information.",
+      // Add more responses based on predicted classes
+    };
 
-    return (
-      responses[predictedClass] ||
-      "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?"
-    );
+    // Example of using chat history for context
+    if (predictedClass === 0 && chatHistory.length > 0) {
+      const lastUserMessage = chatHistory[chatHistory.length - 1].text;
+      if (lastUserMessage.includes('weather')) {
+        return "We were just talking about the weather! Anything else you'd like to know?";
+      }
+    }
+
+    return responses[predictedClass as keyof typeof responses] || "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
   };
 
   const handleSendMessage = async () => {
@@ -458,7 +465,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: enhancedMachineLearning(newMessage.text),
+        text: enhancedMachineLearning(newMessage.text, messages), // Pass chat history
         timestamp: new Date(),
       };
       setMessages((prevMessages) => [...prevMessages, botResponse]);
