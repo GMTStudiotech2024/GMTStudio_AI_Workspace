@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaSmile, FaMicrophone, FaImage, FaSun, FaMoon } from 'react-icons/fa';
+import { FaPaperPlane, FaSmile, FaMicrophone, FaImage, FaSun, FaMoon, FaThumbsUp, FaThumbsDown } from 'react-icons/fa';
 import { Message, Suggestion } from '../types'; // Assuming you have type definitions in types.ts
 import { motion } from 'framer-motion';
 
@@ -338,12 +338,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         0
       );
     }
-
   }
 
   // Initialize the neural network
   const neuralNetwork = new EnhancedNeuralNetwork(
-    [10,10, 10], // Example network architecture
+    [10, 10, 10], // Example network architecture
     0.001, // Example learning rate
     0.3, // Example dropout rate
     64, // Example batch size
@@ -368,11 +367,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     // Weather
     { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
     { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
-
   ];
 
   // Train the neural network
-  const epochs = 3500; // Increased number of epochs
+  const epochs = 1000; // Increased number of epochs
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
@@ -422,11 +420,34 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const handleSendMessage = async () => {
     if (inputValue.trim() === '') return;
 
+    // Store the input vector with the message
+    const keywords = [
+      'hello',
+      'hi',
+      'good morning',
+      'good evening',
+      'hey there',
+      'goodbye',
+      'bye',
+      'see you later',
+      "what's the weather like?",
+      "how's the weather?",
+    ];
+    const inputVector = keywords.map((keyword) =>
+      inputValue
+        .toLowerCase()
+        .split(/\s+/)
+        .some((word) => word.includes(keyword) || keyword.includes(word))
+        ? 1
+        : 0
+    );
+
     const newMessage: Message = {
       id: Date.now().toString(),
       sender: 'user',
       text: inputValue,
       timestamp: new Date(),
+      inputVector: inputVector, // Store the input vector
     };
 
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -448,6 +469,41 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSendMessage();
+    }
+  };
+
+  // Function to handle feedback
+  const handleFeedback = (messageId: string, feedback: 'good' | 'bad') => {
+    // 1. Find the message in the messages array
+    const messageIndex = messages.findIndex((message) => message.id === messageId);
+
+    if (messageIndex !== -1) {
+      // 2. Get the input vector associated with the message
+      const inputVector = messages[messageIndex - 1].inputVector; // Assuming you store the input vector with the user message
+
+      // 3. Adjust the target vector based on feedback
+      if (inputVector) { // Check if inputVector is defined
+        const targetVector = trainingData.find(
+          (data) => data.input.toString() === inputVector.toString()
+        )?.target;
+
+        if (targetVector) {
+          // 4. Increment/Decrement the corresponding element in the target vector
+          const predictedClass = neuralNetwork.predict(inputVector);
+          if (feedback === 'good') {
+            targetVector[predictedClass] += 0.1; // Increment for positive feedback
+          } else {
+            targetVector[predictedClass] -= 0.1; // Decrement for negative feedback
+          }
+
+          // 5. Retrain the neural network with the updated training data
+          neuralNetwork.train(
+            trainingData.map((data) => data.input),
+            trainingData.map((data) => data.target),
+            10 // Retrain for a few epochs
+          );
+        }
+      }
     }
   };
 
@@ -491,6 +547,23 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               }`}
             >
               {message.text}
+              {/* Add feedback buttons for bot messages */}
+              {message.sender === 'bot' && (
+                <div className="flex justify-end mt-2 space-x-2">
+                  <button
+                    onClick={() => handleFeedback(message.id, 'good')}
+                    className="text-green-500 hover:text-green-600"
+                  >
+                    <FaThumbsUp />
+                  </button>
+                  <button
+                    onClick={() => handleFeedback(message.id, 'bad')}
+                    className="text-red-500 hover:text-red-600"
+                  >
+                    <FaThumbsDown />
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         ))}
