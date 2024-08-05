@@ -343,7 +343,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   // Initialize the neural network
   const neuralNetwork = new EnhancedNeuralNetwork(
-    [10, 10, 10], // Example network architecture
+    [10,10, 10], // Example network architecture
     0.001, // Example learning rate
     0.3, // Example dropout rate
     64, // Example batch size
@@ -356,24 +356,24 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     // Greetings
     { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
     { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
-    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
-    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
+    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
+    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
     { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
 
     // Farewells
-    { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "goodbye"
-    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "bye"
-    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "see you later"
+    { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
+    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
+    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
 
     // Weather
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "what's the weather like?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "how's the weather?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
 
     // ... (Add more examples for jokes, news, help, etc.)
   ];
 
   // Train the neural network
-  const epochs = 1000; // Increased number of epochs
+  const epochs = 2000; // Increased number of epochs
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
@@ -408,7 +408,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     const predictedClass = neuralNetwork.predict(inputVector);
 
     const responses = [
-      'Hello! How can I assist you today?', // Greetings
+      'Hello! How can I assist you today?', // hello
+      'Good morning! What can I do for you today?', // good morning
+      'Good evening! What can I do for you today?', // good evening
       'Goodbye! It was a pleasure chatting with you. Have a great day!', // Farewells
       "I'm afraid I don't have real-time weather data. You might want to check a reliable weather service for the most up-to-date information.", // Weather
       // ... (Add more responses for other intents)
