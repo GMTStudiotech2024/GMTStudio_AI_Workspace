@@ -372,7 +372,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   ];
 
   // Train the neural network
-  const epochs = 4000; // Increased number of epochs
+  const epochs = 3500; // Increased number of epochs
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
