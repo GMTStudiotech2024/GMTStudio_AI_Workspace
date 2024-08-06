@@ -369,7 +369,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   // Initialize the neural network
   const neuralNetwork = new EnhancedNeuralNetwork(
-    [15, 15, 10], // Example network architecture (adjust if needed)
+    [15, 50, 10], // Example network architecture (adjust if needed)
     0.001, // Example learning rate
     0.3, // Example dropout rate
     64, // Example batch size
