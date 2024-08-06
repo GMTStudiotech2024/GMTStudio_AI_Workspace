@@ -418,27 +418,28 @@ const trainingData = [
 
   // How Are You
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you doing?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how's it going?"
 ];
 
 // Example Test Data (similar structure to trainingData)
 const testData = [
-    { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello"
-    { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi"
-    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning"
-    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening"
-    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Goodbye"
-    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Bye"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "See you later"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a joke"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a funny joke"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you doing?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the weather like?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "How's the weather?"
-    // Add more test examples for different variations of greetings, farewells, weather queries, jokes, etc.
-    // ...
-  ];
+  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello"
+  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi"
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning"
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening"
+  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Goodbye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Bye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "See you later"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a joke"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a funny joke"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you doing?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the weather like?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "How's the weather?"
+  // Add more test examples for different variations of greetings, farewells, weather queries, jokes, etc.
+  // ...
+];
 
 
 // Define the type for bestHyperparameters
@@ -719,6 +720,79 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setMessages([]);
   };
 
+  // *** Named Entity Recognition (NER) - Basic Rule-Based Example ***
+  const performNER = (text: string): string => {
+    const entities = [];
+    const words = text.split(/\s+/);
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      // Simple rule: Check if the word is capitalized and followed by a common title (e.g., Mr., Ms., Dr.)
+      if (
+        word.match(/^[A-Z][a-z]+$/) &&
+        (i + 1 < words.length &&
+          words[i + 1].match(/^(Mr|Ms|Dr|Mrs)\.$/))
+      ) {
+        entities.push(`${word} ${words[i + 1]}`);
+        i++; // Skip the next word (title)
+      }
+      // Another simple rule: Check for capitalized words that might be locations
+      else if (word.match(/^[A-Z][a-z]+$/)) {
+        entities.push(word);
+      }
+    }
+    return entities.length > 0 ? entities.join(', ') : 'No entities found';
+  };
+
+  // Keep the POS tagging function and fix the regex
+  const performPOS = (text: string): string => {
+    const words = text.split(' ');
+    const tags = words.map(word => {
+      if (word.match(/^[A-Z][a-z]+$/)) return `${word}/NNP`; // Proper noun
+      if (word.match(/^[a-z]+s$/)) return `${word}/NNS`; // Plural noun
+      if (word.match(/^[a-z]+ed$/)) return `${word}/VBD`; // Past tense verb
+      if (word.match(/^[a-z]+ing$/)) return `${word}/VBG`; // Gerund/present participle
+      if (['the', 'a', 'an'].includes(word.toLowerCase())) return `${word}/DT`; // Determiner
+      if (['in', 'on', 'at', 'by'].includes(word.toLowerCase())) return `${word}/IN`; // Preposition
+      return `${word}/NN`; // Default to noun
+    });
+    return tags.join(' ');
+  };
+
+  // If you want to keep the summarization function, fix it like this:
+  const performSummarization = (text: string): string => {
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+    if (sentences.length <= 3) return text; // Return original text if it's already short
+    
+    // Simple summarization: return first and last sentence
+    return `${sentences[0]} ... ${sentences[sentences.length - 1]}`;
+  };
+
+  const handlePOS = () => {
+    if (inputValue) {
+      const posResult = performPOS(inputValue);
+      console.log("POS Result:", posResult);
+      // You can also set this result to state and display it in the UI
+    }
+  };
+
+  const handleSummarization = () => {
+    if (inputValue) {
+      const summaryResult = performSummarization(inputValue);
+      console.log("Summary:", summaryResult);
+      // You can also set this result to state and display it in the UI
+    }
+  };
+
+  const handleNER = () => {
+    if (inputValue) {
+      const nerResult = performNER(inputValue);
+      console.log("Named Entities:", nerResult);
+      // You can also set this result to state and display it in the UI
+      // For example:
+      // setNerResult(nerResult);
+    }
+  };
+
   return (
     <div
       className={`flex flex-col h-screen ${
@@ -842,8 +916,28 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             <FaImage />
           </button>
         </div>
-      </div>
-    </div>
+
+        {/* Add buttons for NLP tasks */}
+        <div className="flex items-center space-x-2 mt-2">
+          <button
+            onClick={handlePOS}
+            className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+          >
+            POS
+          </button>          <button
+            onClick={handleSummarization}
+            className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+          >
+            Summarize
+          </button>
+          <button
+            onClick={handleNER}
+            className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+          >
+            NER
+          </button>
+        </div>
+      </div>    </div>
   );
 };
 
