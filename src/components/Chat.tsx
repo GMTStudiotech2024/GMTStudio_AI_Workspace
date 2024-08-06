@@ -10,12 +10,531 @@ import {
   FaThumbsDown,
   FaTrashAlt,
 } from 'react-icons/fa';
-import { Message, Suggestion } from '../types';
+import { Message, Suggestion } from '../types'; // Assuming you have type definitions in types.ts
 import { motion } from 'framer-motion';
 
 interface ChatProps {
   selectedChat: { title: string } | null;
 }
+
+// Enhanced Neural Network Class
+class EnhancedNeuralNetwork {
+  private layers: number[][];
+  private weights: number[][][];
+  private biases: number[][];
+  private learningRate: number;
+  private velocities: number[][][];
+  private momentums: number[][][];
+  private dropoutRate: number;
+  private batchSize: number;
+  private optimizer: 'adam' | 'rmsprop' | 'sgd' | 'adamw' = 'adamw';
+  private adamParams: { beta1: number; beta2: number; epsilon: number };
+  private rmspropParams: { decay: number; epsilon: number };
+  private l2RegularizationRate: number;
+  private activationFunctions: string[];
+
+  constructor(
+    layerSizes: number[],
+    learningRate: number = 0.001,
+    dropoutRate: number = 0.5,
+    batchSize: number = 32,
+    optimizer: 'adam' | 'rmsprop' | 'sgd' | 'adamw' = 'adamw',
+    l2RegularizationRate: number = 0.01,
+    activationFunctions: string[] = []
+  ) {
+    this.layers = layerSizes.map((size) => new Array(size).fill(0));
+    this.weights = [];
+    this.biases = [];
+    this.velocities = [];
+    this.momentums = [];
+    this.learningRate = learningRate;
+    this.dropoutRate = dropoutRate;
+    this.batchSize = batchSize;
+    this.optimizer = optimizer;
+    this.adamParams = { beta1: 0.9, beta2: 0.999, epsilon: 1e-8 };
+    this.rmspropParams = { decay: 0.9, epsilon: 1e-8 };
+    this.l2RegularizationRate = l2RegularizationRate;
+    this.activationFunctions =
+      activationFunctions.length === layerSizes.length - 1
+        ? activationFunctions
+        : new Array(layerSizes.length - 1).fill('relu');
+
+    for (let i = 1; i < layerSizes.length; i++) {
+      this.weights.push(
+        Array.from({ length: layerSizes[i] }, () =>
+          Array(layerSizes[i - 1])
+            .fill(0)
+            .map(() =>
+              this.initializeWeight(
+                layerSizes[i - 1],
+                layerSizes[i],
+                this.activationFunctions[i - 1]
+              ) 
+            )
+        )
+      );
+      this.biases.push(Array(layerSizes[i]).fill(0));
+      this.velocities.push(
+        Array.from({ length: layerSizes[i] }, () =>
+          Array(layerSizes[i - 1]).fill(0)
+        )
+      );
+      this.momentums.push(
+        Array.from({ length: layerSizes[i] }, () =>
+          Array(layerSizes[i - 1]).fill(0)
+        )
+      );
+    }
+  }
+
+  // Improved weight initialization (He initialization for ReLU and variants)
+  private initializeWeight(
+    fanIn: number,
+    fanOut: number,
+    activation: string
+  ): number {
+    switch (activation) {
+      case 'relu':
+      case 'leakyRelu':
+      case 'elu':
+      case 'swish':
+      case 'mish':
+      case 'gelu':
+        return Math.random() * Math.sqrt(2 / fanIn); // He initialization
+      default:
+        return Math.random() * Math.sqrt(2 / (fanIn + fanOut)); // Xavier initialization
+    }
+  }
+
+  private activation(x: number, type: string): number {
+    switch (type) {
+      case 'sigmoid':
+        return 1 / (1 + Math.exp(-x));
+      case 'tanh':
+        return Math.tanh(x);
+      case 'relu':
+        return Math.max(0, x);
+      case 'leakyRelu':
+        return x > 0 ? x : 0.01 * x;
+      case 'elu':
+        return x >= 0 ? x : Math.exp(x) - 1;
+      case 'swish':
+        return x * this.activation(x, 'sigmoid');
+      case 'mish':
+        return x * Math.tanh(Math.log(1 + Math.exp(x)));
+      case 'gelu':
+        return (
+          0.5 *
+          x *
+          (1 +
+            Math.tanh(
+              Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))
+            ))
+        );
+      default:
+        return x;
+    }
+  }
+
+  private activationDerivative(x: number, type: string): number {
+    switch (type) {
+      case 'sigmoid':
+        return x * (1 - x);
+      case 'tanh':
+        return 1 - x * x;
+      case 'relu':
+        return x > 0 ? 1 : 0;
+      case 'leakyRelu':
+        return x > 0 ? 1 : 0.01;
+      case 'elu':
+        return x >= 0 ? 1 : x + 1;
+      case 'swish': {
+        const sigmoid = this.activation(x, 'sigmoid');
+        return sigmoid + x * sigmoid * (1 - sigmoid);
+      }
+      case 'mish': {
+        const softplus = Math.log(1 + Math.exp(x));
+        const tanh_softplus = Math.tanh(softplus);
+        return (
+          tanh_softplus +
+          x * (1 - tanh_softplus * tanh_softplus) * (1 / (1 + Math.exp(-x)))
+        );
+      }
+      case 'gelu': {
+        const cdf =
+          0.5 *
+          (1 +
+            Math.tanh(
+              Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))
+            ));
+        return cdf + x * this.activation(x, 'sigmoid') * (1 - cdf);
+      }
+      default:
+        return 1;
+    }
+  }
+
+  private softmax(arr: number[]): number[] {
+    const expValues = arr.map((val) => Math.exp(val - Math.max(...arr)));
+    const sumExpValues = expValues.reduce((a, b) => a + b, 0);
+    return expValues.map((val) => val / sumExpValues);
+  }
+
+  private dropout(layer: number[]): number[] {
+    return layer.map((neuron) =>
+      Math.random() > this.dropoutRate
+        ? neuron / (1 - this.dropoutRate)
+        : 0
+    );
+  }
+
+  private forwardPropagation(
+    input: number[],
+    isTraining: boolean = true
+  ): number[] {
+    this.layers[0] = input;
+    for (let i = 1; i < this.layers.length; i++) {
+      for (let j = 0; j < this.layers[i].length; j++) {
+        let sum = this.biases[i - 1][j];
+        for (let k = 0; k < this.layers[i - 1].length; k++) {
+          sum += this.layers[i - 1][k] * this.weights[i - 1][j][k];
+        }
+        this.layers[i][j] =
+          i === this.layers.length - 1
+            ? sum
+            : this.activation(sum, this.activationFunctions[i - 1]);
+      }
+      if (isTraining && i < this.layers.length - 1) {
+        this.layers[i] = this.dropout(this.layers[i]);
+      }
+    }
+    this.layers[this.layers.length - 1] = this.softmax(
+      this.layers[this.layers.length - 1]
+    );
+    return this.layers[this.layers.length - 1];
+  }
+
+  private backPropagation(target: number[]): void {
+    const deltas: number[][] = new Array(this.layers.length)
+      .fill(0)
+      .map(() => []);
+
+    for (let i = 0; i < this.layers[this.layers.length - 1].length; i++) {
+      deltas[this.layers.length - 1][i] =
+        target[i] - this.layers[this.layers.length - 1][i];
+    }
+
+    for (let i = this.layers.length - 2; i > 0; i--) {
+      for (let j = 0; j < this.layers[i].length; j++) {
+        let error = 0;
+        for (let k = 0; k < this.layers[i + 1].length; k++) {
+          error += deltas[i + 1][k] * this.weights[i][k][j];
+        }
+        deltas[i][j] =
+          error *
+          this.activationDerivative(
+            this.layers[i][j],
+            this.activationFunctions[i - 1]
+          );
+      }
+    }
+
+    for (let i = 1; i < this.layers.length; i++) {
+      for (let j = 0; j < this.layers[i].length; j++) {
+        for (let k = 0; k < this.layers[i - 1].length; k++) {
+          const gradient = deltas[i][j] * this.layers[i - 1][k];
+          this.updateWeight(i - 1, j, k, gradient);
+        }
+        this.biases[i - 1][j] += this.learningRate * deltas[i][j];
+      }
+    }
+  }
+
+  private updateWeight(
+    layerIndex: number,
+    neuronIndex: number,
+    weightIndex: number,
+    gradient: number
+  ): void {
+    switch (this.optimizer) {
+      case 'adam':
+        this.adamOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
+        break;
+      case 'rmsprop':
+        this.rmspropOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
+        break;
+      case 'sgd':
+        this.sgdOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
+        break;
+      case 'adamw':
+        this.adamwOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
+        break;
+    }
+  }
+
+  private adamOptimizer(
+    layerIndex: number,
+    neuronIndex: number,
+    weightIndex: number,
+    gradient: number
+  ): void {
+    const { beta1, beta2, epsilon } = this.adamParams;
+    const m = (this.momentums[layerIndex][neuronIndex][weightIndex] =
+      beta1 * this.momentums[layerIndex][neuronIndex][weightIndex] +
+      (1 - beta1) * gradient);
+    const v = (this.velocities[layerIndex][neuronIndex][weightIndex] =
+      beta2 * this.velocities[layerIndex][neuronIndex][weightIndex] +
+      (1 - beta2) * gradient * gradient);
+    const mHat = m / (1 - Math.pow(beta1, this.batchSize));
+    const vHat = v / (1 - Math.pow(beta2, this.batchSize));
+    this.weights[layerIndex][neuronIndex][weightIndex] +=
+      (this.learningRate * mHat) / (Math.sqrt(vHat) + epsilon);
+  }
+
+  private rmspropOptimizer(
+    layerIndex: number,
+    neuronIndex: number,
+    weightIndex: number,
+    gradient: number
+  ): void {
+    const { decay, epsilon } = this.rmspropParams;
+    const v = (this.velocities[layerIndex][neuronIndex][weightIndex] =
+      decay * this.velocities[layerIndex][neuronIndex][weightIndex] +
+      (1 - decay) * gradient * gradient);
+    this.weights[layerIndex][neuronIndex][weightIndex] +=
+      (this.learningRate * gradient) / (Math.sqrt(v) + epsilon);
+  }
+
+  private sgdOptimizer(
+    layerIndex: number,
+    neuronIndex: number,
+    weightIndex: number,
+    gradient: number
+  ): void {
+    this.weights[layerIndex][neuronIndex][weightIndex] +=
+      this.learningRate * gradient;
+  }
+
+  private adamwOptimizer(
+    layerIndex: number,
+    neuronIndex: number,
+    weightIndex: number,
+    gradient: number
+  ): void {
+    const { beta1, beta2, epsilon } = this.adamParams;
+    const m = (this.momentums[layerIndex][neuronIndex][weightIndex] =
+      beta1 * this.momentums[layerIndex][neuronIndex][weightIndex] +
+      (1 - beta1) * gradient);
+    const v = (this.velocities[layerIndex][neuronIndex][weightIndex] =
+      beta2 * this.velocities[layerIndex][neuronIndex][weightIndex] +
+      (1 - beta2) * gradient * gradient);
+    const mHat = m / (1 - Math.pow(beta1, this.batchSize));
+    const vHat = v / (1 - Math.pow(beta2, this.batchSize));
+    const weightDecay =
+      this.l2RegularizationRate *
+      this.weights[layerIndex][neuronIndex][weightIndex];
+    this.weights[layerIndex][neuronIndex][weightIndex] +=
+      this.learningRate *
+      (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay);
+  }
+
+  train(inputs: number[][], targets: number[][], epochs: number): void {
+    for (let epoch = 0; epoch < epochs; epoch++) {
+      let totalLoss = 0;
+      for (let i = 0; i < inputs.length; i += this.batchSize) {
+        const batchInputs = inputs.slice(i, i + this.batchSize);
+        const batchTargets = targets.slice(i, i + this.batchSize);
+        for (let j = 0; j < batchInputs.length; j++) {
+          const output = this.forwardPropagation(batchInputs[j], true);
+          this.backPropagation(batchTargets[j]);
+          totalLoss += this.calculateLoss(output, batchTargets[j]);
+        }
+      }
+      if (epoch % 100 === 0) {
+        console.log(`Epoch ${epoch}, Loss: ${totalLoss / inputs.length}`);
+      }
+      this.learningRate *= 0.99; // Learning rate decay
+    }
+  }
+
+  predict(input: number[]): number {
+    const output = this.forwardPropagation(input, false);
+    return output.indexOf(Math.max(...output));
+  }
+
+  private calculateLoss(output: number[], target: number[]): number {
+    return -output.reduce(
+      (sum, value, index) => sum + target[index] * Math.log(value + 1e-10),
+      0
+    );
+  }
+}
+
+// Function to calculate accuracy
+function calculateAccuracy(neuralNetwork: EnhancedNeuralNetwork, testData: { input: number[], target: number[] }[]): number {
+  let correctPredictions = 0;
+
+  for (const data of testData) {
+    const predictedClass = neuralNetwork.predict(data.input);
+    if (predictedClass === data.target.indexOf(Math.max(...data.target))) {
+      correctPredictions++;
+    }
+  }
+
+  return correctPredictions / testData.length;
+}
+
+// Expanded Training Data 
+const trainingData = [
+  // Greetings
+  {
+    input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  }, // "hello"
+  {
+    input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  }, // "hi"
+  {
+    input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  }, // "good morning"
+  {
+    input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+  }, // "good evening"
+  {
+    input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  }, // "hey there"
+
+  // Farewells
+  {
+    input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+  }, // "goodbye"
+  {
+    input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+  }, // "bye"
+  {
+    input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+  }, // "see you later"
+
+  // Weather
+  {
+    input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+  }, // "what's the weather like?"
+  {
+    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+  }, // "how's the weather?"
+
+  // Jokes
+  {
+    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+  }, // "tell me a joke"
+  {
+    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+  }, // "tell me a funny joke"
+
+  // How are you?
+  {
+    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+  }, // "how are you?"
+  {
+    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+  }, // "how are you doing?"
+  {
+    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+  }, // "how's it going?"
+
+  // ... (Add more intents and examples)
+];
+
+// Example Test Data (similar structure to trainingData)
+const testData = [
+  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello"
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning"
+  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Goodbye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the weather like?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a joke"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you?"
+  // ... Add more test data examples here 
+];
+
+// Define the type for bestHyperparameters
+interface BestHyperparameters {
+  layerSizes: number[];
+  learningRate: number;
+  dropoutRate: number;
+}
+
+// *** Perform Hyperparameter Tuning ONLY ONCE outside the component ***
+// Define hyperparameter options
+const layerSizesOptions = [[15, 15, 10], [20, 15, 10], [15, 20, 10]];
+const learningRateOptions = [0.001, 0.01];
+const dropoutRateOptions = [0.3, 0.5];
+
+let bestAccuracy = 0;
+let bestHyperparameters: BestHyperparameters = { layerSizes: [], learningRate: 0, dropoutRate: 0 };
+
+for (const layerSizes of layerSizesOptions) {
+  for (const learningRate of learningRateOptions) {
+    for (const dropoutRate of dropoutRateOptions) {
+      const neuralNetwork = new EnhancedNeuralNetwork(
+        layerSizes,
+        learningRate,
+        dropoutRate,
+        64, // Batch Size
+        'adamw', // Optimizer
+        0.01 // L2 Regularization Rate
+      );
+
+      neuralNetwork.train(
+        trainingData.map((data) => data.input),
+        trainingData.map((data) => data.target),
+        1000 // Number of epochs
+      );
+
+      const accuracy = calculateAccuracy(neuralNetwork, testData);
+      console.log(`Hyperparameters: layerSizes=${layerSizes}, learningRate=${learningRate}, dropoutRate=${dropoutRate}, accuracy=${accuracy}`);
+
+      if (accuracy > bestAccuracy) {
+        bestAccuracy = accuracy;
+        bestHyperparameters = { layerSizes, learningRate, dropoutRate };
+      }
+    }
+  }
+}
+
+console.log('Best Hyperparameters:', bestHyperparameters);
+console.log('Best Accuracy:', bestAccuracy);
+
+// Create your final model with the best hyperparameters
+const finalNeuralNetwork = new EnhancedNeuralNetwork(
+  bestHyperparameters.layerSizes,
+  bestHyperparameters.learningRate,
+  bestHyperparameters.dropoutRate,
+  64, // Batch Size
+  'adamw', // Optimizer
+  0.01 // L2 Regularization Rate
+);
+
+// Train the final model on the full training set
+finalNeuralNetwork.train(
+  trainingData.map((data) => data.input),
+  trainingData.map((data) => data.target),
+  1000 // Number of epochs
+);
+// *** End of Hyperparameter Tuning ***
 
 const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -38,381 +557,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Enhanced Neural Network Class
-  class EnhancedNeuralNetwork {
-    private layers: number[][];
-    private weights: number[][][];
-    private biases: number[][];
-    private learningRate: number;
-    private velocities: number[][][];
-    private momentums: number[][][];
-    private dropoutRate: number;
-    private batchSize: number;
-    private optimizer: 'adam' | 'rmsprop' | 'sgd' | 'adamw' = 'adamw';
-    private adamParams: { beta1: number; beta2: number; epsilon: number };
-    private rmspropParams: { decay: number; epsilon: number };
-    private l2RegularizationRate: number;
-    private activationFunctions: string[];
-
-    constructor(
-      layerSizes: number[],
-      learningRate: number = 0.001,
-      dropoutRate: number = 0.5,
-      batchSize: number = 32,
-      optimizer: 'adam' | 'rmsprop' | 'sgd' | 'adamw' = 'adamw',
-      l2RegularizationRate: number = 0.01,
-      activationFunctions: string[] = []
-    ) {
-      this.layers = layerSizes.map((size) => new Array(size).fill(0));
-      this.weights = [];
-      this.biases = [];
-      this.velocities = [];
-      this.momentums = [];
-      this.learningRate = learningRate;
-      this.dropoutRate = dropoutRate;
-      this.batchSize = batchSize;
-      this.optimizer = optimizer;
-      this.adamParams = { beta1: 0.9, beta2: 0.999, epsilon: 1e-8 };
-      this.rmspropParams = { decay: 0.9, epsilon: 1e-8 };
-      this.l2RegularizationRate = l2RegularizationRate;
-      this.activationFunctions =
-        activationFunctions.length === layerSizes.length - 1
-          ? activationFunctions
-          : new Array(layerSizes.length - 1).fill('relu');
-
-      for (let i = 1; i < layerSizes.length; i++) {
-        this.weights.push(
-          Array.from({ length: layerSizes[i] }, () =>
-            Array(layerSizes[i - 1])
-              .fill(0)
-              .map(() => this.initializeWeight(layerSizes[i - 1], layerSizes[i]))
-          )
-        );
-        this.biases.push(Array(layerSizes[i]).fill(0));
-        this.velocities.push(
-          Array.from({ length: layerSizes[i] }, () =>
-            Array(layerSizes[i - 1]).fill(0)
-          )
-        );
-        this.momentums.push(
-          Array.from({ length: layerSizes[i] }, () =>
-            Array(layerSizes[i - 1]).fill(0)
-          )
-        );
-      }
-    }
-
-    private initializeWeight(fanIn: number, fanOut: number): number {
-      return Math.random() * Math.sqrt(2 / (fanIn + fanOut));
-    }
-
-    private activation(x: number, type: string): number {
-      switch (type) {
-        case 'sigmoid':
-          return 1 / (1 + Math.exp(-x));
-        case 'tanh':
-          return Math.tanh(x);
-        case 'relu':
-          return Math.max(0, x);
-        case 'leakyRelu':
-          return x > 0 ? x : 0.01 * x;
-        case 'elu':
-          return x >= 0 ? x : Math.exp(x) - 1;
-        case 'swish':
-          return x * this.activation(x, 'sigmoid');
-        case 'mish':
-          return x * Math.tanh(Math.log(1 + Math.exp(x)));
-        case 'gelu':
-          return (
-            0.5 *
-            x *
-            (1 +
-              Math.tanh(
-                Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))
-              ))
-          );
-        default:
-          return x;
-      }
-    }
-
-    private activationDerivative(x: number, type: string): number {
-      switch (type) {
-        case 'sigmoid':
-          return x * (1 - x);
-        case 'tanh':
-          return 1 - x * x;
-        case 'relu':
-          return x > 0 ? 1 : 0;
-        case 'leakyRelu':
-          return x > 0 ? 1 : 0.01;
-        case 'elu':
-          return x >= 0 ? 1 : x + 1;
-        case 'swish': {
-          const sigmoid = this.activation(x, 'sigmoid');
-          return sigmoid + x * sigmoid * (1 - sigmoid);
-        }
-        case 'mish': {
-          const softplus = Math.log(1 + Math.exp(x));
-          const tanh_softplus = Math.tanh(softplus);
-          return (
-            tanh_softplus +
-            x * (1 - tanh_softplus * tanh_softplus) * (1 / (1 + Math.exp(-x)))
-          );
-        }
-        case 'gelu': {
-          const cdf =
-            0.5 *
-            (1 +
-              Math.tanh(
-                Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))
-              ));
-          return cdf + x * this.activation(x, 'sigmoid') * (1 - cdf);
-        }
-        default:
-          return 1;
-      }
-    }
-
-    private softmax(arr: number[]): number[] {
-      const expValues = arr.map((val) => Math.exp(val - Math.max(...arr)));
-      const sumExpValues = expValues.reduce((a, b) => a + b, 0);
-      return expValues.map((val) => val / sumExpValues);
-    }
-
-    private dropout(layer: number[]): number[] {
-      return layer.map((neuron) =>
-        Math.random() > this.dropoutRate
-          ? neuron / (1 - this.dropoutRate)
-          : 0
-      );
-    }
-
-    private forwardPropagation(input: number[], isTraining: boolean = true): number[] {
-      this.layers[0] = input;
-      for (let i = 1; i < this.layers.length; i++) {
-        for (let j = 0; j < this.layers[i].length; j++) {
-          let sum = this.biases[i - 1][j];
-          for (let k = 0; k < this.layers[i - 1].length; k++) {
-            sum += this.layers[i - 1][k] * this.weights[i - 1][j][k];
-          }
-          this.layers[i][j] =
-            i === this.layers.length - 1
-              ? sum
-              : this.activation(sum, this.activationFunctions[i - 1]);
-        }
-        if (isTraining && i < this.layers.length - 1) {
-          this.layers[i] = this.dropout(this.layers[i]);
-        }
-      }
-      this.layers[this.layers.length - 1] = this.softmax(
-        this.layers[this.layers.length - 1]
-      );
-      return this.layers[this.layers.length - 1];
-    }
-
-    private backPropagation(target: number[]): void {
-      const deltas: number[][] = new Array(this.layers.length)
-        .fill(0)
-        .map(() => []);
-
-      for (let i = 0; i < this.layers[this.layers.length - 1].length; i++) {
-        deltas[this.layers.length - 1][i] =
-          target[i] - this.layers[this.layers.length - 1][i];
-      }
-
-      for (let i = this.layers.length - 2; i > 0; i--) {
-        for (let j = 0; j < this.layers[i].length; j++) {
-          let error = 0;
-          for (let k = 0; k < this.layers[i + 1].length; k++) {
-            error += deltas[i + 1][k] * this.weights[i][k][j];
-          }
-          deltas[i][j] =
-            error *
-            this.activationDerivative(
-              this.layers[i][j],
-              this.activationFunctions[i - 1]
-            );
-        }
-      }
-
-      for (let i = 1; i < this.layers.length; i++) {
-        for (let j = 0; j < this.layers[i].length; j++) {
-          for (let k = 0; k < this.layers[i - 1].length; k++) {
-            const gradient = deltas[i][j] * this.layers[i - 1][k];
-            this.updateWeight(i - 1, j, k, gradient);
-          }
-          this.biases[i - 1][j] += this.learningRate * deltas[i][j];
-        }
-      }
-    }
-
-    private updateWeight(
-      layerIndex: number,
-      neuronIndex: number,
-      weightIndex: number,
-      gradient: number
-    ): void {
-      switch (this.optimizer) {
-        case 'adam':
-          this.adamOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
-          break;
-        case 'rmsprop':
-          this.rmspropOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
-          break;
-        case 'sgd':
-          this.sgdOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
-          break;
-        case 'adamw':
-          this.adamwOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
-          break;
-      }
-    }
-
-    private adamOptimizer(
-      layerIndex: number,
-      neuronIndex: number,
-      weightIndex: number,
-      gradient: number
-    ): void {
-      const { beta1, beta2, epsilon } = this.adamParams;
-      const m = (this.momentums[layerIndex][neuronIndex][weightIndex] =
-        beta1 * this.momentums[layerIndex][neuronIndex][weightIndex] +
-        (1 - beta1) * gradient);
-      const v = (this.velocities[layerIndex][neuronIndex][weightIndex] =
-        beta2 * this.velocities[layerIndex][neuronIndex][weightIndex] +
-        (1 - beta2) * gradient * gradient);
-      const mHat = m / (1 - Math.pow(beta1, this.batchSize));
-      const vHat = v / (1 - Math.pow(beta2, this.batchSize));
-      this.weights[layerIndex][neuronIndex][weightIndex] +=
-        (this.learningRate * mHat) / (Math.sqrt(vHat) + epsilon);
-    }
-
-    private rmspropOptimizer(
-      layerIndex: number,
-      neuronIndex: number,
-      weightIndex: number,
-      gradient: number
-    ): void {
-      const { decay, epsilon } = this.rmspropParams;
-      const v = (this.velocities[layerIndex][neuronIndex][weightIndex] =
-        decay * this.velocities[layerIndex][neuronIndex][weightIndex] +
-        (1 - decay) * gradient * gradient);
-      this.weights[layerIndex][neuronIndex][weightIndex] +=
-        (this.learningRate * gradient) / (Math.sqrt(v) + epsilon);
-    }
-
-    private sgdOptimizer(
-      layerIndex: number,
-      neuronIndex: number,
-      weightIndex: number,
-      gradient: number
-    ): void {
-      this.weights[layerIndex][neuronIndex][weightIndex] +=
-        this.learningRate * gradient;
-    }
-
-    private adamwOptimizer(
-      layerIndex: number,
-      neuronIndex: number,
-      weightIndex: number,
-      gradient: number
-    ): void {
-      const { beta1, beta2, epsilon } = this.adamParams;
-      const m = (this.momentums[layerIndex][neuronIndex][weightIndex] =
-        beta1 * this.momentums[layerIndex][neuronIndex][weightIndex] +
-        (1 - beta1) * gradient);
-      const v = (this.velocities[layerIndex][neuronIndex][weightIndex] =
-        beta2 * this.velocities[layerIndex][neuronIndex][weightIndex] +
-        (1 - beta2) * gradient * gradient);
-      const mHat = m / (1 - Math.pow(beta1, this.batchSize));
-      const vHat = v / (1 - Math.pow(beta2, this.batchSize));
-      const weightDecay =
-        this.l2RegularizationRate *
-        this.weights[layerIndex][neuronIndex][weightIndex];
-      this.weights[layerIndex][neuronIndex][weightIndex] +=
-        this.learningRate *
-        (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay);
-    }
-
-    train(inputs: number[][], targets: number[][], epochs: number): void {
-      for (let epoch = 0; epoch < epochs; epoch++) {
-        let totalLoss = 0;
-        for (let i = 0; i < inputs.length; i += this.batchSize) {
-          const batchInputs = inputs.slice(i, i + this.batchSize);
-          const batchTargets = targets.slice(i, i + this.batchSize);
-          for (let j = 0; j < batchInputs.length; j++) {
-            const output = this.forwardPropagation(batchInputs[j], true);
-            this.backPropagation(batchTargets[j]);
-            totalLoss += this.calculateLoss(output, batchTargets[j]);
-          }
-        }
-        if (epoch % 100 === 0) {
-          console.log(`Epoch ${epoch}, Loss: ${totalLoss / inputs.length}`);
-        }
-        this.learningRate *= 0.99; // Learning rate decay
-      }
-    }
-
-    predict(input: number[]): number {
-      const output = this.forwardPropagation(input, false);
-      return output.indexOf(Math.max(...output));
-    }
-
-    private calculateLoss(output: number[], target: number[]): number {
-      return -output.reduce(
-        (sum, value, index) => sum + target[index] * Math.log(value + 1e-10),
-        0
-      );
-    }
-  }
-
-  // Initialize the neural network
-  const neuralNetwork = new EnhancedNeuralNetwork(
-    [15, 50,50, 10], // Example network architecture (adjust if needed)
-    0.001, // Example learning rate
-    0.3, // Example dropout rate
-    64, // Example batch size
-    'adamw', // Example optimizer
-    0.01 // Example L2 regularization rate
-  );
-
-  // Expanded Training Data (More Examples and Intents)
-  const trainingData = [
-    // Greetings
-    { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
-    { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
-    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
-    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
-    { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
-
-    // Farewells
-    { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
-    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
-    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
-
-    // Weather
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
-
-    // Jokes
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "tell me a joke"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "tell me a funny joke"
-
-    // How are you?
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "how are you?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "how are you doing?"
-    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "how's it going?"
-  ];
-
-  // Train the neural network
-  const epochs = 50;
-  neuralNetwork.train(
-    trainingData.map((data) => data.input),
-    trainingData.map((data) => data.target),
-    epochs
-  );
-
   // Enhanced Machine Learning Function with Word Combination and Context
   const enhancedMachineLearning = (
     input: string,
@@ -427,13 +571,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'goodbye',
       'bye',
       'see you later',
-      "what's the weather like?",
-      "how's the weather?",
+      "what's the weather like",
+      "how's the weather",
       'tell me a joke',
       'tell me a funny joke',
-      'How are you?',
-      'How are you doing?',
-      'Hows it going?',
+      'how are you',
+      'how are you doing',
+      "how's it going",
       // Add more keywords here
     ];
 
@@ -446,7 +590,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         : 0
     );
 
-    const predictedClass = neuralNetwork.predict(inputVector);
+    const predictedClass = finalNeuralNetwork.predict(inputVector); // Use the final model
 
     // Contextual Responses with Word Combination
     const responses = {
@@ -475,22 +619,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         'Why did the scarecrow win an award? Because he was outstanding in his field!',
         'What do you call a lazy kangaroo? Pouch potato!',
       ],
-      6: [ // Responses for "How are you?"
+      6: [
         "I'm doing well, thank you for asking!",
         "I'm a chatbot, so I don't have feelings, but I'm functioning as expected!",
       ],
-      7: [ // Responses for "How are you doing?"
-        "I'm doing well, thank you for asking!",
-        "I'm a chatbot, so I don't have feelings, but I'm functioning as expected!",
-      ],
-      8: [ // Responses for "How's it going?"
-        "I'm doing well, thank you for asking!",
-        "I'm a chatbot, so I don't have feelings, but I'm functioning as expected!",
-      ],
-      9:[ // Responses for not knowing the answer
-        "I'm sorry, I don't know the answer to that question.",
-        "I'm not sure how to respond to that. Can you please rephrase your question?",
-      ]
       // Add more responses based on predicted classes
     };
 
@@ -532,9 +664,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       "how's the weather?",
       'tell me a joke',
       'tell me a funny joke',
-      'How are you?',
-      'How are you doing?',
-      'Hows it going?',
+      'how are you',
+      'how are you doing',
+      "how's it going",
       // Add more keywords here
     ];
     const inputVector = keywords.map((keyword) =>
@@ -590,14 +722,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         )?.target;
 
         if (targetVector) {
-          const predictedClass = neuralNetwork.predict(inputVector);
+          const predictedClass = finalNeuralNetwork.predict(inputVector); // Use the final model
           if (feedback === 'good') {
             targetVector[predictedClass] += 0.1;
           } else {
             targetVector[predictedClass] -= 0.1;
           }
 
-          neuralNetwork.train(
+          finalNeuralNetwork.train( // Use the final model
             trainingData.map((data) => data.input),
             trainingData.map((data) => data.target),
             10
@@ -612,7 +744,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   };
 
   return (
-<div
+    <div
       className={`flex flex-col h-screen ${
         darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'
       }`}
