@@ -69,7 +69,7 @@ class EnhancedNeuralNetwork {
                 layerSizes[i - 1],
                 layerSizes[i],
                 this.activationFunctions[i - 1]
-              ) 
+              )
             )
         )
       );
@@ -371,7 +371,10 @@ class EnhancedNeuralNetwork {
 }
 
 // Function to calculate accuracy
-function calculateAccuracy(neuralNetwork: EnhancedNeuralNetwork, testData: { input: number[], target: number[] }[]): number {
+function calculateAccuracy(
+  neuralNetwork: EnhancedNeuralNetwork,
+  testData: { input: number[]; target: number[] }[]
+): number {
   let correctPredictions = 0;
 
   for (const data of testData) {
@@ -384,91 +387,59 @@ function calculateAccuracy(neuralNetwork: EnhancedNeuralNetwork, testData: { inp
   return correctPredictions / testData.length;
 }
 
-// Expanded Training Data 
+// Expanded Training Data
 const trainingData = [
-  // Greetings
-  {
-    input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  }, // "hello"
-  {
-    input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  }, // "hi"
-  {
-    input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  }, // "good morning"
-  {
-    input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-  }, // "good evening"
-  {
-    input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  }, // "hey there"
+  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
+  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
+  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
+  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "greetings"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hey"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "What's up?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good afternoon"
 
   // Farewells
-  {
-    input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-  }, // "goodbye"
-  {
-    input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-  }, // "bye"
-  {
-    input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-    target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-  }, // "see you later"
+  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "farewell"
+  // ... (Add more farewell variations)
 
   // Weather
-  {
-    input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-    target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-  }, // "what's the weather like?"
-  {
-    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-  }, // "how's the weather?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
+  // ... (Add more weather variations)
 
   // Jokes
-  {
-    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-    target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-  }, // "tell me a joke"
-  {
-    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-    target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-  }, // "tell me a funny joke"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a joke"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a funny joke"
+  // ... (Add more joke variations)
 
-  // How are you?
-  {
-    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-    target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-  }, // "how are you?"
-  {
-    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-    target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-  }, // "how are you doing?"
-  {
-    input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-  }, // "how's it going?"
-
-  // ... (Add more intents and examples)
+  // How Are You
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
 ];
 
 // Example Test Data (similar structure to trainingData)
 const testData = [
-  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello"
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning"
-  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Goodbye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the weather like?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a joke"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you?"
-  // ... Add more test data examples here 
-];
+    { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello"
+    { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi"
+    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning"
+    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening"
+    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Goodbye"
+    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Bye"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "See you later"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a joke"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a funny joke"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you doing?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the weather like?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "How's the weather?"
+    // Add more test examples for different variations of greetings, farewells, weather queries, jokes, etc.
+    // ...
+  ];
+
 
 // Define the type for bestHyperparameters
 interface BestHyperparameters {
@@ -479,12 +450,16 @@ interface BestHyperparameters {
 
 // *** Perform Hyperparameter Tuning ONLY ONCE outside the component ***
 // Define hyperparameter options
-const layerSizesOptions = [[15, 15, 10], [20, 15, 10], [15, 20, 10]];
+const layerSizesOptions = [[20, 15, 10], [15, 20, 10], [15, 15, 10]];
 const learningRateOptions = [0.001, 0.01];
 const dropoutRateOptions = [0.3, 0.5];
 
 let bestAccuracy = 0;
-let bestHyperparameters: BestHyperparameters = { layerSizes: [], learningRate: 0, dropoutRate: 0 };
+let bestHyperparameters: BestHyperparameters = {
+  layerSizes: [],
+  learningRate: 0,
+  dropoutRate: 0,
+};
 
 for (const layerSizes of layerSizesOptions) {
   for (const learningRate of learningRateOptions) {
@@ -505,7 +480,9 @@ for (const layerSizes of layerSizesOptions) {
       );
 
       const accuracy = calculateAccuracy(neuralNetwork, testData);
-      console.log(`Hyperparameters: layerSizes=${layerSizes}, learningRate=${learningRate}, dropoutRate=${dropoutRate}, accuracy=${accuracy}`);
+      console.log(
+        `Hyperparameters: layerSizes=${layerSizes}, learningRate=${learningRate}, dropoutRate=${dropoutRate}, accuracy=${accuracy}`
+      );
 
       if (accuracy > bestAccuracy) {
         bestAccuracy = accuracy;
@@ -642,10 +619,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       }
     }
 
-    return (
-      response ||
-      "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?"
-    );
+    return response || "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
   };
 
   const handleSendMessage = async () => {
@@ -669,6 +643,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       "how's it going",
       // Add more keywords here
     ];
+
     const inputVector = keywords.map((keyword) =>
       inputValue
         .toLowerCase()
@@ -729,7 +704,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             targetVector[predictedClass] -= 0.1;
           }
 
-          finalNeuralNetwork.train( // Use the final model
+          finalNeuralNetwork.train(
+            // Use the final model
             trainingData.map((data) => data.input),
             trainingData.map((data) => data.target),
             10
