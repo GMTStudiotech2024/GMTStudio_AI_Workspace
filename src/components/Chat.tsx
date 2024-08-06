@@ -428,30 +428,30 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     // Jokes
     {
       input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-      target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
     }, // "tell me a joke"
     {
       input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-      target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
     }, // "tell me a funny joke"
 
  // How are you?
  {
   input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-  target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+  target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
 }, // "how are you?"
 {
   input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+  target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
 }, // "how are you doing?"
 {
   input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+  target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
 }, // "how's it going?"
   ];
 
   // Train the neural network
-  const epochs = 10;
+  const epochs = 11;
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
@@ -524,6 +524,18 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         "I'm doing well, thank you for asking!",
         "I'm a chatbot, so I don't have feelings, but I'm functioning as expected!",
       ],
+      7: [ // Responses for "How are you doing?"
+        "I'm doing well, thank you for asking!",
+        "I'm a chatbot, so I don't have feelings, but I'm functioning as expected!",
+      ],
+      8: [ // Responses for "How's it going?"
+        "I'm doing well, thank you for asking!",
+        "I'm a chatbot, so I don't have feelings, but I'm functioning as expected!",
+      ],
+      9:[ // Responses for not knowing the answer
+        "I'm sorry, I don't know the answer to that question.",
+        "I'm not sure how to respond to that. Can you please rephrase your question?",
+      ]
       // Add more responses based on predicted classes
     };
 
