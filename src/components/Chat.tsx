@@ -369,7 +369,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   // Initialize the neural network
   const neuralNetwork = new EnhancedNeuralNetwork(
-    [15, 50, 10], // Example network architecture (adjust if needed)
+    [15, 50,50, 10], // Example network architecture (adjust if needed)
     0.001, // Example learning rate
     0.3, // Example dropout rate
     64, // Example batch size
@@ -380,78 +380,33 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   // Expanded Training Data (More Examples and Intents)
   const trainingData = [
     // Greetings
-    {
-      input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }, // "hello"
-    {
-      input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }, // "hi"
-    {
-      input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    }, // "good morning"
-    {
-      input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-    }, // "good evening"
-    {
-      input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    }, // "hey there"
+    { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
+    { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
+    { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
+    { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
+    { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
 
     // Farewells
-    {
-      input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-    }, // "goodbye"
-    {
-      input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-    }, // "bye"
-    {
-      input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-      target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-    }, // "see you later"
+    { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
+    { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
+    { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
 
     // Weather
-    {
-      input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-      target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    }, // "what's the weather like?"
-    {
-      input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-      target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    }, // "how's the weather?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
 
     // Jokes
-    {
-      input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-      target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-    }, // "tell me a joke"
-    {
-      input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-      target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-    }, // "tell me a funny joke"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "tell me a joke"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "tell me a funny joke"
 
- // How are you?
- {
-  input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-  target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-}, // "how are you?"
-{
-  input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-}, // "how are you doing?"
-{
-  input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-}, // "how's it going?"
+    // How are you?
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "how are you?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "how are you doing?"
+    { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "how's it going?"
   ];
 
   // Train the neural network
-  const epochs = 11;
+  const epochs = 50;
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
