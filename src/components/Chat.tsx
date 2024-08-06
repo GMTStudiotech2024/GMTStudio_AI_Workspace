@@ -8,9 +8,9 @@ import {
   FaMoon,
   FaThumbsUp,
   FaThumbsDown,
-  FaTrashAlt, // Import the trash icon
+  FaTrashAlt,
 } from 'react-icons/fa';
-import { Message, Suggestion } from '../types'; // Assuming you have type definitions in types.ts
+import { Message, Suggestion } from '../types';
 import { motion } from 'framer-motion';
 
 interface ChatProps {
@@ -103,7 +103,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
 
     private initializeWeight(fanIn: number, fanOut: number): number {
-      // He initialization for ReLU
       return Math.random() * Math.sqrt(2 / (fanIn + fanOut));
     }
 
@@ -370,7 +369,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   // Initialize the neural network
   const neuralNetwork = new EnhancedNeuralNetwork(
-    [10, 15, 10], // Example network architecture
+    [15, 15, 10], // Example network architecture (adjust if needed)
     0.001, // Example learning rate
     0.3, // Example dropout rate
     64, // Example batch size
@@ -382,53 +381,77 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const trainingData = [
     // Greetings
     {
-      input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     }, // "hello"
     {
-      input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+      input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     }, // "hi"
     {
-      input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+      input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     }, // "good morning"
     {
-      input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+      input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
     }, // "good evening"
     {
-      input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+      input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     }, // "hey there"
 
     // Farewells
     {
-      input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+      input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
     }, // "goodbye"
     {
-      input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
     }, // "bye"
     {
-      input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+      input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
       target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
     }, // "see you later"
 
     // Weather
     {
-      input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
       target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     }, // "what's the weather like?"
     {
-      input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
       target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     }, // "how's the weather?"
+
+    // Jokes
+    {
+      input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+      target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    }, // "tell me a joke"
+    {
+      input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    }, // "tell me a funny joke"
+
+ // How are you?
+ {
+  input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+  target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+}, // "how are you?"
+{
+  input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+}, // "how are you doing?"
+{
+  input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+}, // "how's it going?"
   ];
 
   // Train the neural network
-  const epochs = 1000; // Increased number of epochs
+  const epochs = 10;
   neuralNetwork.train(
     trainingData.map((data) => data.input),
     trainingData.map((data) => data.target),
@@ -451,6 +474,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'see you later',
       "what's the weather like?",
       "how's the weather?",
+      'tell me a joke',
+      'tell me a funny joke',
+      'How are you?',
+      'How are you doing?',
+      'Hows it going?',
+      // Add more keywords here
     ];
 
     const inputVector = keywords.map((keyword) =>
@@ -467,35 +496,33 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     // Contextual Responses with Word Combination
     const responses = {
       0: [
-        'Hello! I wonder how you are doing today?',
+        'Hello! How are you doing today?',
         'Hi there! Do you need any help?',
         'Hey there! How can I assist you?',
-        'How can I assist you today?',
-        'What can I do for you?',
       ],
       1: [
         'Good morning! How can I assist you today?',
         'Good morning to you! What are you up to?',
-        'What a lovely morning! What can I do for you today?',
-        'What can I do for you today?',
       ],
       2: [
         'Good evening! How was your day?',
         'Good evening to you! What can I do for you today?',
-        'Hope you had a good day! What can I do for you today?',
-        'What can I do for you this evening?',
       ],
       3: [
         'Goodbye! Have a great day!',
-        'See you later! ',
-        'Talk to you soon! ',
-        'Have a great day!',
-        'It was a pleasure chatting with you. bye!',
+        'See you later! Talk to you soon!',
       ],
       4: [
         "I'm afraid I don't have real-time weather data.",
         "I'm not able to provide weather information.",
-        "You might want to check a reliable weather service for the most up-to-date information.",
+      ],
+      5: [
+        'Why did the scarecrow win an award? Because he was outstanding in his field!',
+        'What do you call a lazy kangaroo? Pouch potato!',
+      ],
+      6: [ // Responses for "How are you?"
+        "I'm doing well, thank you for asking!",
+        "I'm a chatbot, so I don't have feelings, but I'm functioning as expected!",
       ],
       // Add more responses based on predicted classes
     };
@@ -525,7 +552,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const handleSendMessage = async () => {
     if (inputValue.trim() === '') return;
 
-    // Store the input vector with the message
     const keywords = [
       'hello',
       'hi',
@@ -537,6 +563,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'see you later',
       "what's the weather like?",
       "how's the weather?",
+      'tell me a joke',
+      'tell me a funny joke',
+      'How are you?',
+      'How are you doing?',
+      'Hows it going?',
+      // Add more keywords here
     ];
     const inputVector = keywords.map((keyword) =>
       inputValue
@@ -552,7 +584,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       sender: 'user',
       text: inputValue,
       timestamp: new Date(),
-      inputVector: inputVector, // Store the input vector
+      inputVector: inputVector,
     };
 
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -563,7 +595,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: enhancedMachineLearning(newMessage.text, messages), // Pass chat history
+        text: enhancedMachineLearning(newMessage.text, messages),
         timestamp: new Date(),
       };
       setMessages((prevMessages) => [...prevMessages, botResponse]);
@@ -577,51 +609,43 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
-  // Function to handle feedback
   const handleFeedback = (messageId: string, feedback: 'good' | 'bad') => {
-    // 1. Find the message in the messages array
     const messageIndex = messages.findIndex(
       (message) => message.id === messageId
     );
 
     if (messageIndex !== -1) {
-      // 2. Get the input vector associated with the message
-      const inputVector = messages[messageIndex - 1].inputVector; // Assuming you store the input vector with the user message
+      const inputVector = messages[messageIndex - 1].inputVector;
 
-      // 3. Adjust the target vector based on feedback
       if (inputVector) {
-        // Check if inputVector is defined
         const targetVector = trainingData.find(
           (data) => data.input.toString() === inputVector.toString()
         )?.target;
 
         if (targetVector) {
-          // 4. Increment/Decrement the corresponding element in the target vector
           const predictedClass = neuralNetwork.predict(inputVector);
           if (feedback === 'good') {
-            targetVector[predictedClass] += 0.1; // Increment for positive feedback
+            targetVector[predictedClass] += 0.1;
           } else {
-            targetVector[predictedClass] -= 0.1; // Decrement for negative feedback
+            targetVector[predictedClass] -= 0.1;
           }
 
-          // 5. Retrain the neural network with the updated training data
           neuralNetwork.train(
             trainingData.map((data) => data.input),
             trainingData.map((data) => data.target),
-            10 // Retrain for a few epochs
+            10
           );
         }
       }
     }
   };
 
-  // Function to clear the chat
   const handleClearChat = () => {
     setMessages([]);
   };
 
   return (
-    <div
+<div
       className={`flex flex-col h-screen ${
         darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'
       }`}
