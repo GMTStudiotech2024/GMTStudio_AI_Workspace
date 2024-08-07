@@ -1015,7 +1015,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       {trainingStatus === 'complete' && (
         <div className="flex flex-col h-full w-full">
           <div className="flex justify-between items-center p-4 border-b border-gray-700">
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-bold pl-10">
               {selectedChat ? selectedChat.title : 'New Chat'}
             </h1>
             <div className="flex items-center">
@@ -1049,7 +1049,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 }`}
               >
                 <div
-                  className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
+                  className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg  ${
                     message.sender === 'user'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-700 text-white'
