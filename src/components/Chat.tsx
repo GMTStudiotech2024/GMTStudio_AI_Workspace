@@ -1,15 +1,46 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  FaSmile,
-  FaImage,
-  FaSun,
-} from 'react-icons/fa';
-import { Message, Suggestion } from '../types'; // Assuming you have type definitions in types.ts
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSend, FiSmile, FiMic, FiImage, FiSun, FiMoon, FiThumbsUp, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
+import { FiSend, FiMic, FiImage, FiSun, FiMoon, FiThumbsUp, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
+import { Message as ImportedMessage } from '../types';
 
 interface ChatProps {
   selectedChat: { title: string } | null;
+}
+
+interface Suggestion {
+  text: string;
+  icon: React.ReactNode;
+}
+
+// Simplified Speech Recognition types
+interface SpeechRecognitionResult {
+  transcript: string;
+}
+
+interface SpeechRecognitionEvent {
+  results: SpeechRecognitionResult[][];
+}
+
+interface SpeechRecognitionInstance {
+  start: () => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onend: () => void;
+  onstart: () => void;
+}
+
+// Extend the Window interface
+declare global {
+  interface Window {
+    webkitSpeechRecognition: {
+      new (): SpeechRecognitionInstance;
+    };
+  }
+}
+
+// Define a local interface with a different name
+interface ChatMessage extends ImportedMessage {
+  image?: string;
+  inputVector?: number[];
 }
 
 interface TrainingProgress {
@@ -567,7 +598,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     </motion.div>
   );
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [darkMode, setDarkMode] = useState(true);
   const [trainingStatus, setTrainingStatus] = useState<'initializing' | 'training' | 'complete' | 'error'>('initializing');
@@ -576,11 +607,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [typingMessage, setTypingMessage] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isDeveloper, setIsDeveloper] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const suggestions: Suggestion[] = [
-    { text: "What's the weather like today?", icon: <FaSun /> },
-    { text: 'Tell me a joke', icon: <FaSmile /> },
-    { text: "What's the latest news?", icon: <FaImage /> },
+    { text: "What's the weather like today?", icon: <FiSun /> },
+    { text: 'Tell me a joke', icon: <FiImage /> },
+    { text: "What's the latest news?", icon: <FiImage /> },
   ];
 
   useEffect(() => {
@@ -628,10 +661,19 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }, 0);
   }, []);
 
+  useEffect(() => {
+    // Check if the user is a developer
+    const storedUsername = localStorage.getItem('username');
+    const storedPassword = localStorage.getItem('password');
+    if (storedUsername === 'Developer' && storedPassword === 'GMTStudiotech') {
+      setIsDeveloper(true);
+    }
+  }, []);
+
   // Enhanced Machine Learning Function with Word Combination and Context
   const enhancedMachineLearning = (
     input: string,
-    chatHistory: Message[]
+    chatHistory: ChatMessage[]
   ): string => {
     const keywords = [
       'hello',
@@ -712,7 +754,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         return randomResponse;
       },
       7: () => {
-        return "I apologize, but I'm not sure how to respond to that. Could you please rephrase your question or ask me something else?";
+        return "I apologize, but I'm not sure how to respond to that. Could you please rephrase your question or ask something else?";
       },
       8: () => {
         return "That's an interesting topic! While I don't have personal opinions, I can provide information on various subjects if you have any specific questions.";
@@ -801,7 +843,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         : 0
     );
 
-    const newMessage: Message = {
+    const newMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
       text: inputValue,
@@ -875,7 +917,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         console.log(`New prediction for the input: ${newPrediction}`);
 
         // Provide feedback to the user
-        const feedbackMessage: Message = {
+        const feedbackMessage: ChatMessage = {
           id: Date.now().toString(),
           sender: 'bot',
           text: feedback === 'good' 
@@ -914,9 +956,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           i++;
           nextWord = words[i + 1] || ''; // This reassignment is now valid
         }
-        entities.push(name);
-      } 
-      // Rule 3: Capitalized words at the beginning of sentences (potential names) 
+        entities.push(name);      }       // Rule 3: Capitalized words at the beginning of sentences (potential names) 
       else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
         entities.push(word);
       } 
@@ -1061,26 +1101,63 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    // Check if the user is a developer
-    const storedUsername = localStorage.getItem('username');
-    const storedPassword = localStorage.getItem('password');
-    console.log('Stored username:', storedUsername);
-    console.log('Stored password:', storedPassword);
-    if (storedUsername === 'Developer' && storedPassword === 'GMTStudiotech') {
-      setIsDeveloper(true);
-      console.log('Developer mode activated');
-    }
-  }, []);
+  const handleVoiceInput = () => {
+    if ('webkitSpeechRecognition' in window) {
+      const recognition = new window.webkitSpeechRecognition();
 
-  useEffect(() => {
-    console.log('isDeveloper:', isDeveloper);
-  }, [isDeveloper]);
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = event.results[0][0].transcript;
+        setInputValue((prevValue) => prevValue + transcript);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } else {
+      alert('Speech recognition is not supported in your browser.');
+    }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = 100; // Thumbnail width
+          canvas.height = 100; // Thumbnail height
+          ctx?.drawImage(img, 0, 0, 100, 100);
+          const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
+          
+          // Add image message
+          const newMessage: ChatMessage = {
+            id: Date.now().toString(),
+            sender: 'user',
+            text: 'Uploaded image:',
+            timestamp: new Date(),
+            image: thumbnailDataUrl,
+          };
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div 
       className={`flex flex-col h-screen w-full ${
-        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'
+        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-white'
       } transition-colors duration-300`}
     >
       <AnimatePresence>
@@ -1188,6 +1265,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                       }`}
                     >
                       {message.text}
+                      {message.image && (
+                        <img src={message.image} alt="Uploaded" className="mt-2 rounded" />
+                      )}
                       {message.sender === 'bot' && (
                         <div className="mt-2 text-xs text-gray-400">
                           {isDeveloper ? (
@@ -1226,8 +1306,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 );
               })}
             </AnimatePresence>
-            {typingMessage !== null && (
-              <motion.div 
+            {typingMessage !== null &&              <motion.div 
                 className="flex justify-start"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -1238,7 +1317,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
                 </div>
               </motion.div>
-            )}
+            }
             {isTyping && (
               <motion.div 
                 className="flex justify-start"
@@ -1294,27 +1373,33 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               >
                 <FiSend />
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-              >
-                <FiSmile />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-              >
-                <FiMic />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-              >
-                <FiImage />
-              </motion.button>
+              {isDeveloper && (
+                <>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleVoiceInput}
+                    className={`p-2 rounded ${isListening ? 'bg-red-600' : 'bg-gray-800'} text-white hover:bg-gray-700 transition-colors`}
+                  >
+                    <FiMic />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                  >
+                    <FiImage />
+                  </motion.button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                  />
+                </>
+              )}
             </div>
             <div className="flex items-center space-x-2 mt-2">
               <motion.button
