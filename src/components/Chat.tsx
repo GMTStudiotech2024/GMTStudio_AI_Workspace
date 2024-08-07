@@ -1,17 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  FaPaperPlane,
   FaSmile,
-  FaMicrophone,
   FaImage,
   FaSun,
-  FaMoon,
-  FaThumbsUp,
-  FaThumbsDown,
-  FaTrashAlt,
 } from 'react-icons/fa';
 import { Message, Suggestion } from '../types'; // Assuming you have type definitions in types.ts
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiSend, FiSmile, FiMic, FiImage, FiSun, FiMoon, FiThumbsUp, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
 
 interface ChatProps {
   selectedChat: { title: string } | null;
@@ -375,6 +370,14 @@ class EnhancedNeuralNetwork {
       0
     );
   }
+
+  getLearningRate(): number {
+    return this.learningRate;
+  }
+
+  setLearningRate(rate: number): void {
+    this.learningRate = rate;
+  }
 }
 
 // Function to calculate accuracy
@@ -526,20 +529,42 @@ finalNeuralNetwork.train(
 
 const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const LoadingSpinner: React.FC = () => (
-    <div className="spinner">
+    <motion.div 
+      className="spinner"
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+    >
       <div className="bounce1"></div>
       <div className="bounce2"></div>
       <div className="bounce3"></div>
-    </div>
+    </motion.div>
+  );
+
+  const TerminalAnimation: React.FC = () => (
+    <motion.div 
+      className="terminal-animation"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="terminal-text">AI Training in Progress</div>
+      <motion.div 
+        className="terminal-progress"
+        initial={{ width: 0 }}
+        animate={{ width: "100%" }}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
+    </motion.div>
   );
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [trainingStatus, setTrainingStatus] = useState<'initializing' | 'training' | 'complete' | 'error'>('initializing');
   const [trainingProgress, setTrainingProgress] = useState<TrainingProgress | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [typingMessage, setTypingMessage] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FaSun /> },
@@ -631,6 +656,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     );
 
     const predictedClass = finalNeuralNetwork.predict(inputVector); // Use the final model
+    console.log(`Input: "${input}", Predicted class: ${predictedClass}`);
 
     // Contextual Responses with Word Combination
     const responses = {
@@ -687,6 +713,31 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     return response || "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
   };
 
+  const simulateTyping = (text: string) => {
+    let index = 0;
+    setTypingMessage('');
+    
+    const typingInterval = setInterval(() => {
+      if (index < text.length) {
+        setTypingMessage((prev) => prev + text.charAt(index));
+        index++;
+      } else {
+        clearInterval(typingInterval);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: Date.now().toString(),
+            sender: 'bot',
+            text: text,
+            timestamp: new Date(),
+          },
+        ]);
+        setTypingMessage(null);
+        setIsTyping(false);
+      }
+    }, 30); // Adjust this value to change typing speed
+  };
+
   const handleSendMessage = async () => {
     if (inputValue.trim() === '') return;
 
@@ -736,14 +787,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setIsTyping(true);
 
     setTimeout(() => {
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'bot',
-        text: enhancedMachineLearning(newMessage.text, messages),
-        timestamp: new Date(),
-      };
-      setMessages((prevMessages) => [...prevMessages, botResponse]);
-      setIsTyping(false);
+      const botResponse = enhancedMachineLearning(newMessage.text, messages);
+      simulateTyping(botResponse);
     }, 1000);
   };
 
@@ -754,33 +799,64 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   };
 
   const handleFeedback = (messageId: string, feedback: 'good' | 'bad') => {
-    const messageIndex = messages.findIndex(
-      (message) => message.id === messageId
-    );
+    const messageIndex = messages.findIndex((message) => message.id === messageId);
 
-    if (messageIndex !== -1) {
-      const inputVector = messages[messageIndex - 1].inputVector;
+    if (messageIndex !== -1 && messageIndex > 0) {
+      const userMessage = messages[messageIndex - 1];
 
-      if (inputVector) {
-        const targetVector = trainingData.find(
-          (data) => data.input.toString() === inputVector.toString()
-        )?.target;
+      if (userMessage.inputVector) {
+        const inputVector = userMessage.inputVector;
+        const currentOutput = finalNeuralNetwork.predict(inputVector);
 
-        if (targetVector) {
-          const predictedClass = finalNeuralNetwork.predict(inputVector); // Use the final model
-          if (feedback === 'good') {
-            targetVector[predictedClass] += 0.1;
-          } else {
-            targetVector[predictedClass] -= 0.1;
-          }
-
-          finalNeuralNetwork.train(
-            // Use the final model
-            trainingData.map((data) => data.input),
-            trainingData.map((data) => data.target),
-            10
-          );
+        // Adjust the target vector based on feedback
+        const targetVector = new Array(10).fill(0);
+        if (feedback === 'good') {
+          targetVector[currentOutput] = 1;
+        } else {
+          // For negative feedback, slightly increase probabilities for other classes
+          targetVector.fill(0.1);
+          targetVector[currentOutput] = 0;
         }
+
+        // Add or update the training data
+        const existingDataIndex = trainingData.findIndex(
+          (data) => data.input.toString() === inputVector.toString()
+        );
+
+        if (existingDataIndex !== -1) {
+          trainingData[existingDataIndex].target = targetVector;
+        } else {
+          trainingData.push({ input: inputVector, target: targetVector });
+        }
+
+        // Retrain the model with the updated data
+        console.log('Retraining model...');
+        const originalLearningRate = finalNeuralNetwork.getLearningRate();
+        finalNeuralNetwork.setLearningRate(0.1); // Increase learning rate for retraining
+
+        const loss = finalNeuralNetwork.train(
+          trainingData.map((data) => data.input),
+          trainingData.map((data) => data.target),
+          1000 // Increased number of epochs for more thorough retraining
+        );
+
+        finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
+        console.log(`Retraining complete. Final loss: ${loss}`);
+
+        // Test the model after retraining
+        const newPrediction = finalNeuralNetwork.predict(inputVector);
+        console.log(`New prediction for the input: ${newPrediction}`);
+
+        // Provide feedback to the user
+        const feedbackMessage: Message = {
+          id: Date.now().toString(),
+          sender: 'bot',
+          text: feedback === 'good' 
+            ? "Thank you for the positive feedback! I'll keep that in mind for future responses."
+            : "I apologize for the unsatisfactory response. I've adjusted my understanding and will try to improve my answers in the future.",
+          timestamp: new Date(),
+        };
+        setMessages((prevMessages) => [...prevMessages, feedbackMessage]);
       }
     }
   };
@@ -980,128 +1056,186 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     <div 
       className={`flex flex-col h-screen w-full ${
         darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'
-      }`}
+      } transition-colors duration-300`}
     >
-      {trainingStatus === 'initializing' && (
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            Initializing artificial intelligence, please wait...
-          </h2>
-          <LoadingSpinner />
-        </div>
-      )}
-      {trainingStatus === 'training' && (
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            Artificial intelligence is now training, please wait...
-          </h2>
-          <LoadingSpinner />
-          {trainingProgress && (
-            <div className="mt-4">
-              <p>Epoch: {trainingProgress.epoch}/1500</p>
-              <p>Loss: {trainingProgress.loss.toFixed(4)}</p>
-              <p>Accuracy: {(trainingProgress.accuracy * 100).toFixed(2)}%</p>
-            </div>
-          )}
-        </div>
-      )}
-      {trainingStatus === 'error' && (
-        <div className="text-center text-red-500">
-          <h2 className="text-2xl font-bold mb-4">
-            An error occurred during training. Please try again later.
-          </h2>
-        </div>
-      )}
+      <AnimatePresence>
+        {trainingStatus === 'initializing' && (
+          <motion.div 
+            className="text-center p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <h2 className="text-2xl font-bold mb-4">
+              Initializing artificial intelligence, please wait...
+            </h2>
+            <LoadingSpinner />
+          </motion.div>
+        )}
+        {trainingStatus === 'training' && (
+          <motion.div 
+            className="text-center p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <TerminalAnimation />
+            {trainingProgress && (
+              <motion.div 
+                className="mt-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <p>Epoch: {trainingProgress.epoch}/1500</p>
+                <p>Loss: {trainingProgress.loss.toFixed(4)}</p>
+                <p>Accuracy: {(trainingProgress.accuracy * 100).toFixed(2)}%</p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+        {trainingStatus === 'error' && (
+          <motion.div 
+            className="text-center text-red-500 p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <h2 className="text-2xl font-bold mb-4">
+              An error occurred during training. Please try again later.
+            </h2>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {trainingStatus === 'complete' && (
-        <div className="flex flex-col h-full w-full">
+        <motion.div 
+          className="flex flex-col h-full w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="flex justify-between items-center p-4 border-b border-gray-700">
             <h1 className="text-2xl font-bold pl-10">
               {selectedChat ? selectedChat.title : 'New Chat'}
             </h1>
-            <div className="flex items-center">
-              <button
+            <div className="flex items-center space-x-2">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={handleClearChat}
-                className="p-2 rounded-full hover:bg-gray-700 transition-colors mr-2"
+                className="p-2 rounded-full hover:bg-gray-700 transition-colors"
               >
-                <FaTrashAlt className="text-red-500" />
-              </button>
-              <button
+                <FiTrash2 className="text-red-500" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setDarkMode(!darkMode)}
                 className="p-2 rounded-full hover:bg-gray-700 transition-colors"
               >
                 {darkMode ? (
-                  <FaSun className="text-yellow-500" />
+                  <FiSun className="text-yellow-500" />
                 ) : (
-                  <FaMoon className="text-gray-700" />
+                  <FiMoon className="text-gray-700" />
                 )}
-              </button>
+              </motion.button>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`flex ${
-                  message.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg  ${
-                    message.sender === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-white'
+            <AnimatePresence>
+              {messages.map((message) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${
+                    message.sender === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  {message.text}
-                  {message.sender === 'bot' && (
-                    <div className="flex justify-end mt-2 space-x-2">
-                      <button
-                        onClick={() => handleFeedback(message.id, 'good')}
-                        className="text-green-500 hover:text-green-600"
-                      >
-                        <FaThumbsUp />
-                      </button>
-                      <button
-                        onClick={() => handleFeedback(message.id, 'bad')}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        <FaThumbsDown />
-                      </button>
-                    </div>
-                  )}
+                  <div
+                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
+                      message.sender === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-700 text-white'
+                    }`}
+                  >
+                    {message.text}
+                    {message.sender === 'bot' && (
+                      <div className="flex justify-end mt-2 space-x-2">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleFeedback(message.id, 'good')}
+                          className="text-green-500 hover:text-green-600"
+                        >
+                          <FiThumbsUp />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleFeedback(message.id, 'bad')}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          <FiThumbsDown />
+                        </motion.button>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {typingMessage !== null && (
+              <motion.div 
+                className="flex justify-start"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="bg-gray-700 text-white p-3 rounded-lg">
+                  {typingMessage}
+                  <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
                 </div>
               </motion.div>
-            ))}
+            )}
             {isTyping && (
-              <div className="flex justify-start">
+              <motion.div 
+                className="flex justify-start"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
                 <div className="bg-gray-700 text-white p-3 rounded-lg">
-                  <div className="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
+                  <span className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"></span>
+                  <span className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1" style={{ animationDelay: '0.2s' }}></span>
+                  <span className="inline-block w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
                 </div>
-              </div>
+              </motion.div>
             )}
             <div ref={messagesEndRef} />
           </div>
           <div className="border-t border-gray-700 p-4">
             {messages.length === 0 && (
-              <div className="flex flex-wrap justify-center gap-2 mb-4">
+              <motion.div 
+                className="flex flex-wrap justify-center gap-2 mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
                 {suggestions.map((suggestion, index) => (
-                  <button
+                  <motion.button
                     key={index}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setInputValue(suggestion.text)}
                     className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm transition-colors duration-200"
                   >
                     {suggestion.icon}
                     <span>{suggestion.text}</span>
-                  </button>
+                  </motion.button>
                 ))}
-              </div>
+              </motion.div>
             )}
             <div className="flex items-center space-x-2">
               <input
@@ -1110,46 +1244,66 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type a message..."
-                className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
               />
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={handleSendMessage}
                 className="p-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
               >
-                <FaPaperPlane />
-              </button>
-              <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-                <FaSmile />
-              </button>
-              <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-                <FaMicrophone />
-              </button>
-              <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-                <FaImage />
-              </button>
+                <FiSend />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                <FiSmile />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                <FiMic />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                <FiImage />
+              </motion.button>
             </div>
             <div className="flex items-center space-x-2 mt-2">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handlePOS}
                 className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
               >
                 POS
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleSummarization}
                 className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
               >
                 Summarize
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleNER}
                 className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
               >
                 NER
-              </button>
+              </motion.button>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
