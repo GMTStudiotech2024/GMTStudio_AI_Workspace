@@ -864,7 +864,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         const loss = finalNeuralNetwork.train(
           trainingData.map((data) => data.input),
           trainingData.map((data) => data.target),
-          1000 // Increased number of epochs for more thorough retraining
+          2000 // Increased number of epochs for more thorough retraining
         );
 
         finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
@@ -1169,11 +1169,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <AnimatePresence>
               {messages.map((message) => {
-                // Move the console.log outside of the JSX
-                if (isDeveloper && message.sender === 'bot') {
-                  console.log('Rendering developer info');
-                }
-
                 return (
                   <motion.div
                     key={message.id}
@@ -1193,11 +1188,17 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                       }`}
                     >
                       {message.text}
-                      {isDeveloper && message.sender === 'bot' && (
+                      {message.sender === 'bot' && (
                         <div className="mt-2 text-xs text-gray-400">
-                          <p>Accuracy: {(Math.random() * 0.2 + 0.8).toFixed(4)}</p>
-                          <p>Response time: {(Math.random() * 100 + 50).toFixed(2)}ms</p>
-                          <p>Model: Mazs AI v0.85.5 anatra, Canard, Pato</p>
+                          {isDeveloper ? (
+                            <>
+                              <p>Accuracy: {(Math.random() * 0.2 + 0.8).toFixed(4)}</p>
+                              <p>Response time: {(Math.random() * 100 + 50).toFixed(2)}ms</p>
+                              <p>Model: Mazs AI v0.85.5 anatra, Canard, Pato</p>
+                            </>
+                          ) : (
+                            <p>Model: Mazs AI v0.85.5 anatra</p>
+                          )}
                         </div>
                       )}
                       {message.sender === 'bot' && (

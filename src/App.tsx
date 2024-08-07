@@ -3,7 +3,6 @@ import Sidebar from './components/Sidebar';
 import Chat from './components/Chat';
 import UpdateInfoModal from './components/SettingsModal';
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { FaBars } from 'react-icons/fa';
 import Login from './components/Login';
 import LandingPage from './components/LandingPage';
 import { ChatItem } from './types';
@@ -62,11 +61,8 @@ const App: React.FC = () => {
         onNewChat={handleNewChat}
       />
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
+        <header className="hidden md:flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
           <div className="text-2xl font-bold flex items-center space-x-2">
-            <button onClick={toggleSidebar} className="md:hidden p-2">
-              <FaBars />
-            </button>
             <span className="pl-10">Mazs AI v0.85.5</span>
           </div>
           <button

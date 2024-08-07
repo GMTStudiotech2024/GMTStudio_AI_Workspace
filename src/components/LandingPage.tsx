@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaBrain, FaLock, FaChartLine, FaArrowRight, FaGithub, FaTwitter, FaLinkedin, FaPlay, FaRobot, FaCode, FaDatabase, FaServer, FaUserCog, FaComments, FaBars } from 'react-icons/fa';
+import { GiDuck, GiHummingbird, GiSeagull } from 'react-icons/gi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface LandingPageProps {
@@ -116,6 +117,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </motion.button>
           </div>
         </section>
+
+        <ModelSizes />
 
         <section id="features" className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
           <FeatureCard
@@ -273,6 +276,44 @@ const ArchitectureCard: React.FC<{ title: string; description: string }> = ({ ti
       className="bg-white p-6 md:p-8 rounded-lg text-center shadow-md transition-all duration-200"
     >
       <h4 className="text-xl md:text-2xl font-semibold mb-4 text-gray-900">{title}</h4>
+      <p className="text-gray-600">{description}</p>
+    </motion.div>
+  );
+};
+
+const ModelSizes: React.FC = () => {
+  return (
+    <section className="bg-blue-100 rounded-lg p-8 mb-24">
+      <h3 className="text-3xl md:text-4xl font-bold mb-6 text-center text-blue-800">Mazs AI Model Sizes</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <ModelSizeCard
+          icon={<GiHummingbird className="text-5xl mb-4 text-blue-600" />}
+          name="Anatra"
+          description="Lightweight and efficient for simple tasks"
+        />
+        <ModelSizeCard
+          icon={<GiDuck className="text-5xl mb-4 text-blue-600" />}
+          name="Canard"
+          description="Balanced performance for most applications"
+        />
+        <ModelSizeCard
+          icon={<GiSeagull className="text-5xl mb-4 text-blue-600" />}
+          name="Pato"
+          description="Advanced capabilities for complex scenarios"
+        />
+      </div>
+    </section>
+  );
+};
+
+const ModelSizeCard: React.FC<{ icon: React.ReactNode; name: string; description: string }> = ({ icon, name, description }) => {
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.05 }}
+      className="bg-white p-6 rounded-lg text-center shadow-md transition-all duration-200"
+    >
+      {icon}
+      <h4 className="text-2xl font-semibold mb-2 text-blue-800">{name}</h4>
       <p className="text-gray-600">{description}</p>
     </motion.div>
   );
