@@ -487,7 +487,7 @@ for (const layerSizes of layerSizesOptions) {
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        100 // Number of epochs
+        500// Number of epochs
       );
 
       const accuracy = calculateAccuracy(neuralNetwork, testData);
@@ -520,7 +520,7 @@ const finalNeuralNetwork = new EnhancedNeuralNetwork(
 finalNeuralNetwork.train(
   trainingData.map((data) => data.input),
   trainingData.map((data) => data.target),
-  100 // Number of epochs
+  500 // Number of epochs
 );
 // *** End of Hyperparameter Tuning ***
 
