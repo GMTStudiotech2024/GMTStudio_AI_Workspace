@@ -735,7 +735,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         setTypingMessage(null);
         setIsTyping(false);
       }
-    }, 30); // Adjust this value to change typing speed
+    }, 50); // Adjust this value to change typing speed
   };
 
   const handleSendMessage = async () => {
