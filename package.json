@@ -17,6 +17,7 @@
     "@tensorflow/tfjs": "^4.20.0",
     "@tensorflow/tfjs-converter": "file:^3.6.0npm install @tensorflow/tfjs-converter@^3.6.0",
     "@vercel/speed-insights": "^1.0.12",
+    "assemblyai": "^4.6.1",
     "axios": "^1.7.2",
     "compromise": "^14.13.0",
     "dotenv": "^16.4.5",

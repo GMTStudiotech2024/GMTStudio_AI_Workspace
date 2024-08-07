@@ -399,12 +399,15 @@ const trainingData = [
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "What's up?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good afternoon"
 
-  // Farewells
+  // Farewells (expanded)
   { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
   { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "farewell"
-  // ... (Add more farewell variations)
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "take care"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "have a good one"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "catch you later"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "until next time"
 
   // Weather
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
@@ -452,7 +455,7 @@ interface BestHyperparameters {
 // *** Perform Hyperparameter Tuning ONLY ONCE outside the component ***
 // Define hyperparameter options
 const layerSizesOptions = [[20, 15, 10], [15, 20, 10], [15, 15, 10]];
-const learningRateOptions = [0.001, 0.01];
+const learningRateOptions = [0.005, 0.05];
 const dropoutRateOptions = [0.3, 0.5];
 
 let bestAccuracy = 0;
@@ -477,7 +480,7 @@ for (const layerSizes of layerSizesOptions) {
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        1000 // Number of epochs
+        1500 // Number of epochs
       );
 
       const accuracy = calculateAccuracy(neuralNetwork, testData);
@@ -510,7 +513,7 @@ const finalNeuralNetwork = new EnhancedNeuralNetwork(
 finalNeuralNetwork.train(
   trainingData.map((data) => data.input),
   trainingData.map((data) => data.target),
-  1000 // Number of epochs
+  1500 // Number of epochs
 );
 // *** End of Hyperparameter Tuning ***
 
@@ -549,6 +552,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'goodbye',
       'bye',
       'see you later',
+      'farewell',
+      'take care',
+      'have a good one',
+      'catch you later',
+      'until next time',
       "what's the weather like",
       "how's the weather",
       'tell me a joke',
@@ -588,6 +596,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       3: [
         'Goodbye! Have a great day!',
         'See you later! Talk to you soon!',
+        'Take care! It was nice chatting with you.',
+        'Farewell! Hope to see you again soon.',
       ],
       4: [
         "I'm afraid I don't have real-time weather data.",
@@ -635,6 +645,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       'goodbye',
       'bye',
       'see you later',
+      'farewell',
+      'take care',
+      'have a good one',
+      'catch you later',
+      'until next time',
       "what's the weather like?",
       "how's the weather?",
       'tell me a joke',
@@ -771,7 +786,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     if (inputValue) {
       const posResult = performPOS(inputValue);
       console.log("POS Result:", posResult);
-      // You can also set this result to state and display it in the UI
     }
   };
 
