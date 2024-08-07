@@ -739,73 +739,182 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const performNER = (text: string): string => {
     const entities = [];
     const words = text.split(/\s+/);
+  
     for (let i = 0; i < words.length; i++) {
       const word = words[i];
-      // Simple rule: Check if the word is capitalized and followed by a common title (e.g., Mr., Ms., Dr.)
-      if (
-        word.match(/^[A-Z][a-z]+$/) &&
-        (i + 1 < words.length &&
-          words[i + 1].match(/^(Mr|Ms|Dr|Mrs)\.$/))
-      ) {
-        entities.push(`${word} ${words[i + 1]}`);
-        i++; // Skip the next word (title)
+      let nextWord = words[i + 1] || ''; // Change to let
+  
+      // Rule 1: Capitalized words followed by titles (Mr., Ms., Dr., etc.)
+      if (word.match(/^[A-Z][a-z]+$/) && nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)) {
+        entities.push(`${word} ${nextWord}`);
+        i++; 
       }
-      // Another simple rule: Check for capitalized words that might be locations
-      else if (word.match(/^[A-Z][a-z]+$/)) {
+      // Rule 2: Sequences of Capitalized words (potential names or organizations)
+      else if (word.match(/^[A-Z][a-z]+$/) && nextWord.match(/^[A-Z][a-z]+$/)) {
+        let name = word;
+        while (nextWord.match(/^[A-Z][a-z]+$/) && i < words.length - 1) {
+          name += ` ${nextWord}`;
+          i++;
+          nextWord = words[i + 1] || ''; // This reassignment is now valid
+        }
+        entities.push(name);
+      } 
+      // Rule 3: Capitalized words at the beginning of sentences (potential names) 
+      else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
         entities.push(word);
+      } 
+      // Rule 4: Locations - (Add a list of known locations or use a more advanced method)
+      // This is a very basic example, you'll need a better way to identify locations
+      else if (word.match(/^[A-Z][a-z]+$/) && ['City', 'Town', 'Country'].includes(nextWord)) { 
+        entities.push(word);
+        i++;
       }
     }
+  
     return entities.length > 0 ? entities.join(', ') : 'No entities found';
   };
-
   // Keep the POS tagging function and fix the regex
   const performPOS = (text: string): string => {
     const words = text.split(' ');
-    const tags = words.map(word => {
-      if (word.match(/^[A-Z][a-z]+$/)) return `${word}/NNP`; // Proper noun
-      if (word.match(/^[a-z]+s$/)) return `${word}/NNS`; // Plural noun
-      if (word.match(/^[a-z]+ed$/)) return `${word}/VBD`; // Past tense verb
-      if (word.match(/^[a-z]+ing$/)) return `${word}/VBG`; // Gerund/present participle
-      if (['the', 'a', 'an'].includes(word.toLowerCase())) return `${word}/DT`; // Determiner
-      if (['in', 'on', 'at', 'by'].includes(word.toLowerCase())) return `${word}/IN`; // Preposition
-      return `${word}/NN`; // Default to noun
+    const tags = words.map((word, index) => {
+      // Regular expressions for different parts of speech
+      const nounRegex = /^[a-z]+(s)?$/;          // Nouns (singular or plural)
+      const verbRegex = /^[a-z]+(ed|ing|s)?$/;   // Verbs (past tense, present participle, 3rd person singular)
+      const adjectiveRegex = /^[a-z]+(er|est)?$/; // Adjectives (comparative, superlative)
+      const adverbRegex = /^[a-z]+ly$/;          // Adverbs
+      const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; // Pronouns
+      const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; // Prepositions
+      const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; // Conjunctions
+      const determinerRegex = /^(the|a|an)$/i;  // Determiners
+      
+      word = word.toLowerCase(); // Normalize to lowercase
+  
+      // Check for punctuation
+      if (word.match(/^[.,!?;:]+$/)) return `${word}/PUNCT`;
+  
+      // Check for numbers
+      if (word.match(/^[0-9]+(\.[0-9]+)?$/)) return `${word}/NUM`;
+  
+      // Apply more specific rules
+      if (word === 'to' && index < words.length - 1 && words[index + 1].match(verbRegex)) {
+        return `${word}/TO`; // 'to' as part of infinitive
+      }
+  
+      if (word.match(determinerRegex)) return `${word}/DET`;
+      if (word.match(pronounRegex)) return `${word}/PRON`;
+      if (word.match(prepositionRegex)) return `${word}/PREP`;
+      if (word.match(conjunctionRegex)) return `${word}/CONJ`;
+      if (word.match(adverbRegex)) return `${word}/ADV`;
+      if (word.match(adjectiveRegex)) return `${word}/ADJ`;
+      if (word.match(verbRegex)) return `${word}/VERB`;
+      if (word.match(nounRegex)) return `${word}/NOUN`;
+  
+      return `${word}/UNK`; // Unknown
     });
     return tags.join(' ');
   };
 
-  // If you want to keep the summarization function, fix it like this:
   const performSummarization = (text: string): string => {
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-    if (sentences.length <= 3) return text; // Return original text if it's already short
-    
-    // Simple summarization: return first and last sentence
-    return `${sentences[0]} ... ${sentences[sentences.length - 1]}`;
-  };
+    if (sentences.length <= 3) return text; 
+  
+    // 1. Calculate Term Frequencies (TF) and Sentence Lengths
+    const wordFrequencies: { [key: string]: number } = {};
+    const sentenceLengths = sentences.map(sentence => sentence.split(/\s+/).length);
+    for (const sentence of sentences) {
+      const words = sentence.toLowerCase().split(/\W+/);
+      for (const word of words) {
+        if (word && !['a', 'an', 'the', 'in', 'on', 'at', 'to', 'of'].includes(word)) { // Ignore common words
+          wordFrequencies[word] = (wordFrequencies[word] || 0) + 1;
+        }
+      }
+    }
+  
+    // 2. Calculate Inverse Document Frequency (IDF)
+    const idf: { [key: string]: number } = {};
+    const numSentences = sentences.length;
+    for (const word in wordFrequencies) {
+      let count = 0;
+      for (const sentence of sentences) {
+        if (sentence.toLowerCase().includes(word)) {
+          count++;
+        }
+      }
+      idf[word] = Math.log(numSentences / (count + 1)); // Add 1 to avoid division by zero
+    }
+  
+    // 3. Calculate Sentence Scores (combining TF-IDF and sentence length)
+    const sentenceScores = sentences.map((sentence, index) => {
+      const words = sentence.toLowerCase().split(/\W+/);
+      let score = 0;
+      for (const word of words) {
+        if (word && wordFrequencies[word] && idf[word]) {
+          score += wordFrequencies[word] * idf[word];
+        }
+      }
+      // Consider sentence length as a factor (longer sentences might be more important)
+      score += sentenceLengths[index] * 0.1;
+      return score;
+    });
+  
+    // 4. Select Top Sentences
+    const maxSummaryLength = Math.min(3, Math.ceil(sentences.length / 3)); // At most 1/3 of original sentences
+    const sortedIndices = sentenceScores
+      .map((score, index) => ({ score, index }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, maxSummaryLength)
+      .sort((a, b) => a.index - b.index); // Maintain original order
 
+    // 5. Construct Summary
+    const topSentences = sortedIndices.map(({ index }) => sentences[index]);
+    return topSentences.join(' ');
+  };
   const handlePOS = () => {
     if (inputValue) {
       const posResult = performPOS(inputValue);
-      console.log("POS Result:", posResult);
+      
+      const posMessage: Message = {
+        id: Date.now().toString(),
+        sender: 'bot',
+        text: `POS Tagging Result:\n${posResult}`,
+        timestamp: new Date(),
+      };
+      setMessages((prevMessages) => [...prevMessages, posMessage]);
+      setInputValue(''); // Clear the input box
+    }
+  };
+  
+  const handleNER = () => {
+    if (inputValue) {
+      const nerResult = performNER(inputValue);
+      
+      const nerMessage: Message = {
+        id: Date.now().toString(),
+        sender: 'bot',
+        text: `Named Entities Found:\n${nerResult}`,
+        timestamp: new Date(),
+      };
+      setMessages((prevMessages) => [...prevMessages, nerMessage]);
+      setInputValue(''); // Clear the input box
     }
   };
 
   const handleSummarization = () => {
     if (inputValue) {
       const summaryResult = performSummarization(inputValue);
-      console.log("Summary:", summaryResult);
-      // You can also set this result to state and display it in the UI
+      
+      const summaryMessage: Message = {
+        id: Date.now().toString(),
+        sender: 'bot',
+        text: `Text Summary:\n${summaryResult}`,
+        timestamp: new Date(),
+      };
+      setMessages((prevMessages) => [...prevMessages, summaryMessage]);
+      setInputValue(''); // Clear the input box
     }
   };
 
-  const handleNER = () => {
-    if (inputValue) {
-      const nerResult = performNER(inputValue);
-      console.log("Named Entities:", nerResult);
-      // You can also set this result to state and display it in the UI
-      // For example:
-      // setNerResult(nerResult);
-    }
-  };
+
 
   return (
     <div
