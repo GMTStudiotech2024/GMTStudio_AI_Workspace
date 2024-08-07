@@ -65,7 +65,7 @@ const App: React.FC = () => {
             <button onClick={toggleSidebar} className="md:hidden p-2">
               <FaBars />
             </button>
-            <span className="pl-10">Mazs AI v0.75.1</span>
+            <span className="pl-10">Mazs AI v0.85.5</span>
           </div>
           <button
             onClick={toggleSettingsModal}
@@ -79,7 +79,7 @@ const App: React.FC = () => {
           <UpdateInfoModal
             onClose={toggleSettingsModal}
             title="Latest Updates"
-            version="v0.75.1"
+            version="v0.85.5"
             description="AI improvements"
           />
         )}

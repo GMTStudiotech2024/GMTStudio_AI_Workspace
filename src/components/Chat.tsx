@@ -676,9 +676,49 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         return `${randomGreeting}! ${randomHowAreYou} today?`;
       },
       1: () => {
-        // Similar for other categories...
+        const randomMorningGreeting = wordDatabase.greetings.filter(g => g.toLowerCase().includes('morning'))[Math.floor(Math.random() * wordDatabase.greetings.filter(g => g.toLowerCase().includes('morning')).length)];
+        return `${randomMorningGreeting}! I hope you're having a great start to your day.`;
       },
-      // ...
+      2: () => {
+        const randomEveningGreeting = wordDatabase.greetings.filter(g => g.toLowerCase().includes('evening'))[Math.floor(Math.random() * wordDatabase.greetings.filter(g => g.toLowerCase().includes('evening')).length)];
+        return `${randomEveningGreeting}! How has your day been so far?`;
+      },
+      3: () => {
+        const randomFarewell = wordDatabase.farewells[Math.floor(Math.random() * wordDatabase.farewells.length)];
+        return `${randomFarewell}! It was great chatting with you. Take care!`;
+      },
+      4: () => {
+        const randomWeatherQuery = wordDatabase.weatherQueries[Math.floor(Math.random() * wordDatabase.weatherQueries.length)];
+        return `I'm sorry, but I don't have real-time weather data. However, I can tell you that ${randomWeatherQuery} is an important factor in daily life. If you need accurate weather information, I recommend checking a reliable weather service or app.`;
+      },
+      5: () => {
+        const randomJoke = [
+          "Why don't scientists trust atoms? Because they make up everything!",
+          "Why did the scarecrow win an award? He was outstanding in his field!",
+          "Why don't eggs tell jokes? They'd crack each other up!",
+          "What do you call a fake noodle? An impasta!",
+          "Why did the math book look so sad? Because it had too many problems!",
+        ][Math.floor(Math.random() * 5)];
+        return `Here's a joke for you: ${randomJoke} 😄`;
+      },
+      6: () => {
+        const randomResponse = [
+          "I'm doing well, thank you for asking! How about you?",
+          "I'm functioning at optimal capacity, which I suppose is the AI equivalent of feeling great!",
+          "As an AI, I don't have feelings, but I'm operating efficiently and ready to assist you!",
+          "I'm here and ready to help! How can I assist you today?",
+        ][Math.floor(Math.random() * 4)];
+        return randomResponse;
+      },
+      7: () => {
+        return "I apologize, but I'm not sure how to respond to that. Could you please rephrase your question or ask me something else?";
+      },
+      8: () => {
+        return "That's an interesting topic! While I don't have personal opinions, I can provide information on various subjects if you have any specific questions.";
+      },
+      9: () => {
+        return "I'm afraid I don't have enough context to provide a meaningful response to that. Could you please provide more details or ask a more specific question?";
+      },
     };
 
     // Choose a response generator function based on the predicted class
