@@ -17,6 +17,12 @@ interface ChatProps {
   selectedChat: { title: string } | null;
 }
 
+interface TrainingProgress {
+  epoch: number;
+  loss: number;
+  accuracy: number;
+}
+
 // Enhanced Neural Network Class
 class EnhancedNeuralNetwork {
   private layers: number[][];
@@ -338,9 +344,9 @@ class EnhancedNeuralNetwork {
       (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay);
   }
 
-  train(inputs: number[][], targets: number[][], epochs: number): void {
+  train(inputs: number[][], targets: number[][], epochs: number): number {
+    let totalLoss = 0;
     for (let epoch = 0; epoch < epochs; epoch++) {
-      let totalLoss = 0;
       for (let i = 0; i < inputs.length; i += this.batchSize) {
         const batchInputs = inputs.slice(i, i + this.batchSize);
         const batchTargets = targets.slice(i, i + this.batchSize);
@@ -355,6 +361,7 @@ class EnhancedNeuralNetwork {
       }
       this.learningRate *= 0.99; // Learning rate decay
     }
+    return totalLoss / inputs.length; // Return the average loss
   }
 
   predict(input: number[]): number {
@@ -480,7 +487,7 @@ for (const layerSizes of layerSizesOptions) {
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        1500 // Number of epochs
+        100 // Number of epochs
       );
 
       const accuracy = calculateAccuracy(neuralNetwork, testData);
@@ -513,15 +520,25 @@ const finalNeuralNetwork = new EnhancedNeuralNetwork(
 finalNeuralNetwork.train(
   trainingData.map((data) => data.input),
   trainingData.map((data) => data.target),
-  1500 // Number of epochs
+  100 // Number of epochs
 );
 // *** End of Hyperparameter Tuning ***
 
 const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
+  const LoadingSpinner: React.FC = () => (
+    <div className="spinner">
+      <div className="bounce1"></div>
+      <div className="bounce2"></div>
+      <div className="bounce3"></div>
+    </div>
+  );
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [trainingStatus, setTrainingStatus] = useState<'initializing' | 'training' | 'complete' | 'error'>('initializing');
+  const [trainingProgress, setTrainingProgress] = useState<TrainingProgress | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const suggestions: Suggestion[] = [
@@ -531,12 +548,49 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   ];
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const trainModel = async () => {
+      try {
+        // Set status to 'training' before starting the epochs
+        setTrainingStatus('training');
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+        // Create your final model with the best hyperparameters
+        const finalNeuralNetwork = new EnhancedNeuralNetwork(
+          bestHyperparameters.layerSizes,
+          bestHyperparameters.learningRate,
+          bestHyperparameters.dropoutRate,
+          64, // Batch Size
+          'adamw', // Optimizer
+          0.01 // L2 Regularization Rate
+        );
+
+        // Train the final model on the full training set
+        for (let epoch = 0; epoch < 1500; epoch++) {
+          const loss = finalNeuralNetwork.train(
+            trainingData.map((data) => data.input),
+            trainingData.map((data) => data.target),
+            1
+          );
+
+          const accuracy = calculateAccuracy(finalNeuralNetwork, testData);
+
+          // Update training progress every 10 epochs
+          if (epoch % 10 === 0) {
+            setTrainingProgress({ epoch, loss, accuracy });
+          }
+        }
+
+        setTrainingStatus('complete');
+      } catch (error) {
+        console.error('Training error:', error);
+        setTrainingStatus('error');
+      }
+    };
+
+    // Use setTimeout to ensure the initial loading screen is rendered
+    setTimeout(() => {
+      trainModel();
+    }, 0);
+  }, []);
 
   // Enhanced Machine Learning Function with Word Combination and Context
   const enhancedMachineLearning = (
@@ -914,153 +968,190 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
-    <div
-      className={`flex flex-col h-screen ${
+    <div 
+      className={`flex flex-col h-screen w-full ${
         darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'
       }`}
     >
-      <div className="flex justify-between items-center p-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold pl-10">
-          {selectedChat ? selectedChat.title : 'New Chat'}
-        </h1>
-        <div className="flex items-center">
-          {/* Clear Chat Button */}
-          <button
-            onClick={handleClearChat}
-            className="p-2 rounded-full hover:bg-gray-700 transition-colors mr-2"
-          >
-            <FaTrashAlt className="text-red-500" />
-          </button>
-          {/* Dark Mode Button */}
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-          >
-            {darkMode ? (
-              <FaSun className="text-yellow-500" />
-            ) : (
-              <FaMoon className="text-gray-700" />
-            )}
-          </button>
+      {trainingStatus === 'initializing' && (
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">
+            Initializing artificial intelligence, please wait...
+          </h2>
+          <LoadingSpinner />
         </div>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <motion.div
-            key={message.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`flex ${
-              message.sender === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
-            <div
-              className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
-                message.sender === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-white'
-              }`}
-            >
-              {message.text}
-              {/* Add feedback buttons for bot messages */}
-              {message.sender === 'bot' && (
-                <div className="flex justify-end mt-2 space-x-2">
-                  <button
-                    onClick={() => handleFeedback(message.id, 'good')}
-                    className="text-green-500 hover:text-green-600"
-                  >
-                    <FaThumbsUp />
-                  </button>
-                  <button
-                    onClick={() => handleFeedback(message.id, 'bad')}
-                    className="text-red-500 hover:text-red-600"
-                  >
-                    <FaThumbsDown />
-                  </button>
-                </div>
-              )}
+      )}
+      {trainingStatus === 'training' && (
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">
+            Artificial intelligence is now training, please wait...
+          </h2>
+          <LoadingSpinner />
+          {trainingProgress && (
+            <div className="mt-4">
+              <p>Epoch: {trainingProgress.epoch}/1500</p>
+              <p>Loss: {trainingProgress.loss.toFixed(4)}</p>
+              <p>Accuracy: {(trainingProgress.accuracy * 100).toFixed(2)}%</p>
             </div>
-          </motion.div>
-        ))}
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className="bg-gray-700 text-white p-3 rounded-lg">
-              <div className="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-      <div className="border-t border-gray-700 p-4">
-        {messages.length === 0 && (
-          <div className="flex flex-wrap justify-center gap-2 mb-4">
-            {suggestions.map((suggestion, index) => (
+          )}
+        </div>
+      )}
+      {trainingStatus === 'error' && (
+        <div className="text-center text-red-500">
+          <h2 className="text-2xl font-bold mb-4">
+            An error occurred during training. Please try again later.
+          </h2>
+        </div>
+      )}
+      {trainingStatus === 'complete' && (
+        <div className="flex flex-col h-full w-full">
+          <div className="flex justify-between items-center p-4 border-b border-gray-700">
+            <h1 className="text-2xl font-bold">
+              {selectedChat ? selectedChat.title : 'New Chat'}
+            </h1>
+            <div className="flex items-center">
               <button
-                key={index}
-                onClick={() => setInputValue(suggestion.text)}
-                className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm transition-colors duration-200"
+                onClick={handleClearChat}
+                className="p-2 rounded-full hover:bg-gray-700 transition-colors mr-2"
               >
-                {suggestion.icon}
-                <span>{suggestion.text}</span>
+                <FaTrashAlt className="text-red-500" />
               </button>
-            ))}
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+              >
+                {darkMode ? (
+                  <FaSun className="text-yellow-500" />
+                ) : (
+                  <FaMoon className="text-gray-700" />
+                )}
+              </button>
+            </div>
           </div>
-        )}
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type a message..."
-            className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={handleSendMessage}
-            className="p-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-          >
-            <FaPaperPlane />
-          </button>
-          <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-            <FaSmile />
-          </button>
-          <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-            <FaMicrophone />
-          </button>
-          <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-            <FaImage />
-          </button>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((message) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`flex ${
+                  message.sender === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                <div
+                  className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
+                    message.sender === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-white'
+                  }`}
+                >
+                  {message.text}
+                  {message.sender === 'bot' && (
+                    <div className="flex justify-end mt-2 space-x-2">
+                      <button
+                        onClick={() => handleFeedback(message.id, 'good')}
+                        className="text-green-500 hover:text-green-600"
+                      >
+                        <FaThumbsUp />
+                      </button>
+                      <button
+                        onClick={() => handleFeedback(message.id, 'bad')}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <FaThumbsDown />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-gray-700 text-white p-3 rounded-lg">
+                  <div className="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="border-t border-gray-700 p-4">
+            {messages.length === 0 && (
+              <div className="flex flex-wrap justify-center gap-2 mb-4">
+                {suggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setInputValue(suggestion.text)}
+                    className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm transition-colors duration-200"
+                  >
+                    {suggestion.icon}
+                    <span>{suggestion.text}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type a message..."
+                className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={handleSendMessage}
+                className="p-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              >
+                <FaPaperPlane />
+              </button>
+              <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
+                <FaSmile />
+              </button>
+              <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
+                <FaMicrophone />
+              </button>
+              <button className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors">
+                <FaImage />
+              </button>
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <button
+                onClick={handlePOS}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                POS
+              </button>
+              <button
+                onClick={handleSummarization}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                Summarize
+              </button>
+              <button
+                onClick={handleNER}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                NER
+              </button>
+            </div>
+          </div>
         </div>
-
-        {/* Add buttons for NLP tasks */}
-        <div className="flex items-center space-x-2 mt-2">
-          <button
-            onClick={handlePOS}
-            className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-          >
-            POS
-          </button>          <button
-            onClick={handleSummarization}
-            className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-          >
-            Summarize
-          </button>
-          <button
-            onClick={handleNER}
-            className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-          >
-            NER
-          </button>
-        </div>
-      </div>    </div>
+      )}
+    </div>
   );
 };
 
