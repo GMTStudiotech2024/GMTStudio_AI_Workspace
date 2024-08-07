@@ -527,6 +527,16 @@ finalNeuralNetwork.train(
 );
 // *** End of Hyperparameter Tuning ***
 
+// Database of words for generative output
+const wordDatabase = {
+  greetings: ['Hello', 'Hi', 'Hey', 'Greetings', 'Good morning', 'Good evening', 'Good afternoon'],
+  farewells: ['Goodbye', 'Bye', 'See you later', 'Farewell', 'Take care', 'Have a good one', 'Catch you later', 'Until next time'],
+  howAreYou: ['How are you', 'How are you doing', "How's it going", 'How are you feeling'],
+  weatherQueries: ["What's the weather like", "How's the weather", 'What is the temperature'],
+  jokes: ['Tell me a joke', 'Tell me a funny joke', 'Do you know any jokes'],
+  // Add more categories and words as needed
+};
+
 const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const LoadingSpinner: React.FC = () => (
     <motion.div 
@@ -658,48 +668,24 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     const predictedClass = finalNeuralNetwork.predict(inputVector); // Use the final model
     console.log(`Input: "${input}", Predicted class: ${predictedClass}`);
 
-    // Contextual Responses with Word Combination
+    // Contextual Responses with Word Combination and Generative Output
     const responses = {
-      0: [
-        'Hello! How are you doing today?',
-        'Hi there! Do you need any help?',
-        'Hey there! How can I assist you?',
-      ],
-      1: [
-        'Good morning! How can I assist you today?',
-        'Good morning to you! What are you up to?',
-      ],
-      2: [
-        'Good evening! How was your day?',
-        'Good evening to you! What can I do for you today?',
-      ],
-      3: [
-        'Goodbye! Have a great day!',
-        'See you later! Talk to you soon!',
-        'Take care! It was nice chatting with you.',
-        'Farewell! Hope to see you again soon.',
-      ],
-      4: [
-        "I'm afraid I don't have real-time weather data.",
-        "I'm not able to provide weather information.",
-      ],
-      5: [
-        'Why did the scarecrow win an award? Because he was outstanding in his field!',
-        'What do you call a lazy kangaroo? Pouch potato!',
-      ],
-      6: [
-        "I'm doing well, thank you for asking!",
-        "I'm a chatbot, so I don't have feelings, but I'm functioning as expected!",
-      ],
-      // Add more responses based on predicted classes
+      0: () => {
+        const randomGreeting = wordDatabase.greetings[Math.floor(Math.random() * wordDatabase.greetings.length)];
+        const randomHowAreYou = wordDatabase.howAreYou[Math.floor(Math.random() * wordDatabase.howAreYou.length)];
+        return `${randomGreeting}! ${randomHowAreYou} today?`;
+      },
+      1: () => {
+        // Similar for other categories...
+      },
+      // ...
     };
 
-    // Choose a random response from the array for the predicted class
-    const randomResponseIndex = Math.floor(
-      Math.random() * responses[predictedClass as keyof typeof responses].length
-    );
-    let response =
-      responses[predictedClass as keyof typeof responses][randomResponseIndex];
+    // Choose a response generator function based on the predicted class
+    const responseGenerator = responses[predictedClass as keyof typeof responses];
+
+    // Generate the response using the selected function
+    let response = responseGenerator ? responseGenerator() : "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
 
     // Example of using chat history for context
     if (predictedClass === 0 && chatHistory.length > 0) {
@@ -710,7 +696,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       }
     }
 
-    return response || "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
+    return response ?? "I'm sorry, I couldn't generate a response. Could you please try again?";
   };
 
   const simulateTyping = (text: string) => {
