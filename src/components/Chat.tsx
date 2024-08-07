@@ -988,14 +988,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const handlePOS = () => {
     if (inputValue) {
       const posResult = performPOS(inputValue);
-      
-      const posMessage: Message = {
-        id: Date.now().toString(),
-        sender: 'bot',
-        text: `POS Tagging Result:\n${posResult}`,
-        timestamp: new Date(),
-      };
-      setMessages((prevMessages) => [...prevMessages, posMessage]);
+      setIsTyping(true);
+      simulateTyping(`POS Tagging Result:\n${posResult}`);
       setInputValue(''); // Clear the input box
     }
   };
@@ -1003,14 +997,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const handleNER = () => {
     if (inputValue) {
       const nerResult = performNER(inputValue);
-      
-      const nerMessage: Message = {
-        id: Date.now().toString(),
-        sender: 'bot',
-        text: `Named Entities Found:\n${nerResult}`,
-        timestamp: new Date(),
-      };
-      setMessages((prevMessages) => [...prevMessages, nerMessage]);
+      setIsTyping(true);
+      simulateTyping(`Named Entities Found:\n${nerResult}`);
       setInputValue(''); // Clear the input box
     }
   };
@@ -1018,14 +1006,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const handleSummarization = () => {
     if (inputValue) {
       const summaryResult = performSummarization(inputValue);
-      
-      const summaryMessage: Message = {
-        id: Date.now().toString(),
-        sender: 'bot',
-        text: `Text Summary:\n${summaryResult}`,
-        timestamp: new Date(),
-      };
-      setMessages((prevMessages) => [...prevMessages, summaryMessage]);
+      setIsTyping(true);
+      simulateTyping(`Text Summary:\n${summaryResult}`);
       setInputValue(''); // Clear the input box
     }
   };
