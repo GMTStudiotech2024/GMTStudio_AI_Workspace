@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {  FaBrain, FaLock, FaChartLine, FaArrowRight, FaGithub, FaTwitter, FaLinkedin,  FaPlay, FaRobot, FaCode, FaDatabase } from 'react-icons/fa';
-import { motion } from 'framer-motion';
+import { FaBrain, FaLock, FaChartLine, FaArrowRight, FaGithub, FaTwitter, FaLinkedin, FaPlay, FaRobot, FaCode, FaDatabase, FaServer, FaUserCog, FaComments, FaBars } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -8,6 +8,7 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,8 +18,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
-    <div className="bg-white text-gray-900 min-h-screen">
+    <div className="bg-gradient-to-b from-gray-100 to-white text-gray-900 min-h-screen">
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
         <div className="container mx-auto px-4 py-4">
           <nav className="flex justify-between items-center">
@@ -30,7 +35,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             >
               Mazs AI
             </motion.h1>
-            <div className="flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-6">
               <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors duration-200">Features</a>
               <a href="#architecture" className="text-gray-600 hover:text-blue-600 transition-colors duration-200">Architecture</a>
               <a href="#future" className="text-gray-600 hover:text-blue-600 transition-colors duration-200">Future</a>
@@ -43,9 +48,37 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 Get Started <FaArrowRight className="ml-2" />
               </motion.button>
             </div>
+            <button onClick={toggleMobileMenu} className="md:hidden text-gray-600">
+              <FaBars size={24} />
+            </button>
           </nav>
         </div>
       </header>
+
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 bg-white z-40 md:hidden"
+          >
+            <div className="flex flex-col items-center justify-center h-full space-y-6">
+              <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors duration-200" onClick={toggleMobileMenu}>Features</a>
+              <a href="#architecture" className="text-gray-600 hover:text-blue-600 transition-colors duration-200" onClick={toggleMobileMenu}>Architecture</a>
+              <a href="#future" className="text-gray-600 hover:text-blue-600 transition-colors duration-200" onClick={toggleMobileMenu}>Future</a>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => { onGetStarted(); toggleMobileMenu(); }}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center"
+              >
+                Get Started <FaArrowRight className="ml-2" />
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main className="container mx-auto px-4 pt-32 pb-16">
         <section className="text-center mb-24">
@@ -53,7 +86,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="text-6xl font-bold mb-6 text-gray-900"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900"
           >
             Mazs AI: Neural Network-Powered Chatbot
           </motion.h2>
@@ -61,30 +94,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-2xl mb-10 max-w-3xl mx-auto text-gray-600"
+            className="text-lg md:text-xl lg:text-2xl mb-10 max-w-3xl mx-auto text-gray-600"
           >
-            Explore the future of conversational AI with our three-layer neural network chatbot.
+            A technical deep dive into our advanced conversational AI system.
           </motion.p>
-          <div className="flex justify-center space-x-4">
+          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onGetStarted} 
-              className="bg-blue-600 text-white px-8 py-4 rounded-md text-lg font-semibold shadow-lg transition-all duration-200 flex items-center"
+              className="bg-blue-600 text-white px-8 py-4 rounded-md text-lg font-semibold shadow-lg transition-all duration-200 flex items-center justify-center"
             >
               Start Exploring <FaArrowRight className="ml-2" />
             </motion.button>
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-gray-200 text-gray-800 px-8 py-4 rounded-md text-lg font-semibold shadow-lg transition-all duration-200 flex items-center"
+              className="bg-gray-200 text-gray-800 px-8 py-4 rounded-md text-lg font-semibold shadow-lg transition-all duration-200 flex items-center justify-center"
             >
               Watch Demo <FaPlay className="ml-2" />
             </motion.button>
           </div>
         </section>
 
-        <section id="features" className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 mb-24">
+        <section id="features" className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
           <FeatureCard
             icon={<FaRobot className="text-5xl mb-6 text-blue-600" />}
             title="Intent Classification"
@@ -118,48 +151,38 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </section>
 
         <section id="architecture" className="text-center mb-24">
-          <h3 className="text-4xl font-bold mb-6">Neural Network Architecture</h3>
-          <p className="text-xl mb-8">Mazs AI employs a three-layer feedforward neural network:</p>
+          <h3 className="text-3xl md:text-4xl font-bold mb-6">Neural Network Architecture</h3>
+          <p className="text-lg md:text-xl mb-8">Mazs AI employs a sophisticated three-layer feedforward neural network:</p>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-blue-100 p-6 rounded-lg">
-              <h4 className="text-2xl font-semibold mb-4">Input Layer</h4>
-              <p>10 neurons representing keyword presence</p>
-            </div>
-            <div className="bg-blue-100 p-6 rounded-lg">
-              <h4 className="text-2xl font-semibold mb-4">Hidden Layer</h4>
-              <p>10 neurons with ReLU activation</p>
-            </div>
-            <div className="bg-blue-100 p-6 rounded-lg">
-              <h4 className="text-2xl font-semibold mb-4">Output Layer</h4>
-              <p>10 neurons with Softmax activation</p>
-            </div>
+            <ArchitectureCard title="Input Layer" description="Variable size, encoding user input as binary vectors" />
+            <ArchitectureCard title="Hidden Layer" description="Variable size with ReLU activation for complex pattern learning" />
+            <ArchitectureCard title="Output Layer" description="10 neurons with Softmax activation for intent classification" />
           </div>
         </section>
 
         <section id="future" className="text-center mb-24">
-          <h3 className="text-4xl font-bold mb-6">Future Enhancements</h3>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h4 className="text-2xl font-semibold mb-4">NLP Integration</h4>
-              <p>Implementing advanced NLP techniques for improved language understanding</p>
-            </div>
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h4 className="text-2xl font-semibold mb-4">Dialogue Management</h4>
-              <p>Developing a sophisticated system for context-aware conversations</p>
-            </div>
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h4 className="text-2xl font-semibold mb-4">API Integration</h4>
-              <p>Connecting to external APIs for real-time information and task execution</p>
-            </div>
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h4 className="text-2xl font-semibold mb-4">Personalization</h4>
-              <p>Exploring techniques for tailored user experiences</p>
-            </div>
+          <h3 className="text-3xl md:text-4xl font-bold mb-6">Future Enhancements</h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <EnhancementCard
+              icon={<FaComments className="text-5xl mb-6 text-blue-600" />}
+              title="Advanced NLP Integration"
+              description="Implementing sophisticated NLP techniques for improved language understanding and context awareness"
+            />
+            <EnhancementCard
+              icon={<FaUserCog className="text-5xl mb-6 text-blue-600" />}
+              title="Personalized User Experiences"
+              description="Developing adaptive response systems based on individual user preferences and interaction history"
+            />
+            <EnhancementCard
+              icon={<FaServer className="text-5xl mb-6 text-blue-600" />}
+              title="External API Integration"
+              description="Connecting to various external services for real-time information retrieval and task execution capabilities"
+            />
           </div>
         </section>
 
         <section className="text-center mb-24">
-          <h3 className="text-4xl font-bold mb-6">Ready to explore the future of AI chatbots?</h3>
+          <h3 className="text-3xl md:text-4xl font-bold mb-6">Ready to explore the future of AI chatbots?</h3>
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -173,8 +196,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
 
       <footer className="bg-gray-100 py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-between items-start">
-            <div className="w-full md:w-1/4 mb-6 md:mb-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div>
               <h4 className="text-2xl font-bold mb-4 text-blue-600">Mazs AI</h4>
               <p className="text-gray-600 mb-4">Advancing conversational AI through neural network innovation.</p>
               <div className="flex space-x-4">
@@ -183,7 +206,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors duration-200"><FaGithub size={24} /></a>
               </div>
             </div>
-            <div className="w-full md:w-1/4 mb-6 md:mb-0">
+            <div>
               <h5 className="text-lg font-semibold mb-4">Quick Links</h5>
               <ul className="space-y-2">
                 <li><a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors duration-200">Features</a></li>
@@ -192,7 +215,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <li><a href="#" className="text-gray-600 hover:text-blue-600 transition-colors duration-200">Contact</a></li>
               </ul>
             </div>
-            <div className="w-full md:w-1/4 mb-6 md:mb-0">
+            <div>
               <h5 className="text-lg font-semibold mb-4">Resources</h5>
               <ul className="space-y-2">
                 <li><a href="#" className="text-gray-600 hover:text-blue-600 transition-colors duration-200">Documentation</a></li>
@@ -200,7 +223,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <li><a href="#" className="text-gray-600 hover:text-blue-600 transition-colors duration-200">Research Papers</a></li>
               </ul>
             </div>
-            <div className="w-full md:w-1/4">
+            <div>
               <h5 className="text-lg font-semibold mb-4">Legal</h5>
               <ul className="space-y-2">
                 <li><a href="#" className="text-gray-600 hover:text-blue-600 transition-colors duration-200">Privacy Policy</a></li>
@@ -221,10 +244,35 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description:
   return (
     <motion.div 
       whileHover={{ scale: 1.05 }}
-      className="bg-white p-8 rounded-lg text-center shadow-lg transition-all duration-200"
+      className="bg-white p-6 md:p-8 rounded-lg text-center shadow-lg transition-all duration-200"
     >
       {icon}
-      <h3 className="text-2xl font-semibold mb-4 text-gray-900">{title}</h3>
+      <h3 className="text-xl md:text-2xl font-semibold mb-4 text-gray-900">{title}</h3>
+      <p className="text-gray-600">{description}</p>
+    </motion.div>
+  );
+};
+
+const EnhancementCard: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => {
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.05 }}
+      className="bg-gray-100 p-6 md:p-8 rounded-lg text-center shadow-md transition-all duration-200"
+    >
+      {icon}
+      <h4 className="text-xl md:text-2xl font-semibold mb-4 text-gray-900">{title}</h4>
+      <p className="text-gray-600">{description}</p>
+    </motion.div>
+  );
+};
+
+const ArchitectureCard: React.FC<{ title: string; description: string }> = ({ title, description }) => {
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.05 }}
+      className="bg-white p-6 md:p-8 rounded-lg text-center shadow-md transition-all duration-200"
+    >
+      <h4 className="text-xl md:text-2xl font-semibold mb-4 text-gray-900">{title}</h4>
       <p className="text-gray-600">{description}</p>
     </motion.div>
   );

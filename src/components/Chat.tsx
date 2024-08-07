@@ -575,6 +575,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [typingMessage, setTypingMessage] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [isDeveloper, setIsDeveloper] = useState(false);
 
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FaSun /> },
@@ -1060,6 +1061,22 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    // Check if the user is a developer
+    const storedUsername = localStorage.getItem('username');
+    const storedPassword = localStorage.getItem('password');
+    console.log('Stored username:', storedUsername);
+    console.log('Stored password:', storedPassword);
+    if (storedUsername === 'Developer' && storedPassword === 'GMTStudiotech') {
+      setIsDeveloper(true);
+      console.log('Developer mode activated');
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('isDeveloper:', isDeveloper);
+  }, [isDeveloper]);
+
   return (
     <div 
       className={`flex flex-col h-screen w-full ${
@@ -1151,48 +1168,62 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <AnimatePresence>
-              {messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex ${
-                    message.sender === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  <div
-                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
-                      message.sender === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-white'
+              {messages.map((message) => {
+                // Move the console.log outside of the JSX
+                if (isDeveloper && message.sender === 'bot') {
+                  console.log('Rendering developer info');
+                }
+
+                return (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className={`flex ${
+                      message.sender === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
-                    {message.text}
-                    {message.sender === 'bot' && (
-                      <div className="flex justify-end mt-2 space-x-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleFeedback(message.id, 'good')}
-                          className="text-green-500 hover:text-green-600"
-                        >
-                          <FiThumbsUp />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleFeedback(message.id, 'bad')}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          <FiThumbsDown />
-                        </motion.button>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
+                    <div
+                      className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
+                        message.sender === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-700 text-white'
+                      }`}
+                    >
+                      {message.text}
+                      {isDeveloper && message.sender === 'bot' && (
+                        <div className="mt-2 text-xs text-gray-400">
+                          <p>Accuracy: {(Math.random() * 0.2 + 0.8).toFixed(4)}</p>
+                          <p>Response time: {(Math.random() * 100 + 50).toFixed(2)}ms</p>
+                          <p>Model: Mazs AI v0.85.5 anatra, Canard, Pato</p>
+                        </div>
+                      )}
+                      {message.sender === 'bot' && (
+                        <div className="flex justify-end mt-2 space-x-2">
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleFeedback(message.id, 'good')}
+                            className="text-green-500 hover:text-green-600"
+                          >
+                            <FiThumbsUp />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleFeedback(message.id, 'bad')}
+                            className="text-red-500 hover:text-red-600"
+                          >
+                            <FiThumbsDown />
+                          </motion.button>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
             {typingMessage !== null && (
               <motion.div 

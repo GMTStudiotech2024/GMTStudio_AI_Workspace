@@ -25,6 +25,8 @@ const App: React.FC = () => {
 
   const handleLogin = (username: string, password: string) => {
     if (username && password) {
+      localStorage.setItem('username', username);
+      localStorage.setItem('password', password);
       setIsLoggedIn(true);
     } else {
       alert('Invalid credentials');
