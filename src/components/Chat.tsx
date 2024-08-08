@@ -521,7 +521,7 @@ for (const layerSizes of layerSizesOptions) {
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        500// Number of epochs
+        500 // Number of epochs
       );
 
       const accuracy = calculateAccuracy(neuralNetwork, testData);
@@ -558,15 +558,110 @@ finalNeuralNetwork.train(
 );
 // *** End of Hyperparameter Tuning ***
 
-// Database of words for generative output
+// Enhanced Database of words for generative output
 const wordDatabase = {
-  greetings: ['Hello', 'Hi', 'Hey', 'Greetings', 'Good morning', 'Good evening', 'Good afternoon'],
+  greetings: ['Hello', 'Hi', 'Hey', 'Greetings', 'Good morning', 'Good afternoon', 'Good evening'],
   farewells: ['Goodbye', 'Bye', 'See you later', 'Farewell', 'Take care', 'Have a good one', 'Catch you later', 'Until next time'],
   howAreYou: ['How are you', 'How are you doing', "How's it going", 'How are you feeling'],
   weatherQueries: ["What's the weather like", "How's the weather", 'What is the temperature'],
   jokes: ['Tell me a joke', 'Tell me a funny joke', 'Do you know any jokes'],
-  // Add more categories and words as needed
+  positiveAdjectives: ['great', 'wonderful', 'fantastic', 'amazing', 'excellent', 'superb'],
+  timeOfDay: ['morning', 'afternoon', 'evening', 'day'],
+  topics: ['weather', 'news', 'sports', 'technology', 'movies', 'music', 'books'],
 };
+
+// Enhanced generative functions
+const generateGreeting = (timeOfDay: string): string => {
+  const greetings = wordDatabase.greetings.filter(g => g.toLowerCase().includes(timeOfDay));
+  const greeting = greetings[Math.floor(Math.random() * greetings.length)] || wordDatabase.greetings[Math.floor(Math.random() * wordDatabase.greetings.length)];
+  const howAreYou = wordDatabase.howAreYou[Math.floor(Math.random() * wordDatabase.howAreYou.length)];
+  return `${greeting}! ${howAreYou} this ${timeOfDay}?`;
+};
+
+const generateFarewell = (): string => {
+  const farewell = wordDatabase.farewells[Math.floor(Math.random() * wordDatabase.farewells.length)];
+  const positiveAdjective = wordDatabase.positiveAdjectives[Math.floor(Math.random() * wordDatabase.positiveAdjectives.length)];
+  return `${farewell}! It was ${positiveAdjective} chatting with you. Take care!`;
+};
+
+const generateWeatherResponse = (): string => {
+  const weatherQuery = wordDatabase.weatherQueries[Math.floor(Math.random() * wordDatabase.weatherQueries.length)];
+  const topic = wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
+  return `I'm sorry, but I don't have real-time weather data. However, I can tell you that ${weatherQuery} is an important factor in daily life. If you need accurate weather information, I recommend checking a reliable weather service or app. In the meantime, would you like to chat about ${topic}?`;
+};
+
+const generateJoke = (): string => {
+  const jokes = [
+    "Why don't scientists trust atoms? Because they make up everything!",
+    "Why did the scarecrow win an award? He was outstanding in his field!",
+    "Why don't eggs tell jokes? They'd crack each other up!",
+    "What do you call a fake noodle? An impasta!",
+    "Why did the math book look so sad? Because it had too many problems!",
+    "What do you call a bear with no teeth? A gummy bear!",
+    "Why did the cookie go to the doctor? Because it was feeling crumbly!",
+    "What do you call a sleeping bull? A bulldozer!",
+  ];
+  const joke = jokes[Math.floor(Math.random() * jokes.length)];
+  return `Here's a joke for you: ${joke} 😄 I hope that brought a smile to your face!`;
+};
+
+const generateHowAreYouResponse = (): string => {
+  const responses = [
+    "I'm functioning at optimal capacity, which I suppose is the AI equivalent of feeling great!",
+    "As an AI, I don't have feelings, but I'm operating efficiently and ready to assist you!",
+    "I'm here and ready to help! How can I assist you today?",
+    "I'm doing well, thank you for asking! How about you? Is there anything specific you'd like to chat about?",
+    "I'm always excited to learn new things from our conversations. What's on your mind today?",
+  ];
+  return responses[Math.floor(Math.random() * responses.length)];
+};
+
+// Update the enhancedMachineLearning function
+const enhancedMachineLearning = (input: string): string => {
+  // Create inputVector based on the input
+  const keywords = [
+    'hello', 'hi', 'good morning', 'good evening', 'hey there',
+    'goodbye', 'bye', 'see you later', 'farewell', 'take care',
+    'have a good one', 'catch you later', 'until next time',
+    "what's the weather like?", "how's the weather?",
+    'tell me a joke', 'tell me a funny joke',
+    'how are you', 'how are you doing', "how's it going",
+  ];
+
+  const inputVector = keywords.map((keyword) =>
+    input.toLowerCase().includes(keyword) ? 1 : 0
+  );
+
+  const predictedClass = finalNeuralNetwork.predict(inputVector);
+  console.log(`Input: "${input}", Predicted class: ${predictedClass}`);
+
+  // Get the current time of day
+  const hour = new Date().getHours();
+  const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+
+  // Contextual Responses with Word Combination and Generative Output
+  const responses = {
+    0: () => generateGreeting(timeOfDay),
+    1: () => generateGreeting('morning'),
+    2: () => generateGreeting('evening'),
+    3: () => generateFarewell(),
+    4: () => generateWeatherResponse(),
+    5: () => generateJoke(),
+    6: () => generateHowAreYouResponse(),
+    7: () => "I apologize, but I'm not sure how to respond to that. Could you please rephrase your question or ask something else?",
+    8: () => {
+      const topic = wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
+      return `That's an interesting topic! While I don't have personal opinions, I can provide information on various subjects. Would you like to know more about ${topic}?`;
+    },
+    9: () => "I'm afraid I don't have enough context to provide a meaningful response to that. Could you please provide more details or ask a more specific question?",
+  };
+
+  // Return the appropriate response based on the predicted class
+  return responses[predictedClass as keyof typeof responses]();
+};
+
+// ... rest of the code ...
+
 
 const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const LoadingSpinner: React.FC = () => (
@@ -670,118 +765,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   }, []);
 
-  // Enhanced Machine Learning Function with Word Combination and Context
-  const enhancedMachineLearning = (
-    input: string,
-    chatHistory: ChatMessage[]
-  ): string => {
-    const keywords = [
-      'hello',
-      'hi',
-      'good morning',
-      'good evening',
-      'hey there',
-      'goodbye',
-      'bye',
-      'see you later',
-      'farewell',
-      'take care',
-      'have a good one',
-      'catch you later',
-      'until next time',
-      "what's the weather like",
-      "how's the weather",
-      'tell me a joke',
-      'tell me a funny joke',
-      'how are you',
-      'how are you doing',
-      "how's it going",
-      // Add more keywords here
-    ];
-
-    const inputVector = keywords.map((keyword) =>
-      input
-        .toLowerCase()
-        .split(/\s+/)
-        .some((word) => word.includes(keyword) || keyword.includes(word))
-        ? 1
-        : 0
-    );
-
-    const predictedClass = finalNeuralNetwork.predict(inputVector); // Use the final model
-    console.log(`Input: "${input}", Predicted class: ${predictedClass}`);
-
-    // Contextual Responses with Word Combination and Generative Output
-    const responses = {
-      0: () => {
-        const randomGreeting = wordDatabase.greetings[Math.floor(Math.random() * wordDatabase.greetings.length)];
-        const randomHowAreYou = wordDatabase.howAreYou[Math.floor(Math.random() * wordDatabase.howAreYou.length)];
-        return `${randomGreeting}! ${randomHowAreYou} today?`;
-      },
-      1: () => {
-        const randomMorningGreeting = wordDatabase.greetings.filter(g => g.toLowerCase().includes('morning'))[Math.floor(Math.random() * wordDatabase.greetings.filter(g => g.toLowerCase().includes('morning')).length)];
-        return `${randomMorningGreeting}! I hope you're having a great start to your day.`;
-      },
-      2: () => {
-        const randomEveningGreeting = wordDatabase.greetings.filter(g => g.toLowerCase().includes('evening'))[Math.floor(Math.random() * wordDatabase.greetings.filter(g => g.toLowerCase().includes('evening')).length)];
-        return `${randomEveningGreeting}! How has your day been so far?`;
-      },
-      3: () => {
-        const randomFarewell = wordDatabase.farewells[Math.floor(Math.random() * wordDatabase.farewells.length)];
-        return `${randomFarewell}! It was great chatting with you. Take care!`;
-      },
-      4: () => {
-        const randomWeatherQuery = wordDatabase.weatherQueries[Math.floor(Math.random() * wordDatabase.weatherQueries.length)];
-        return `I'm sorry, but I don't have real-time weather data. However, I can tell you that ${randomWeatherQuery} is an important factor in daily life. If you need accurate weather information, I recommend checking a reliable weather service or app.`;
-      },
-      5: () => {
-        const randomJoke = [
-          "Why don't scientists trust atoms? Because they make up everything!",
-          "Why did the scarecrow win an award? He was outstanding in his field!",
-          "Why don't eggs tell jokes? They'd crack each other up!",
-          "What do you call a fake noodle? An impasta!",
-          "Why did the math book look so sad? Because it had too many problems!",
-        ][Math.floor(Math.random() * 5)];
-        return `Here's a joke for you: ${randomJoke} 😄`;
-      },
-      6: () => {
-        const randomResponse = [
-          "I'm doing well, thank you for asking! How about you?",
-          "I'm functioning at optimal capacity, which I suppose is the AI equivalent of feeling great!",
-          "As an AI, I don't have feelings, but I'm operating efficiently and ready to assist you!",
-          "I'm here and ready to help! How can I assist you today?",
-        ][Math.floor(Math.random() * 4)];
-        return randomResponse;
-      },
-      7: () => {
-        return "I apologize, but I'm not sure how to respond to that. Could you please rephrase your question or ask something else?";
-      },
-      8: () => {
-        return "That's an interesting topic! While I don't have personal opinions, I can provide information on various subjects if you have any specific questions.";
-      },
-      9: () => {
-        return "I'm afraid I don't have enough context to provide a meaningful response to that. Could you please provide more details or ask a more specific question?";
-      },
-    };
-
-    // Choose a response generator function based on the predicted class
-    const responseGenerator = responses[predictedClass as keyof typeof responses];
-
-    // Generate the response using the selected function
-    let response = responseGenerator ? responseGenerator() : "I'm not quite sure how to respond to that. Could you please rephrase your question or ask something else?";
-
-    // Example of using chat history for context
-    if (predictedClass === 0 && chatHistory.length > 0) {
-      const lastUserMessage = chatHistory[chatHistory.length - 1].text;
-      if (lastUserMessage.includes('weather')) {
-        response =
-          "We were just talking about the weather! Anything else you'd like to know?";
-      }
-    }
-
-    return response ?? "I'm sorry, I couldn't generate a response. Could you please try again?";
-  };
-
   const simulateTyping = (text: string) => {
     let index = 0;
     setTypingMessage('');
@@ -856,7 +839,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setIsTyping(true);
 
     setTimeout(() => {
-      const botResponse = enhancedMachineLearning(newMessage.text, messages);
+      const botResponse = enhancedMachineLearning(newMessage.text);
       simulateTyping(botResponse);
     }, 1000);
   };
@@ -1316,7 +1299,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   {typingMessage}
                   <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
                 </div>
-              </motion.div>
+                </motion.div>
             }
             {isTyping && (
               <motion.div 
