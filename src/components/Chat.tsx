@@ -448,13 +448,23 @@ const trainingData = [
   { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "greetings"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hey"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "What's up?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Howdy"
+  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello there"
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Nice to meet you"
 
   // Good morning (Class 1)
   { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good afternoon"
+  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good morning"
+  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good morning"
+  { input: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning, how are you?"
 
   // Good evening (Class 2)
   { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
+  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good evening"
+  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good evening"
+  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, how are you?"
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, what's up?"
 
   // Farewells (Class 3)
   { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
@@ -463,33 +473,52 @@ const trainingData = [
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "farewell"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "take care"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "have a good one"
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye, bye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "catch you later"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "until next time"
 
   // Weather (Class 4)
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Is it going to rain today?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the temperature outside?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Do I need an umbrella today?"
 
   // How are you (Class 5)
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you doing?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how's it going?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How have you been?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How's your day going?"
 
   // Jokes (Class 6)
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a joke"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a funny joke"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Do you know any jokes?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Make me laugh"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "I need a good laugh"
 
-  // New class: Time (Class 7)
+  // Time (Class 7)
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "what time is it?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "do you have the time?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What's the current time?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "Can you tell me the time?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What hour is it?"
 
-  // New class: Help (Class 8)
+  // Help (Class 8)
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "can you help me?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I need assistance"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "Could you give me a hand?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I'm having trouble with something"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "How do I use this feature?"
 
-  // New class: Thank you (Class 9)
+  // Thank you (Class 9)
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thank you"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thanks a lot"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "I appreciate your help"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "That's very kind of you"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "Much appreciated"
 ];
-
 
 // Define the type for bestHyperparameters
 interface BestHyperparameters {
@@ -637,7 +666,9 @@ const generateGreeting = (timeOfDay: string): string => {
     wordDatabase.howAreYou[
       Math.floor(Math.random() * wordDatabase.howAreYou.length)
     ];
-  return `${greeting}! ${howAreYou} this ${timeOfDay}?`;
+  const topic =
+    wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
+  return `${greeting}! ${howAreYou} this ${timeOfDay}? I hope you're having a great day so far. Is there anything specific you'd like to chat about, perhaps ${topic}?`;
 };
 
 const generateFarewell = (): string => {
@@ -649,7 +680,9 @@ const generateFarewell = (): string => {
     wordDatabase.positiveAdjectives[
       Math.floor(Math.random() * wordDatabase.positiveAdjectives.length)
     ];
-  return `${farewell}! It was ${positiveAdjective} chatting with you. Take care!`;
+  const topic =
+    wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
+  return `${farewell}! It was ${positiveAdjective} chatting with you about ${topic}. I hope you have a wonderful rest of your day. Feel free to come back anytime if you want to talk more!`;
 };
 
 const generateWeatherResponse = (): string => {
@@ -659,7 +692,7 @@ const generateWeatherResponse = (): string => {
     ];
   const topic =
     wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
-  return `I'm sorry, but I don't have real-time weather data. However, I can tell you that ${weatherQuery} is an important factor in daily life. If you need accurate weather information, I recommend checking a reliable weather service or app. In the meantime, would you like to chat about ${topic}?`;
+  return `I'm sorry, but I don't have real-time weather data. However, I can tell you that ${weatherQuery} is an important factor in daily life. If you need accurate weather information, I recommend checking a reliable weather service or app. In the meantime, would you like to chat about how ${topic} might be affected by different weather conditions?`;
 };
 
 const generateJoke = (): string => {
@@ -674,16 +707,37 @@ const generateJoke = (): string => {
     'What do you call a sleeping bull? A bulldozer!',
   ];
   const joke = jokes[Math.floor(Math.random() * jokes.length)];
-  return `Here's a joke for you: ${joke} 😄 I hope that brought a smile to your face!`;
+  return `Here's a joke for you: ${joke} 😄 I hope that brought a smile to your face! Would you like to hear another one or perhaps chat about something else?`;
 };
 
 const generateHowAreYouResponse = (): string => {
   const responses = [
-    "I'm functioning at optimal capacity, which I suppose is the AI equivalent of feeling great!",
-    "As an AI, I don't have feelings, but I'm operating efficiently and ready to assist you!",
-    "I'm here and ready to help! How can I assist you today?",
-    "I'm doing well, thank you for asking! How about you? Is there anything specific you'd like to chat about?",
-    "I'm always excited to learn new things from our conversations. What's on your mind today?",
+    "I'm functioning at optimal capacity, which I suppose is the AI equivalent of feeling great! How about you? Is there anything exciting happening in your day?",
+    "As an AI, I don't have feelings, but I'm operating efficiently and ready to assist you! What's on your mind today?",
+    "I'm here and ready to help! How can I assist you today? Is there a particular topic you'd like to discuss or explore?",
+    "I'm doing well, thank you for asking! How about you? Is there anything specific you'd like to chat about or any questions you have?",
+    "I'm always excited to learn new things from our conversations. What's been the most interesting part of your day so far?",
+  ];
+  return responses[Math.floor(Math.random() * responses.length)];
+};
+
+const generateTimeResponse = (): string => {
+  const currentTime = new Date().toLocaleTimeString();
+  return `The current time is ${currentTime}. Time is such a fascinating concept, isn't it? Is there anything time-related you'd like to discuss, like time management or the philosophy of time?`;
+};
+
+const generateHelpResponse = (): string => {
+  const topics = wordDatabase.topics.slice(0, 3);
+  return `I'd be happy to help! I can assist with a variety of topics. For example, we could discuss ${topics.join(', ')}, or any other subject you're interested in. What would you like help with?`;
+};
+
+const generateThankYouResponse = (): string => {
+  const responses = [
+    "You're welcome! I'm glad I could help. Is there anything else you'd like to know or discuss?",
+    "It's my pleasure! I enjoy our conversations. Do you have any other questions or topics you'd like to explore?",
+    "I'm happy I could assist you. Remember, I'm always here if you need more information or just want to chat!",
+    "No problem at all! I'm here to help and learn. Is there a particular subject you're curious about that we could delve into?",
+    "I'm glad I could be of assistance. Your questions help me learn and improve. What else would you like to talk about?",
   ];
   return responses[Math.floor(Math.random() * responses.length)];
 };
@@ -733,19 +787,11 @@ const enhancedMachineLearning = (input: string): string => {
     2: () => generateGreeting('evening'),
     3: () => generateFarewell(),
     4: () => generateWeatherResponse(),
-    5: () => generateJoke(),
-    6: () => generateHowAreYouResponse(),
-    7: () =>
-      "I apologize, but I'm not sure how to respond to that. Could you please rephrase your question or ask something else?",
-    8: () => {
-      const topic =
-        wordDatabase.topics[
-          Math.floor(Math.random() * wordDatabase.topics.length)
-        ];
-      return `That's an interesting topic! While I don't have personal opinions, I can provide information on various subjects. Would you like to know more about ${topic}?`;
-    },
-    9: () =>
-      "I'm afraid I don't have enough context to provide a meaningful response to that. Could you please provide more details or ask a more specific question?",
+    5: () => generateHowAreYouResponse(),
+    6: () => generateJoke(),
+    7: () => generateTimeResponse(),
+    8: () => generateHelpResponse(),
+    9: () => generateThankYouResponse(),
   };
 
   // Return the appropriate response based on the predicted class
@@ -762,6 +808,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       animate={{ opacity: [0.5, 1, 0.5] }}
       transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
     >
+      <span>.</span>
       <span>.</span>
       <span>.</span>
       <span>.</span>
