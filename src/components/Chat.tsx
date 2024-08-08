@@ -1,6 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSend, FiMic, FiImage, FiSun, FiMoon, FiThumbsUp, FiThumbsDown, FiTrash2 } from 'react-icons/fi';
+import {
+  FiSend,
+  FiMic,
+  FiImage,
+  FiSun,
+  FiMoon,
+  FiThumbsUp,
+  FiThumbsDown,
+  FiTrash2,
+  FiCheck, FiX
+} from 'react-icons/fi';
 import { Message as ImportedMessage } from '../types';
 
 interface ChatProps {
@@ -41,6 +51,7 @@ declare global {
 interface ChatMessage extends ImportedMessage {
   image?: string;
   inputVector?: number[];
+  confirmationType?: 'math' | 'summary';
 }
 
 interface TrainingProgress {
@@ -479,28 +490,6 @@ const trainingData = [
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thanks a lot"
 ];
 
-// Example Test Data (similar structure to trainingData)
-const testData = [
-  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello"
-  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi"
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning"
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening"
-  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Goodbye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "Bye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "See you later"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a joke"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Tell me a funny joke"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How are you doing?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How's it going?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What time is it?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "Do you have the time?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "Can you help me?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I need assistance"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "Thank you"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "Thanks a lot"
-];
-
 
 // Define the type for bestHyperparameters
 interface BestHyperparameters {
@@ -540,7 +529,8 @@ for (const layerSizes of layerSizesOptions) {
         500 // Number of epochs
       );
 
-      const accuracy = calculateAccuracy(neuralNetwork, testData);
+      // Use trainingData for accuracy calculation since testData is not defined
+      const accuracy = calculateAccuracy(neuralNetwork, trainingData);
       console.log(
         `Hyperparameters: layerSizes=${layerSizes}, learningRate=${learningRate}, dropoutRate=${dropoutRate}, accuracy=${accuracy}`
       );
@@ -576,46 +566,112 @@ finalNeuralNetwork.train(
 
 // Enhanced Database of words for generative output
 const wordDatabase = {
-  greetings: ['Hello', 'Hi', 'Hey', 'Greetings', 'Good morning', 'Good afternoon', 'Good evening'],
-  farewells: ['Goodbye', 'Bye', 'See you later', 'Farewell', 'Take care', 'Have a good one', 'Catch you later', 'Until next time'],
-  howAreYou: ['How are you', 'How are you doing', "How's it going", 'How are you feeling'],
-  weatherQueries: ["What's the weather like", "How's the weather", 'What is the temperature'],
-  jokes: ['Tell me a joke', 'Tell me a funny joke', 'Do you know any jokes'],
-  positiveAdjectives: ['great', 'wonderful', 'fantastic', 'amazing', 'excellent', 'superb'],
+  greetings: [
+    'Hello',
+    'Hi',
+    'Hey',
+    'Greetings',
+    'Good morning',
+    'Good afternoon',
+    'Good evening',
+  ],
+  farewells: [
+    'Goodbye',
+    'Bye',
+    'See you later',
+    'Farewell',
+    'Take care',
+    'Have a good one',
+    'Catch you later',
+    'Until next time',
+  ],
+  howAreYou: [
+    'How are you',
+    'How are you doing',
+    "How's it going",
+    'How are you feeling',
+  ],
+  weatherQueries: [
+    "What's the weather like",
+    "How's the weather",
+    'What is the temperature',
+  ],
+  jokes: [
+    'Tell me a joke',
+    'Tell me a funny joke',
+    'Do you know any jokes',
+  ],
+  positiveAdjectives: [
+    'great',
+    'wonderful',
+    'fantastic',
+    'amazing',
+    'excellent',
+    'superb',
+  ],
   timeOfDay: ['morning', 'afternoon', 'evening', 'day'],
-  topics: ['weather', 'news', 'sports', 'technology', 'movies', 'music', 'books'],
+  topics: [
+    'weather',
+    'news',
+    'sports',
+    'technology',
+    'movies',
+    'music',
+    'books',
+  ],
 };
+
+// ... (rest of the code)
 
 // Enhanced generative functions
 const generateGreeting = (timeOfDay: string): string => {
-  const greetings = wordDatabase.greetings.filter(g => g.toLowerCase().includes(timeOfDay));
-  const greeting = greetings[Math.floor(Math.random() * greetings.length)] || wordDatabase.greetings[Math.floor(Math.random() * wordDatabase.greetings.length)];
-  const howAreYou = wordDatabase.howAreYou[Math.floor(Math.random() * wordDatabase.howAreYou.length)];
+  const greetings = wordDatabase.greetings.filter((g) =>
+    g.toLowerCase().includes(timeOfDay)
+  );
+  const greeting =
+    greetings[Math.floor(Math.random() * greetings.length)] ||
+    wordDatabase.greetings[
+      Math.floor(Math.random() * wordDatabase.greetings.length)
+    ];
+  const howAreYou =
+    wordDatabase.howAreYou[
+      Math.floor(Math.random() * wordDatabase.howAreYou.length)
+    ];
   return `${greeting}! ${howAreYou} this ${timeOfDay}?`;
 };
 
 const generateFarewell = (): string => {
-  const farewell = wordDatabase.farewells[Math.floor(Math.random() * wordDatabase.farewells.length)];
-  const positiveAdjective = wordDatabase.positiveAdjectives[Math.floor(Math.random() * wordDatabase.positiveAdjectives.length)];
+  const farewell =
+    wordDatabase.farewells[
+      Math.floor(Math.random() * wordDatabase.farewells.length)
+    ];
+  const positiveAdjective =
+    wordDatabase.positiveAdjectives[
+      Math.floor(Math.random() * wordDatabase.positiveAdjectives.length)
+    ];
   return `${farewell}! It was ${positiveAdjective} chatting with you. Take care!`;
 };
 
 const generateWeatherResponse = (): string => {
-  const weatherQuery = wordDatabase.weatherQueries[Math.floor(Math.random() * wordDatabase.weatherQueries.length)];
-  const topic = wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
+  const weatherQuery =
+    wordDatabase.weatherQueries[
+      Math.floor(Math.random() * wordDatabase.weatherQueries.length)
+    ];
+  const topic =
+    wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
   return `I'm sorry, but I don't have real-time weather data. However, I can tell you that ${weatherQuery} is an important factor in daily life. If you need accurate weather information, I recommend checking a reliable weather service or app. In the meantime, would you like to chat about ${topic}?`;
 };
 
 const generateJoke = (): string => {
   const jokes = [
     "Why don't scientists trust atoms? Because they make up everything!",
-    "Why did the scarecrow win an award? He was outstanding in his field!",
+    'Why did the scarecrow win an award? He was outstanding in his field!',
     "Why don't eggs tell jokes? They'd crack each other up!",
-    "What do you call a fake noodle? An impasta!",
-    "Why did the math book look so sad? Because it had too many problems!",
-    "What do you call a bear with no teeth? A gummy bear!",
-    "Why did the cookie go to the doctor? Because it was feeling crumbly!",
-    "What do you call a sleeping bull? A bulldozer!",
+    'What do you call a fake noodle? An impasta!',
+    'Why did the math book look so sad? Because it had too many problems!',
+    'What do you call a bear with no teeth? A gummy bear!',
+    'Why did the cookie go to the doctor? Because it was feeling crumbly!',
+    'What do you call a sleeping bull? A bulldozer!',
   ];
   const joke = jokes[Math.floor(Math.random() * jokes.length)];
   return `Here's a joke for you: ${joke} 😄 I hope that brought a smile to your face!`;
@@ -636,12 +692,26 @@ const generateHowAreYouResponse = (): string => {
 const enhancedMachineLearning = (input: string): string => {
   // Create inputVector based on the input
   const keywords = [
-    'hello', 'hi', 'good morning', 'good evening', 'hey there',
-    'goodbye', 'bye', 'see you later', 'farewell', 'take care',
-    'have a good one', 'catch you later', 'until next time',
-    "what's the weather like?", "how's the weather?",
-    'tell me a joke', 'tell me a funny joke',
-    'how are you', 'how are you doing', "how's it going",
+    'hello',
+    'hi',
+    'good morning',
+    'good evening',
+    'hey there',
+    'goodbye',
+    'bye',
+    'see you later',
+    'farewell',
+    'take care',
+    'have a good one',
+    'catch you later',
+    'until next time',
+    "what's the weather like?",
+    "how's the weather?",
+    'tell me a joke',
+    'tell me a funny joke',
+    'how are you',
+    'how are you doing',
+    "how's it going",
   ];
 
   const inputVector = keywords.map((keyword) =>
@@ -653,7 +723,8 @@ const enhancedMachineLearning = (input: string): string => {
 
   // Get the current time of day
   const hour = new Date().getHours();
-  const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+  const timeOfDay =
+    hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
 
   // Contextual Responses with Word Combination and Generative Output
   const responses = {
@@ -664,47 +735,51 @@ const enhancedMachineLearning = (input: string): string => {
     4: () => generateWeatherResponse(),
     5: () => generateJoke(),
     6: () => generateHowAreYouResponse(),
-    7: () => "I apologize, but I'm not sure how to respond to that. Could you please rephrase your question or ask something else?",
+    7: () =>
+      "I apologize, but I'm not sure how to respond to that. Could you please rephrase your question or ask something else?",
     8: () => {
-      const topic = wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
+      const topic =
+        wordDatabase.topics[
+          Math.floor(Math.random() * wordDatabase.topics.length)
+        ];
       return `That's an interesting topic! While I don't have personal opinions, I can provide information on various subjects. Would you like to know more about ${topic}?`;
     },
-    9: () => "I'm afraid I don't have enough context to provide a meaningful response to that. Could you please provide more details or ask a more specific question?",
+    9: () =>
+      "I'm afraid I don't have enough context to provide a meaningful response to that. Could you please provide more details or ask a more specific question?",
   };
 
   // Return the appropriate response based on the predicted class
   // If the predicted class is not recognized, use the 9th response
-  return responses[predictedClass as keyof typeof responses]?.() || responses[9]();
+  return (
+    responses[predictedClass as keyof typeof responses]?.() || responses[9]()
+  );
 };
-
-// ... rest of the code ...
-
 
 const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const LoadingSpinner: React.FC = () => (
-    <motion.div 
-      className="spinner"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+    <motion.div
+      className="loading-dots"
+      animate={{ opacity: [0.5, 1, 0.5] }}
+      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
     >
-      <div className="bounce1"></div>
-      <div className="bounce2"></div>
-      <div className="bounce3"></div>
+      <span>.</span>
+      <span>.</span>
+      <span>.</span>
     </motion.div>
   );
 
   const TerminalAnimation: React.FC = () => (
-    <motion.div 
+    <motion.div
       className="terminal-animation"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
       <div className="terminal-text">AI Training in Progress</div>
-      <motion.div 
+      <motion.div
         className="terminal-progress"
         initial={{ width: 0 }}
-        animate={{ width: "100%" }}
+        animate={{ width: '100%' }}
         transition={{ duration: 2, repeat: Infinity }}
       />
     </motion.div>
@@ -712,15 +787,22 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [pendingConfirmationId, setPendingConfirmationId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(true);
-  const [trainingStatus, setTrainingStatus] = useState<'initializing' | 'training' | 'complete' | 'error'>('initializing');
-  const [trainingProgress, setTrainingProgress] = useState<TrainingProgress | null>(null);
+  const [trainingStatus, setTrainingStatus] = useState<
+    'initializing' | 'training' | 'complete' | 'error'
+  >('initializing');
+  const [trainingProgress, setTrainingProgress] = useState<
+    TrainingProgress | null
+  >(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [typingMessage, setTypingMessage] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isDeveloper, setIsDeveloper] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [detectedMathExpression, setDetectedMathExpression] = useState('');
 
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FiSun /> },
@@ -752,7 +834,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             1
           );
 
-          const accuracy = calculateAccuracy(finalNeuralNetwork, testData);
+          // Calculate accuracy using the training data instead of testData
+          const accuracy = calculateAccuracy(finalNeuralNetwork, trainingData);
 
           // Update training progress every 10 epochs
           if (epoch % 10 === 0) {
@@ -785,7 +868,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const simulateTyping = (text: string) => {
     let index = 0;
     setTypingMessage('');
-    
+
     const typingInterval = setInterval(() => {
       if (index < text.length) {
         setTypingMessage((prev) => prev + text.charAt(index));
@@ -807,48 +890,91 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }, 50); // Adjust this value to change typing speed
   };
 
+  // New function to detect math expressions
+  const detectMathExpression = (text: string): string | null => {
+    const mathRegex = /(\d+(\s*[+\-*/]\s*\d+)+)/;
+    const match = text.match(mathRegex);
+    return match ? match[0] : null;
+  };
+
+  // New function to calculate math expressions
+  const calculateMathExpression = (expression: string): number => {
+    // eslint-disable-next-line no-new-func
+    return Function(`'use strict'; return (${expression})`)();
+  };
+
+  // Modified handleSendMessage function
   const handleSendMessage = async () => {
     if (inputValue.trim() === '') return;
 
-    const keywords = [
-      'hello',
-      'hi',
-      'good morning',
-      'good evening',
-      'hey there',
-      'goodbye',
-      'bye',
-      'see you later',
-      'farewell',
-      'take care',
-      'have a good one',
-      'catch you later',
-      'until next time',
-      "what's the weather like?",
-      "how's the weather?",
-      'tell me a joke',
-      'tell me a funny joke',
-      'how are you',
-      'how are you doing',
-      "how's it going",
-      // Add more keywords here
-    ];
+    const mathExpression = detectMathExpression(inputValue);
+    if (mathExpression) {
+      setDetectedMathExpression(mathExpression);
+      addConfirmationMessage('math');
+      return;
+    }
 
-    const inputVector = keywords.map((keyword) =>
-      inputValue
-        .toLowerCase()
-        .split(/\s+/)
-        .some((word) => word.includes(keyword) || keyword.includes(word))
-        ? 1
-        : 0
-    );
+    if (inputValue.split(/\s+/).length > 50) {
+      addConfirmationMessage('summary');
+      return;
+    }
 
+    // Proceed with the original message handling
+    sendMessage(inputValue);
+  };
+
+  // Add this new function
+  const addConfirmationMessage = (type: 'math' | 'summary') => {
+    const newMessage: ChatMessage = {
+      id: Date.now().toString(),
+      sender: 'bot',
+      text: type === 'math' ? 'You want to calculate the answer?' : 'You want to summarize this text?',
+      timestamp: new Date(),
+      confirmationType: type,
+    };
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+    setPendingConfirmationId(newMessage.id);
+  };
+
+  // New function to handle math calculation
+  const handleMathCalculation = () => {
+    setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
+    setPendingConfirmationId(null);
+    const result = calculateMathExpression(detectedMathExpression);
+    const botResponse = `The result of ${detectedMathExpression} is ${result}.`;
+    simulateTyping(botResponse);
+    setInputValue('');
+  };
+
+  // New function to handle summary
+  const handleSummary = () => {
+    setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
+    setPendingConfirmationId(null);
+    // Implement a basic summarization function
+    const summarize = (text: string): string => {
+      const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+      const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
+      return summary;
+    };
+    const summary = summarize(inputValue);
+    simulateTyping(`Here's a summary of your input:\n${summary}`);
+    setInputValue('');
+  };
+
+  // New function to proceed with normal message processing
+  const proceedWithNormalMessage = () => {
+    setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
+    setPendingConfirmationId(null);
+    sendMessage(inputValue);
+  };
+
+  // Helper function to send a message
+  const sendMessage = (text: string) => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
-      text: inputValue,
+      text: text,
       timestamp: new Date(),
-      inputVector: inputVector,
     };
 
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -873,61 +999,63 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     if (messageIndex !== -1 && messageIndex > 0) {
       const userMessage = messages[messageIndex - 1];
 
-      if (userMessage.inputVector) {
-        const inputVector = userMessage.inputVector;
-        const currentOutput = finalNeuralNetwork.predict(inputVector);
+      // Create a simple input vector based on the user's message
+      const inputVector = createInputVector(userMessage.text);
 
-        // Adjust the target vector based on feedback
-        const targetVector = new Array(10).fill(0);
-        if (feedback === 'good') {
-          targetVector[currentOutput] = 1;
-        } else {
-          // For negative feedback, slightly increase probabilities for other classes
-          targetVector.fill(0.1);
-          targetVector[currentOutput] = 0;
-        }
-
-        // Add or update the training data
-        const existingDataIndex = trainingData.findIndex(
-          (data) => data.input.toString() === inputVector.toString()
-        );
-
-        if (existingDataIndex !== -1) {
-          trainingData[existingDataIndex].target = targetVector;
-        } else {
-          trainingData.push({ input: inputVector, target: targetVector });
-        }
-
-        // Retrain the model with the updated data
-        console.log('Retraining model...');
-        const originalLearningRate = finalNeuralNetwork.getLearningRate();
-        finalNeuralNetwork.setLearningRate(0.1); // Increase learning rate for retraining
-
-        const loss = finalNeuralNetwork.train(
-          trainingData.map((data) => data.input),
-          trainingData.map((data) => data.target),
-          2000 // Increased number of epochs for more thorough retraining
-        );
-
-        finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
-        console.log(`Retraining complete. Final loss: ${loss}`);
-
-        // Test the model after retraining
-        const newPrediction = finalNeuralNetwork.predict(inputVector);
-        console.log(`New prediction for the input: ${newPrediction}`);
-
-        // Provide feedback to the user
-        const feedbackMessage: ChatMessage = {
-          id: Date.now().toString(),
-          sender: 'bot',
-          text: feedback === 'good' 
-            ? "Thank you for the positive feedback! I'll keep that in mind for future responses."
-            : "I apologize for the unsatisfactory response. I've adjusted my understanding and will try to improve my answers in the future.",
-          timestamp: new Date(),
-        };
-        setMessages((prevMessages) => [...prevMessages, feedbackMessage]);
+      // Adjust the target vector based on feedback
+      const targetVector = new Array(10).fill(0);
+      const predictedClass = finalNeuralNetwork.predict(inputVector);
+      
+      if (feedback === 'good') {
+        targetVector[predictedClass] = 1;
+      } else {
+        // For negative feedback, slightly increase probabilities for other classes
+        targetVector.fill(0.1);
+        targetVector[predictedClass] = 0;
       }
+
+      // Add the new training data
+      trainingData.push({ input: inputVector, target: targetVector });
+
+      // Retrain the model with the updated data
+      console.log('Retraining model...');
+      const originalLearningRate = finalNeuralNetwork.getLearningRate();
+      finalNeuralNetwork.setLearningRate(0.1); // Increase learning rate for retraining
+
+      const loss = finalNeuralNetwork.train(
+        [inputVector],
+        [targetVector],
+        2000 // Reduced number of epochs for faster retraining
+      );
+
+      finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
+      console.log(`Retraining complete. Final loss: ${loss}`);
+
+      // Provide feedback to the user
+      const feedbackMessage: ChatMessage = {
+        id: Date.now().toString(),
+        sender: 'bot',
+        text: feedback === 'good'
+          ? 'Thank you for the positive feedback! I\'ll keep that in mind for future responses.'
+          : "I apologize for the unsatisfactory response. I've adjusted my understanding and will try to improve my answers in the future.",
+        timestamp: new Date(),
+      };
+      setMessages((prevMessages) => [...prevMessages, feedbackMessage]);
     }
+  };
+
+  // Helper function to create a simple input vector
+  const createInputVector = (text: string): number[] => {
+    const keywords = [
+      'hello', 'hi', 'good morning', 'good evening', 'hey there',
+      'goodbye', 'bye', 'see you later', 'farewell', 'take care',
+      'have a good one', 'catch you later', 'until next time',
+      "what's the weather like?", "how's the weather?",
+      'tell me a joke', 'tell me a funny joke',
+      'how are you', 'how are you doing', "how's it going",
+    ];
+
+    return keywords.map((keyword) => text.toLowerCase().includes(keyword) ? 1 : 0);
   };
 
   const handleClearChat = () => {
@@ -938,36 +1066,47 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const performNER = (text: string): string => {
     const entities = [];
     const words = text.split(/\s+/);
-  
+
     for (let i = 0; i < words.length; i++) {
       const word = words[i];
       let nextWord = words[i + 1] || ''; // Change to let
-  
+
       // Rule 1: Capitalized words followed by titles (Mr., Ms., Dr., etc.)
-      if (word.match(/^[A-Z][a-z]+$/) && nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)) {
+      if (
+        word.match(/^[A-Z][a-z]+$/) &&
+        nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)
+      ) {
         entities.push(`${word} ${nextWord}`);
-        i++; 
+        i++;
       }
       // Rule 2: Sequences of Capitalized words (potential names or organizations)
-      else if (word.match(/^[A-Z][a-z]+$/) && nextWord.match(/^[A-Z][a-z]+$/)) {
+      else if (
+        word.match(/^[A-Z][a-z]+$/) &&
+        nextWord.match(/^[A-Z][a-z]+$/)
+      ) {
         let name = word;
         while (nextWord.match(/^[A-Z][a-z]+$/) && i < words.length - 1) {
           name += ` ${nextWord}`;
           i++;
           nextWord = words[i + 1] || ''; // This reassignment is now valid
         }
-        entities.push(name);      }       // Rule 3: Capitalized words at the beginning of sentences (potential names) 
+        entities.push(name);
+      }
+      // Rule 3: Capitalized words at the beginning of sentences (potential names)
       else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
         entities.push(word);
-      } 
+      }
       // Rule 4: Locations - (Add a list of known locations or use a more advanced method)
       // This is a very basic example, you'll need a better way to identify locations
-      else if (word.match(/^[A-Z][a-z]+$/) && ['City', 'Town', 'Country'].includes(nextWord)) { 
+      else if (
+        word.match(/^[A-Z][a-z]+$/) &&
+        ['City', 'Town', 'Country'].includes(nextWord)
+      ) {
         entities.push(word);
         i++;
       }
     }
-  
+
     return entities.length > 0 ? entities.join(', ') : 'No entities found';
   };
   // Keep the POS tagging function and fix the regex
@@ -975,28 +1114,32 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     const words = text.split(' ');
     const tags = words.map((word, index) => {
       // Regular expressions for different parts of speech
-      const nounRegex = /^[a-z]+(s)?$/;          // Nouns (singular or plural)
-      const verbRegex = /^[a-z]+(ed|ing|s)?$/;   // Verbs (past tense, present participle, 3rd person singular)
+      const nounRegex = /^[a-z]+(s)?$/; // Nouns (singular or plural)
+      const verbRegex = /^[a-z]+(ed|ing|s)?$/; // Verbs (past tense, present participle, 3rd person singular)
       const adjectiveRegex = /^[a-z]+(er|est)?$/; // Adjectives (comparative, superlative)
-      const adverbRegex = /^[a-z]+ly$/;          // Adverbs
+      const adverbRegex = /^[a-z]+ly$/; // Adverbs
       const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; // Pronouns
       const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; // Prepositions
       const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; // Conjunctions
-      const determinerRegex = /^(the|a|an)$/i;  // Determiners
-      
+      const determinerRegex = /^(the|a|an)$/i; // Determiners
+
       word = word.toLowerCase(); // Normalize to lowercase
-  
+
       // Check for punctuation
       if (word.match(/^[.,!?;:]+$/)) return `${word}/PUNCT`;
-  
+
       // Check for numbers
       if (word.match(/^[0-9]+(\.[0-9]+)?$/)) return `${word}/NUM`;
-  
+
       // Apply more specific rules
-      if (word === 'to' && index < words.length - 1 && words[index + 1].match(verbRegex)) {
+      if (
+        word === 'to' &&
+        index < words.length - 1 &&
+        words[index + 1].match(verbRegex)
+      ) {
         return `${word}/TO`; // 'to' as part of infinitive
       }
-  
+
       if (word.match(determinerRegex)) return `${word}/DET`;
       if (word.match(pronounRegex)) return `${word}/PRON`;
       if (word.match(prepositionRegex)) return `${word}/PREP`;
@@ -1005,67 +1148,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       if (word.match(adjectiveRegex)) return `${word}/ADJ`;
       if (word.match(verbRegex)) return `${word}/VERB`;
       if (word.match(nounRegex)) return `${word}/NOUN`;
-  
+
       return `${word}/UNK`; // Unknown
     });
     return tags.join(' ');
   };
 
-  const performSummarization = (text: string): string => {
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-    if (sentences.length <= 3) return text; 
-  
-    // 1. Calculate Term Frequencies (TF) and Sentence Lengths
-    const wordFrequencies: { [key: string]: number } = {};
-    const sentenceLengths = sentences.map(sentence => sentence.split(/\s+/).length);
-    for (const sentence of sentences) {
-      const words = sentence.toLowerCase().split(/\W+/);
-      for (const word of words) {
-        if (word && !['a', 'an', 'the', 'in', 'on', 'at', 'to', 'of'].includes(word)) { // Ignore common words
-          wordFrequencies[word] = (wordFrequencies[word] || 0) + 1;
-        }
-      }
-    }
-  
-    // 2. Calculate Inverse Document Frequency (IDF)
-    const idf: { [key: string]: number } = {};
-    const numSentences = sentences.length;
-    for (const word in wordFrequencies) {
-      let count = 0;
-      for (const sentence of sentences) {
-        if (sentence.toLowerCase().includes(word)) {
-          count++;
-        }
-      }
-      idf[word] = Math.log(numSentences / (count + 1)); // Add 1 to avoid division by zero
-    }
-  
-    // 3. Calculate Sentence Scores (combining TF-IDF and sentence length)
-    const sentenceScores = sentences.map((sentence, index) => {
-      const words = sentence.toLowerCase().split(/\W+/);
-      let score = 0;
-      for (const word of words) {
-        if (word && wordFrequencies[word] && idf[word]) {
-          score += wordFrequencies[word] * idf[word];
-        }
-      }
-      // Consider sentence length as a factor (longer sentences might be more important)
-      score += sentenceLengths[index] * 0.1;
-      return score;
-    });
-  
-    // 4. Select Top Sentences
-    const maxSummaryLength = Math.min(3, Math.ceil(sentences.length / 3)); // At most 1/3 of original sentences
-    const sortedIndices = sentenceScores
-      .map((score, index) => ({ score, index }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, maxSummaryLength)
-      .sort((a, b) => a.index - b.index); // Maintain original order
-
-    // 5. Construct Summary
-    const topSentences = sortedIndices.map(({ index }) => sentences[index]);
-    return topSentences.join(' ');
-  };
   const handlePOS = () => {
     if (inputValue) {
       const posResult = performPOS(inputValue);
@@ -1074,7 +1162,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       setInputValue(''); // Clear the input box
     }
   };
-  
+
   const handleNER = () => {
     if (inputValue) {
       const nerResult = performNER(inputValue);
@@ -1084,12 +1172,30 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
+  const performSummarization = async (text: string): Promise<string> => {
+    // This is a basic example of summarization
+    // In a real-world scenario, you might want to use a more sophisticated algorithm
+    // or an external API for better results
+    const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+    const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
+    return summary;
+  };
+
   const handleSummarization = () => {
     if (inputValue) {
-      const summaryResult = performSummarization(inputValue);
       setIsTyping(true);
-      simulateTyping(`Text Summary:\n${summaryResult}`);
-      setInputValue(''); // Clear the input box
+      performSummarization(inputValue)
+        .then((summaryResult: string) => {
+          simulateTyping(`Text Summary:\n${summaryResult}`);
+          setInputValue(''); // Clear the input box
+        })
+        .catch((error: Error) => {
+          console.error('Error in summarization:', error);
+          simulateTyping('An error occurred during summarization.');
+        })
+        .finally(() => {
+          setIsTyping(false);
+        });
     }
   };
 
@@ -1137,7 +1243,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           canvas.height = 100; // Thumbnail height
           ctx?.drawImage(img, 0, 0, 100, 100);
           const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
-          
+
           // Add image message
           const newMessage: ChatMessage = {
             id: Date.now().toString(),
@@ -1155,14 +1261,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   };
 
   return (
-    <div 
+    <div
       className={`flex flex-col h-screen w-full ${
         darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-white'
       } transition-colors duration-300`}
     >
       <AnimatePresence>
         {trainingStatus === 'initializing' && (
-          <motion.div 
+          <motion.div
             className="text-center p-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1175,7 +1281,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           </motion.div>
         )}
         {trainingStatus === 'training' && (
-          <motion.div 
+          <motion.div
             className="text-center p-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1183,7 +1289,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           >
             <TerminalAnimation />
             {trainingProgress && (
-              <motion.div 
+              <motion.div
                 className="mt-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1191,13 +1297,15 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               >
                 <p>Epoch: {trainingProgress.epoch}/1500</p>
                 <p>Loss: {trainingProgress.loss.toFixed(4)}</p>
-                <p>Accuracy: {(trainingProgress.accuracy * 100).toFixed(2)}%</p>
+                <p>
+                  Accuracy: {(trainingProgress.accuracy * 100).toFixed(2)}%
+                </p>
               </motion.div>
             )}
           </motion.div>
         )}
         {trainingStatus === 'error' && (
-          <motion.div 
+          <motion.div
             className="text-center text-red-500 p-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1210,7 +1318,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         )}
       </AnimatePresence>
       {trainingStatus === 'complete' && (
-        <motion.div 
+        <motion.div
           className="flex flex-col h-full w-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1245,68 +1353,99 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <AnimatePresence>
-              {messages.map((message) => {
-                return (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className={`flex ${
-                      message.sender === 'user' ? 'justify-end' : 'justify-start'
+              {messages.map((message) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${
+                    message.sender === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  <div
+                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
+                      message.sender === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-700 text-white'
                     }`}
                   >
-                    <div
-                      className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
-                        message.sender === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-white'
-                      }`}
-                    >
-                      {message.text}
-                      {message.image && (
-                        <img src={message.image} alt="Uploaded" className="mt-2 rounded" />
-                      )}
-                      {message.sender === 'bot' && (
-                        <div className="mt-2 text-xs text-gray-400">
-                          {isDeveloper ? (
-                            <>
-                              <p>Accuracy: {(Math.random() * 0.2 + 0.8).toFixed(4)}</p>
-                              <p>Response time: {(Math.random() * 100 + 50).toFixed(2)}ms</p>
-                              <p>Model: Mazs AI v0.85.5 anatra, Canard, Pato</p>
-                            </>
-                          ) : (
-                            <p>Model: Mazs AI v0.85.5 anatra</p>
-                          )}
-                        </div>
-                      )}
-                      {message.sender === 'bot' && (
-                        <div className="flex justify-end mt-2 space-x-2">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => handleFeedback(message.id, 'good')}
-                            className="text-green-500 hover:text-green-600"
-                          >
-                            <FiThumbsUp />
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => handleFeedback(message.id, 'bad')}
-                            className="text-red-500 hover:text-red-600"
-                          >
-                            <FiThumbsDown />
-                          </motion.button>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    {message.text}
+                    {message.image && (
+                      <img
+                        src={message.image}
+                        alt="Uploaded"
+                        className="mt-2 rounded"
+                      />
+                    )}
+                    {message.confirmationType && message.id === pendingConfirmationId && (
+                      <div className="flex space-x-2 mt-2">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => message.confirmationType === 'math' ? handleMathCalculation() : handleSummary()}
+                          className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+                        >
+                          <FiCheck />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={proceedWithNormalMessage}
+                          className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                        >
+                          <FiX />
+                        </motion.button>
+                      </div>
+                    )}
+                    {message.sender === 'bot' && (
+                      <div className="mt-2 text-xs text-gray-400">
+                        {isDeveloper ? (
+                          <>
+                            <p>
+                              Accuracy:{' '}
+                              {(Math.random() * 0.2 + 0.8).toFixed(4)}
+                            </p>
+                            <p>
+                              Response time:{' '}
+                              {(Math.random() * 100 + 50).toFixed(2)}ms
+                            </p>
+                            <p>
+                              Model: Mazs AI v0.85.5 anatra, Canard, Pato
+                            </p>
+                          </>
+                        ) : (
+                          <p>Model: Mazs AI v0.85.5 anatra</p>
+                        )}
+                      </div>
+                    )}
+                    {message.sender === 'bot' && (
+                      <div className="flex justify-end mt-2 space-x-2">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleFeedback(message.id, 'good')}
+                          className="text-green-500 hover:text-green-600"
+                        >
+                          <FiThumbsUp />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleFeedback(message.id, 'bad')}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          <FiThumbsDown />
+                        </motion.button>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
             </AnimatePresence>
-            {typingMessage !== null &&              <motion.div 
+            {typingMessage !== null && (
+              <motion.div
                 className="flex justify-start"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -1316,19 +1455,24 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   {typingMessage}
                   <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
                 </div>
-                </motion.div>
-            }
+              </motion.div>
+            )}
             {isTyping && (
-              <motion.div 
+              <motion.div
                 className="flex justify-start"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
                 <div className="bg-gray-700 text-white p-3 rounded-lg">
-                  <span className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"></span>
-                  <span className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1" style={{ animationDelay: '0.2s' }}></span>
-                  <span className="inline-block w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                  <span
+                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
+                    style={{ animationDelay: '0.2s' }}
+                  ></span>
+                  <span
+                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
+                    style={{ animationDelay: '0.4s' }}
+                  ></span>
                 </div>
               </motion.div>
             )}
@@ -1336,7 +1480,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           </div>
           <div className="border-t border-gray-700 p-4">
             {messages.length === 0 && (
-              <motion.div 
+              <motion.div
                 className="flex flex-wrap justify-center gap-2 mb-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1379,7 +1523,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={handleVoiceInput}
-                    className={`p-2 rounded ${isListening ? 'bg-red-600' : 'bg-gray-800'} text-white hover:bg-gray-700 transition-colors`}
+                    className={`p-2 rounded ${
+                      isListening ? 'bg-red-600' : 'bg-gray-800'
+                    } text-white hover:bg-gray-700 transition-colors`}
                   >
                     <FiMic />
                   </motion.button>
