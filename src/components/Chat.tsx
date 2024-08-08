@@ -1103,7 +1103,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       const loss = finalNeuralNetwork.train(
         [inputVector],
         [targetVector],
-       1000// Reduced number of epochs for faster retraining
+       250// Reduced number of epochs for faster retraining
       );
 
       finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
@@ -1251,12 +1251,20 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   };
 
   const performSummarization = async (text: string): Promise<string> => {
-    // This is a basic example of summarization
-    // In a real-world scenario, you might want to use a more sophisticated algorithm
-    // or an external API for better results
     const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
-    const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
-    return summary;
+    let summary = '';
+    let tokenCount = 0;
+
+    for (const sentence of sentences) {
+      const sentenceTokens = sentence.split(/\s+/).length;
+      if (tokenCount + sentenceTokens > maxTokens) {
+        break;
+      }
+      summary += sentence + '. ';
+      tokenCount += sentenceTokens;
+    }
+
+    return summary.trim();
   };
 
   const handleSummarization = () => {
@@ -1264,7 +1272,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       setIsTyping(true);
       performSummarization(inputValue)
         .then((summaryResult: string) => {
-          simulateTyping(`Text Summary:\n${summaryResult}`);
+          simulateTyping(`Text Summary (max ${maxTokens} tokens):\n${summaryResult}`);
           setInputValue(''); // Clear the input box
         })
         .catch((error: Error) => {
@@ -1341,7 +1349,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   return (
     <div
       className={`flex flex-col h-screen w-full ${
-        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-white'
+        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
       } transition-colors duration-300`}
     >
       <AnimatePresence>
@@ -1353,7 +1361,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             exit={{ opacity: 0 }}
           >
             <h2 className="text-2xl font-bold mb-4">
-              Initializing artificial intelligence, please wait...
+              Initializing AI, please wait...
             </h2>
             <LoadingSpinner />
           </motion.div>
@@ -1402,11 +1410,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex justify-between items-center p-4 border-b border-gray-700">
+          <header className="flex justify-between items-center p-4 border-b border-gray-700 bg-opacity-90 backdrop-filter backdrop-blur-lg">
             <h1 className="text-2xl font-bold pl-10">
               {selectedChat ? selectedChat.title : 'New Chat'} - {selectedModel}
             </h1>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ">
               {isDeveloper && (
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -1438,7 +1446,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 )}
               </motion.button>
             </div>
-          </div>
+          </header>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <AnimatePresence>
               {messages.map((message) => (
@@ -1453,13 +1461,15 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   }`}
                 >
                   <div
-                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
+                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg shadow-md ${
                       message.sender === 'user'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-white'
+                        : darkMode
+                        ? 'bg-gray-800 text-white'
+                        : 'bg-white text-gray-800'
                     }`}
                   >
-                    {message.text}
+                    <p className="text-sm">{message.text}</p>
                     {message.image && (
                       <img
                         src={message.image}
@@ -1467,26 +1477,31 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                         className="mt-2 rounded"
                       />
                     )}
-                    {message.confirmationType && message.id === pendingConfirmationId && (
-                      <div className="flex space-x-2 mt-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => message.confirmationType === 'math' ? handleMathCalculation() : handleSummary()}
-                          className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
-                        >
-                          <FiCheck />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={proceedWithNormalMessage}
-                          className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
-                        >
-                          <FiX />
-                        </motion.button>
-                      </div>
-                    )}
+                    {message.confirmationType &&
+                      message.id === pendingConfirmationId && (
+                        <div className="flex space-x-2 mt-2">
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() =>
+                              message.confirmationType === 'math'
+                                ? handleMathCalculation()
+                                : handleSummary()
+                            }
+                            className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+                          >
+                            <FiCheck />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={proceedWithNormalMessage}
+                            className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                          >
+                            <FiX />
+                          </motion.button>
+                        </div>
+                      )}
                     {message.sender === 'bot' && (
                       <div className="mt-2 text-xs text-gray-400">
                         {isDeveloper ? (
@@ -1499,12 +1514,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               Response time:{' '}
                               {(Math.random() * 100 + 50).toFixed(2)}ms
                             </p>
-                            <p>
-                              Model: Mazs AI v0.90.1 
-                            </p>
+                            <p>Model: {selectedModel}</p>
                           </>
                         ) : (
-                          <p>Model: Mazs AI v0.90.1 anatra</p>
+                          <p>Model: {selectedModel}</p>
                         )}
                       </div>
                     )}
@@ -1539,9 +1552,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <div className="bg-gray-700 text-white p-3 rounded-lg">
+                <div
+                  className={`p-3 rounded-lg shadow-md ${
+                    darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+                  }`}
+                >
                   {typingMessage}
-                  <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
+                  <span className="inline-block w-1 h-4 ml-1 bg-current animate-blink"></span>
                 </div>
               </motion.div>
             )}
@@ -1552,14 +1569,22 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <div className="bg-gray-700 text-white p-3 rounded-lg">
+                <div
+                  className={`p-3 rounded-lg shadow-md ${
+                    darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+                  }`}
+                >
                   <span
-                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
+                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce mr-1"
                     style={{ animationDelay: '0.2s' }}
                   ></span>
                   <span
-                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
+                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce"
                     style={{ animationDelay: '0.4s' }}
+                  ></span>
+                  <span
+                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce"
+                    style={{ animationDelay: '0.6s' }}
                   ></span>
                 </div>
               </motion.div>
@@ -1580,7 +1605,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setInputValue(suggestion.text)}
-                    className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm transition-colors duration-200"
+                    className={`flex items-center space-x-2 ${
+                      darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'
+                    } text-current rounded-full px-4 py-2 text-sm transition-colors duration-200`}
                   >
                     {suggestion.icon}
                     <span>{suggestion.text}</span>
@@ -1595,13 +1622,15 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type a message..."
-                className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                className={`flex-1 p-2 rounded-full ${
+                  darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+                } border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200`}
               />
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleSendMessage}
-                className="p-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
               >
                 <FiSend />
               </motion.button>
@@ -1611,9 +1640,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={handleVoiceInput}
-                    className={`p-2 rounded ${
-                      isListening ? 'bg-red-600' : 'bg-gray-800'
-                    } text-white hover:bg-gray-700 transition-colors`}
+                    className={`p-2 rounded-full ${
+                      isListening
+                        ? 'bg-red-600'
+                        : darkMode
+                        ? 'bg-gray-800'
+                        : 'bg-gray-200'
+                    } text-current hover:bg-gray-700 transition-colors`}
                   >
                     <FiMic />
                   </motion.button>
@@ -1621,7 +1654,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                    className={`p-2 rounded-full ${
+                      darkMode ? 'bg-gray-800' : 'bg-gray-200'
+                    } text-current hover:bg-gray-700 transition-colors`}
                   >
                     <FiImage />
                   </motion.button>
@@ -1640,7 +1675,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handlePOS}
-                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                className={`p-2 rounded-full ${
+                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
+                } text-current hover:bg-gray-700 transition-colors`}
               >
                 POS
               </motion.button>
@@ -1648,7 +1685,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSummarization}
-                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                className={`p-2 rounded-full ${
+                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
+                } text-current hover:bg-gray-700 transition-colors`}
               >
                 Summarize
               </motion.button>
@@ -1656,7 +1695,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNER}
-                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                className={`p-2 rounded-full ${
+                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
+                } text-current hover:bg-gray-700 transition-colors`}
               >
                 NER
               </motion.button>
@@ -1667,12 +1708,17 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-gray-800 p-6 rounded-lg w-96"
+            className={`bg-${darkMode ? 'gray-800' : 'white'} p-6 rounded-lg w-96 shadow-xl`}
           >
             <h2 className="text-xl font-bold mb-4">Model Settings</h2>
             <div className="space-y-4">
@@ -1695,7 +1741,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   type="number"
                   value={maxTokens}
                   onChange={(e) => setMaxTokens(parseInt(e.target.value))}
-                  className="w-full bg-gray-700 p-2 rounded"
+                  className={`w-full bg-${darkMode ? 'gray-700' : 'gray-100'} p-2 rounded`}
                 />
               </div>
               <div>
@@ -1703,7 +1749,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="w-full bg-gray-700 p-2 rounded"
+                  className={`w-full bg-${darkMode ? 'gray-700' : 'gray-100'} p-2 rounded`}
                 >
                   <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
                   <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
@@ -1722,7 +1768,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               </motion.button>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

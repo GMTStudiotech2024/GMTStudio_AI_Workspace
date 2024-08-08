@@ -34,14 +34,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('username');
-    localStorage.removeItem('password');
-    setIsLoggedIn(false);
-    setShowLandingPage(true);
-    setIsSettingsOpen(false);
-  };
-
   const handleGetStarted = () => {
     setShowLandingPage(false);
   };
@@ -63,14 +55,14 @@ const App: React.FC = () => {
   }
 
   return (
-    <Router>
+    <Router> {/* Wrap the entire app with Router */}
       <div className="flex h-screen bg-background text-white overflow-hidden">
         <Sidebar 
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
           onSelectChat={handleSelectChat}
           onNewChat={handleNewChat}
-          isDeveloper={isDeveloper}
+          isDeveloper={isDeveloper} // Add this line
         />
         <main className="flex-1 flex flex-col overflow-hidden">
           <header className="hidden md:flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
@@ -88,7 +80,6 @@ const App: React.FC = () => {
           {isSettingsOpen && (
             <UpdateInfoModal
               onClose={toggleSettingsModal}
-              onLogout={handleLogout}
               title="Latest Updates"
               version="v0.90.1"
               description="AI improvements"
