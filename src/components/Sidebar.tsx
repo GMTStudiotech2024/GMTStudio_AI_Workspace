@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { FaPlus, FaSearch, FaTrash, FaUser, FaPencilAlt, FaCog, FaChevronLeft, FaChevronRight, FaHistory } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChatItem } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
   onSelectChat: (chat: ChatItem) => void;
   onNewChat: (chat: ChatItem) => void;
+  isDeveloper: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelectChat, onNewChat }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelectChat, onNewChat, isDeveloper }) => {
   const [chats, setChats] = useState<ChatItem[]>(() => {
     const savedChats = localStorage.getItem('chats');
     return savedChats ? JSON.parse(savedChats) : [];
@@ -20,6 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
   const [newChatTitle, setNewChatTitle] = useState('');
   const [newChatCategory, setNewChatCategory] = useState<'Personal' | 'Work'>('Personal');
   const [isAddingNewChat, setIsAddingNewChat] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     localStorage.setItem('chats', JSON.stringify(chats));
@@ -48,6 +51,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
       setNewChatTitle('');
       setNewChatCategory('Personal');
       setIsAddingNewChat(false);
+    }
+  };
+
+  const handleLogout = () => {
+    // Clear any user-related data from localStorage
+    localStorage.removeItem('username');
+    localStorage.removeItem('password');
+    // Try to navigate, if it fails, reload the page
+    try {
+      navigate('/login');
+    } catch (error) {
+      console.error('Navigation failed, reloading page', error);
+      window.location.href = '/login';
     }
   };
 
@@ -177,10 +193,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
                 </div>
                 <div>
                   <p className="text-sm font-semibold">User</p>
-                  <p className="text-xs text-gray-400">Free Plan</p>
+                  <p className="text-xs text-gray-400">{isDeveloper ? 'Developer' : 'Free Plan'}</p>
                 </div>
               </div>
-              <button className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700 transition-colors">
+              <button 
+                className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700 transition-colors"
+                onClick={handleLogout}
+              >
                 <FaCog />
               </button>
             </div>

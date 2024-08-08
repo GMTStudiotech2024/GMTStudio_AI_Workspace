@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import Login from './components/Login';
 import LandingPage from './components/LandingPage';
 import { ChatItem } from './types';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -13,6 +14,7 @@ const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLandingPage, setShowLandingPage] = useState(true);
   const [selectedChat, setSelectedChat] = useState<ChatItem | null>(null);
+  const [isDeveloper] = useState(false);
 
   const toggleSettingsModal = () => {
     setIsSettingsOpen(!isSettingsOpen);
@@ -30,6 +32,14 @@ const App: React.FC = () => {
     } else {
       alert('Invalid credentials');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    localStorage.removeItem('password');
+    setIsLoggedIn(false);
+    setShowLandingPage(true);
+    setIsSettingsOpen(false);
   };
 
   const handleGetStarted = () => {
@@ -53,37 +63,41 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background text-white overflow-hidden">
-      <Sidebar 
-        isSidebarOpen={isSidebarOpen}
-        toggleSidebar={toggleSidebar}
-        onSelectChat={handleSelectChat}
-        onNewChat={handleNewChat}
-      />
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="hidden md:flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
-          <div className="text-2xl font-bold flex items-center space-x-2">
-            <span className="pl-10">Mazs AI v0.90.1</span>
-          </div>
-          <button
-            onClick={toggleSettingsModal}
-            className="bg-primary p-2 rounded"
-          >
-            Settings
-          </button>
-        </header>
-        <Chat selectedChat={selectedChat} />
-        {isSettingsOpen && (
-          <UpdateInfoModal
-            onClose={toggleSettingsModal}
-            title="Latest Updates"
-            version="v0.90.1"
-            description="AI improvements"
-          />
-        )}
-      </main>
-      <SpeedInsights />
-    </div>
+    <Router>
+      <div className="flex h-screen bg-background text-white overflow-hidden">
+        <Sidebar 
+          isSidebarOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+          onSelectChat={handleSelectChat}
+          onNewChat={handleNewChat}
+          isDeveloper={isDeveloper}
+        />
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <header className="hidden md:flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
+            <div className="text-2xl font-bold flex items-center space-x-2">
+              <span className="pl-10">Mazs AI v0.90.1</span>
+            </div>
+            <button
+              onClick={toggleSettingsModal}
+              className="bg-primary p-2 rounded"
+            >
+              Settings
+            </button>
+          </header>
+          <Chat selectedChat={selectedChat} />
+          {isSettingsOpen && (
+            <UpdateInfoModal
+              onClose={toggleSettingsModal}
+              onLogout={handleLogout}
+              title="Latest Updates"
+              version="v0.90.1"
+              description="AI improvements"
+            />
+          )}
+        </main>
+        <SpeedInsights />
+      </div>
+    </Router>
   );
 };
 
