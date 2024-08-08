@@ -58,13 +58,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar, onSelec
     // Clear any user-related data from localStorage
     localStorage.removeItem('username');
     localStorage.removeItem('password');
-    // Try to navigate, if it fails, reload the page
-    try {
-      navigate('/login');
-    } catch (error) {
-      console.error('Navigation failed, reloading page', error);
-      window.location.href = '/login';
-    }
+    // Navigate to the login page
+    navigate('/LandingPage');
   };
 
   const filteredChats = chats.filter(chat =>
