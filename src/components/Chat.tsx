@@ -1459,11 +1459,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               {(Math.random() * 100 + 50).toFixed(2)}ms
                             </p>
                             <p>
-                              Model: Mazs AI v0.85.5 anatra, Canard, Pato
+                              Model: Mazs AI v0.90.1 anatra, Canard, Pato
                             </p>
                           </>
                         ) : (
-                          <p>Model: Mazs AI v0.85.5 anatra</p>
+                          <p>Model: Mazs AI v0.90.1 anatra</p>
                         )}
                       </div>
                     )}
