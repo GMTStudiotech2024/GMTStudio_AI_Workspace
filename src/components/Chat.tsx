@@ -9,9 +9,11 @@ import {
   FiThumbsUp,
   FiThumbsDown,
   FiTrash2,
-  FiCheck, FiX
+  FiCheck,
+  FiX,
+  FiSettings
 } from 'react-icons/fi';
-import { Message as ImportedMessage } from '../types';
+import { Message as ImportedMessage } from '../types'; // Make sure you have the correct import for your Message type
 
 interface ChatProps {
   selectedChat: { title: string } | null;
@@ -442,82 +444,82 @@ function calculateAccuracy(
 // Expanded Training Data
 const trainingData = [
   // Greetings (Class 0)
-  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
-  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
-  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
-  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "greetings"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hey"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "What's up?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Howdy"
-  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello there"
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Nice to meet you"
+  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
+  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
+  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
+  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "greetings"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hey"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "What's up?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Howdy"
+  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello there"
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Nice to meet you"
 
   // Good morning (Class 1)
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good afternoon"
-  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good morning"
-  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good morning"
-  { input: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning, how are you?"
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good afternoon"
+  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good morning"
+  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good morning"
+  { input: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning, how are you?"
 
   // Good evening (Class 2)
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
-  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good evening"
-  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good evening"
-  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, how are you?"
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, what's up?"
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
+  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good evening"
+  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good evening"
+  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, how are you?"
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, what's up?"
 
   // Farewells (Class 3)
-  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "farewell"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "take care"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "have a good one"
-  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye, bye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "catch you later"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "until next time"
+  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "farewell"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "take care"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "have a good one"
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye, bye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "catch you later"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "until next time"
 
   // Weather (Class 4)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Is it going to rain today?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the temperature outside?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Do I need an umbrella today?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Is it going to rain today?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the temperature outside?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Do I need an umbrella today?"
 
   // How are you (Class 5)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you doing?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how's it going?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How have you been?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How's your day going?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you doing?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how's it going?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How have you been?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How's your day going?"
 
   // Jokes (Class 6)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a joke"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a funny joke"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Do you know any jokes?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Make me laugh"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "I need a good laugh"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a joke"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a funny joke"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Do you know any jokes?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Make me laugh"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "I need a good laugh"
 
   // Time (Class 7)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "what time is it?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "do you have the time?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What's the current time?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "Can you tell me the time?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What hour is it?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "what time is it?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "do you have the time?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What's the current time?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "Can you tell me the time?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What hour is it?"
 
   // Help (Class 8)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "can you help me?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I need assistance"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "Could you give me a hand?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I'm having trouble with something"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "How do I use this feature?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "can you help me?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I need assistance"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "Could you give me a hand?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I'm having trouble with something"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "How do I use this feature?"
 
   // Thank you (Class 9)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thank you"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thanks a lot"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "I appreciate your help"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "That's very kind of you"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "Much appreciated"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thank you"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thanks a lot"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "I appreciate your help"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "That's very kind of you"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "Much appreciated"
 ];
 
 // Define the type for bestHyperparameters
@@ -526,10 +528,9 @@ interface BestHyperparameters {
   learningRate: number;
   dropoutRate: number;
 }
-
 // *** Perform Hyperparameter Tuning ONLY ONCE outside the component ***
 // Define hyperparameter options
-const layerSizesOptions = [[20, 15, 10], [20, 20, 10], [20, 15, 10]];
+const layerSizesOptions = [[25, 25, 10], [25, 20, 10], [25, 15, 10]];
 const learningRateOptions = [0.005, 0.05];
 const dropoutRateOptions = [0.3, 0.5];
 
@@ -539,7 +540,6 @@ let bestHyperparameters: BestHyperparameters = {
   learningRate: 0,
   dropoutRate: 0,
 };
-
 for (const layerSizes of layerSizesOptions) {
   for (const learningRate of learningRateOptions) {
     for (const dropoutRate of dropoutRateOptions) {
@@ -555,7 +555,7 @@ for (const layerSizes of layerSizesOptions) {
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        500 // Number of epochs
+        50 // Number of epochs
       );
 
       // Use trainingData for accuracy calculation since testData is not defined
@@ -589,7 +589,7 @@ const finalNeuralNetwork = new EnhancedNeuralNetwork(
 finalNeuralNetwork.train(
   trainingData.map((data) => data.input),
   trainingData.map((data) => data.target),
-  500 // Number of epochs
+  250 // Number of epochs
 );
 // *** End of Hyperparameter Tuning ***
 
@@ -766,6 +766,12 @@ const enhancedMachineLearning = (input: string): string => {
     'how are you',
     'how are you doing',
     "how's it going",
+    "what is the time",
+    "what is the date",
+    "help me with the math",
+    "help me find my airpods",
+    "thanks for the help",
+    
   ];
 
   const inputVector = keywords.map((keyword) =>
@@ -787,8 +793,8 @@ const enhancedMachineLearning = (input: string): string => {
     2: () => generateGreeting('evening'),
     3: () => generateFarewell(),
     4: () => generateWeatherResponse(),
-    5: () => generateHowAreYouResponse(),
-    6: () => generateJoke(),
+    5: () => generateJoke(),
+    6: () => generateHowAreYouResponse(),
     7: () => generateTimeResponse(),
     8: () => generateHelpResponse(),
     9: () => generateThankYouResponse(),
@@ -808,6 +814,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       animate={{ opacity: [0.5, 1, 0.5] }}
       transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
     >
+      <span>.</span>
       <span>.</span>
       <span>.</span>
       <span>.</span>
@@ -846,6 +853,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [typingMessage, setTypingMessage] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isDeveloper, setIsDeveloper] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(150);
+  const [selectedModel, setSelectedModel] = useState('Mazs AI v0.90.1 anatra');
   const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -856,6 +867,22 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     { text: 'Tell me a joke', icon: <FiImage /> },
     { text: "What's the latest news?", icon: <FiImage /> },
   ];
+
+  // Function to get typing speed based on selected model
+  const getTypingSpeed = (model: string): number => {
+    switch (model) {
+      case 'Mazs AI v0.90.1 anatra':
+        return 40;
+      case 'Mazs AI v0.90.1 canard':
+        return 30;
+      case 'Mazs AI v0.90.1 pato':
+        return 20;
+      default:
+        return 40;
+    }
+  };
+
+  const [typingSpeed, setTypingSpeed] = useState(getTypingSpeed(selectedModel));
 
   useEffect(() => {
     const trainModel = async () => {
@@ -912,6 +939,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   }, []);
 
+  useEffect(() => {
+    setTypingSpeed(getTypingSpeed(selectedModel));
+  }, [selectedModel]);
+
   const simulateTyping = (text: string) => {
     let index = 0;
     setTypingMessage('');
@@ -927,14 +958,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           {
             id: Date.now().toString(),
             sender: 'bot',
-            text: text,
+            text: `${selectedModel}: ${text}`, // Add model name to the message
             timestamp: new Date(),
           },
         ]);
         setTypingMessage(null);
         setIsTyping(false);
       }
-    }, 50); // Adjust this value to change typing speed
+    }, typingSpeed);
   };
 
   // New function to detect math expressions
@@ -1072,7 +1103,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       const loss = finalNeuralNetwork.train(
         [inputVector],
         [targetVector],
-        2000 // Reduced number of epochs for faster retraining
+       1000// Reduced number of epochs for faster retraining
       );
 
       finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
@@ -1373,9 +1404,19 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         >
           <div className="flex justify-between items-center p-4 border-b border-gray-700">
             <h1 className="text-2xl font-bold pl-10">
-              {selectedChat ? selectedChat.title : 'New Chat'}
+              {selectedChat ? selectedChat.title : 'New Chat'} - {selectedModel}
             </h1>
             <div className="flex items-center space-x-2">
+              {isDeveloper && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowSettings(true)}
+                  className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+                >
+                  <FiSettings className="text-gray-400" />
+                </motion.button>
+              )}
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -1459,7 +1500,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               {(Math.random() * 100 + 50).toFixed(2)}ms
                             </p>
                             <p>
-                              Model: Mazs AI v0.90.1 anatra, Canard, Pato
+                              Model: Mazs AI v0.90.1 
                             </p>
                           </>
                         ) : (
@@ -1622,6 +1663,66 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             </div>
           </div>
         </motion.div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-gray-800 p-6 rounded-lg w-96"
+          >
+            <h2 className="text-xl font-bold mb-4">Model Settings</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Temperature</label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  value={temperature}
+                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                  className="w-full"
+                />
+                <span>{temperature} - {temperature <= 0.3 ? 'Normal' : temperature >= 0.8 ? 'Nonsensical' : 'Creative'}</span>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Max Tokens</label>
+                <input
+                  type="number"
+                  value={maxTokens}
+                  onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+                  className="w-full bg-gray-700 p-2 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Model</label>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="w-full bg-gray-700 p-2 rounded"
+                >
+                  <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
+                  <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
+                  <option value="Mazs AI v0.90.1 pato">Mazs AI v0.90.1 pato (20ms)</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowSettings(false)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+              >
+                Close
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );
