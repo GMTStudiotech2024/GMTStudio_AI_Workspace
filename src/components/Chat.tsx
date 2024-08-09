@@ -487,7 +487,7 @@ const trainingData = [
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Do I need an umbrella today?"
 
   // How are you (Class 5)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]}, 
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you doing?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how's it going?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How have you been?"
@@ -780,7 +780,6 @@ const enhancedMachineLearning = (input: string): string => {
 
   const predictedClass = finalNeuralNetwork.predict(inputVector);
   console.log(`Input: "${input}", Predicted class: ${predictedClass}`);
-
   // Get the current time of day
   const hour = new Date().getHours();
   const timeOfDay =
@@ -793,8 +792,8 @@ const enhancedMachineLearning = (input: string): string => {
     2: () => generateGreeting('evening'),
     3: () => generateFarewell(),
     4: () => generateWeatherResponse(),
-    5: () => generateJoke(),
-    6: () => generateHowAreYouResponse(),
+    5: () => generateHowAreYouResponse(),
+    6: () => generateJoke(),
     7: () => generateTimeResponse(),
     8: () => generateHelpResponse(),
     9: () => generateThankYouResponse(),
@@ -1087,691 +1086,690 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       if (feedback === 'good') {
         targetVector[predictedClass] = 1;
       } else {
-        // For negative feedback, slightly increase probabilities for other classes
-        targetVector.fill(0.1);
-        targetVector[predictedClass] = 0;
-      }
+       // For negative feedback, slightly increase probabilities for other classes
+       targetVector.fill(0.1);
+       targetVector[predictedClass] = 0;
+     }
 
-      // Add the new training data
-      trainingData.push({ input: inputVector, target: targetVector });
+     // Add the new training data
+     trainingData.push({ input: inputVector, target: targetVector });
 
-      // Retrain the model with the updated data
-      console.log('Retraining model...');
-      const originalLearningRate = finalNeuralNetwork.getLearningRate();
-      finalNeuralNetwork.setLearningRate(0.1); // Increase learning rate for retraining
+     // Retrain the model with the updated data
+     console.log('Retraining model...');
+     const originalLearningRate = finalNeuralNetwork.getLearningRate();
+     finalNeuralNetwork.setLearningRate(0.1); // Increase learning rate for faster retraining
+     const loss = finalNeuralNetwork.train(
+       [inputVector],
+       [targetVector],
+       250 // Reduced number of epochs for faster retraining
+     );
 
-      const loss = finalNeuralNetwork.train(
-        [inputVector],
-        [targetVector],
-       250// Reduced number of epochs for faster retraining
-      );
+     finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
+     console.log(`Retraining complete. Final loss: ${loss}`);
 
-      finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
-      console.log(`Retraining complete. Final loss: ${loss}`);
+     // Provide feedback to the user
+     const feedbackMessage: ChatMessage = {
+       id: Date.now().toString(),
+       sender: 'bot',
+       text: feedback === 'good'
+         ? "Thank you for the positive feedback! I'll keep that in mind for future responses."
+         : "I apologize for the unsatisfactory response. I've adjusted my understanding and will try to improve my answers in the future.",
+       timestamp: new Date(),
+     };
+     setMessages((prevMessages) => [...prevMessages, feedbackMessage]);
+   }
+ };
 
-      // Provide feedback to the user
-      const feedbackMessage: ChatMessage = {
-        id: Date.now().toString(),
-        sender: 'bot',
-        text: feedback === 'good'
-          ? 'Thank you for the positive feedback! I\'ll keep that in mind for future responses.'
-          : "I apologize for the unsatisfactory response. I've adjusted my understanding and will try to improve my answers in the future.",
-        timestamp: new Date(),
-      };
-      setMessages((prevMessages) => [...prevMessages, feedbackMessage]);
-    }
-  };
+ // Helper function to create a simple input vector
+ const createInputVector = (text: string): number[] => {
+   const keywords = [
+     'hello', 'hi', 'good morning', 'good evening', 'hey there',
+     'goodbye', 'bye', 'see you later', 'farewell', 'take care',
+     'have a good one', 'catch you later', 'until next time',
+     "what's the weather like?", "how's the weather?",
+     'tell me a joke', 'tell me a funny joke',
+     'how are you', 'how are you doing', "how's it going",
+   ];
 
-  // Helper function to create a simple input vector
-  const createInputVector = (text: string): number[] => {
-    const keywords = [
-      'hello', 'hi', 'good morning', 'good evening', 'hey there',
-      'goodbye', 'bye', 'see you later', 'farewell', 'take care',
-      'have a good one', 'catch you later', 'until next time',
-      "what's the weather like?", "how's the weather?",
-      'tell me a joke', 'tell me a funny joke',
-      'how are you', 'how are you doing', "how's it going",
-    ];
+   return keywords.map((keyword) => text.toLowerCase().includes(keyword) ? 1 : 0);
+ };
 
-    return keywords.map((keyword) => text.toLowerCase().includes(keyword) ? 1 : 0);
-  };
+ const handleClearChat = () => {
+   setMessages([]);
+ };
 
-  const handleClearChat = () => {
-    setMessages([]);
-  };
+ // *** Named Entity Recognition (NER) - Basic Rule-Based Example ***
+ const performNER = (text: string): string => {
+   const entities = [];
+   const words = text.split(/\s+/);
 
-  // *** Named Entity Recognition (NER) - Basic Rule-Based Example ***
-  const performNER = (text: string): string => {
-    const entities = [];
-    const words = text.split(/\s+/);
+   for (let i = 0; i < words.length; i++) {
+     const word = words[i];
+     let nextWord = words[i + 1] || ''; // Change to let
 
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      let nextWord = words[i + 1] || ''; // Change to let
+     // Rule 1: Capitalized words followed by titles (Mr., Ms., Dr., etc.)
+     if (
+       word.match(/^[A-Z][a-z]+$/) &&
+       nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)
+     ) {
+       entities.push(`${word} ${nextWord}`);
+       i++;
+     }
+     // Rule 2: Sequences of Capitalized words (potential names or organizations)
+     else if (
+       word.match(/^[A-Z][a-z]+$/) &&
+       nextWord.match(/^[A-Z][a-z]+$/)
+     ) {
+       let name = word;
+       while (nextWord.match(/^[A-Z][a-z]+$/) && i < words.length - 1) {
+         name += ` ${nextWord}`;
+         i++;
+         nextWord = words[i + 1] || ''; // This reassignment is now valid
+       }
+       entities.push(name);
+     }
+     // Rule 3: Capitalized words at the beginning of sentences (potential names)
+     else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
+       entities.push(word);
+     }
+     // Rule 4: Locations - (Add a list of known locations or use a more advanced method)
+     // This is a very basic example, you'll need a better way to identify locations
+     else if (
+       word.match(/^[A-Z][a-z]+$/) &&
+       ['City', 'Town', 'Country'].includes(nextWord)
+     ) {
+       entities.push(word);
+       i++;
+     }
+   }
 
-      // Rule 1: Capitalized words followed by titles (Mr., Ms., Dr., etc.)
-      if (
-        word.match(/^[A-Z][a-z]+$/) &&
-        nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)
-      ) {
-        entities.push(`${word} ${nextWord}`);
-        i++;
-      }
-      // Rule 2: Sequences of Capitalized words (potential names or organizations)
-      else if (
-        word.match(/^[A-Z][a-z]+$/) &&
-        nextWord.match(/^[A-Z][a-z]+$/)
-      ) {
-        let name = word;
-        while (nextWord.match(/^[A-Z][a-z]+$/) && i < words.length - 1) {
-          name += ` ${nextWord}`;
-          i++;
-          nextWord = words[i + 1] || ''; // This reassignment is now valid
-        }
-        entities.push(name);
-      }
-      // Rule 3: Capitalized words at the beginning of sentences (potential names)
-      else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
-        entities.push(word);
-      }
-      // Rule 4: Locations - (Add a list of known locations or use a more advanced method)
-      // This is a very basic example, you'll need a better way to identify locations
-      else if (
-        word.match(/^[A-Z][a-z]+$/) &&
-        ['City', 'Town', 'Country'].includes(nextWord)
-      ) {
-        entities.push(word);
-        i++;
-      }
-    }
+   return entities.length > 0 ? entities.join(', ') : 'No entities found';
+ };
+ // Keep the POS tagging function and fix the regex
+ const performPOS = (text: string): string => {
+   const words = text.split(' ');
+   const tags = words.map((word, index) => {
+     // Regular expressions for different parts of speech
+     const nounRegex = /^[a-z]+(s)?$/; // Nouns (singular or plural)
+     const verbRegex = /^[a-z]+(ed|ing|s)?$/; // Verbs (past tense, present participle, 3rd person singular)
+     const adjectiveRegex = /^[a-z]+(er|est)?$/; // Adjectives (comparative, superlative)
+     const adverbRegex = /^[a-z]+ly$/; // Adverbs
+     const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; // Pronouns
+     const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; // Prepositions
+     const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; // Conjunctions
+     const determinerRegex = /^(the|a|an)$/i; // Determiners
 
-    return entities.length > 0 ? entities.join(', ') : 'No entities found';
-  };
-  // Keep the POS tagging function and fix the regex
-  const performPOS = (text: string): string => {
-    const words = text.split(' ');
-    const tags = words.map((word, index) => {
-      // Regular expressions for different parts of speech
-      const nounRegex = /^[a-z]+(s)?$/; // Nouns (singular or plural)
-      const verbRegex = /^[a-z]+(ed|ing|s)?$/; // Verbs (past tense, present participle, 3rd person singular)
-      const adjectiveRegex = /^[a-z]+(er|est)?$/; // Adjectives (comparative, superlative)
-      const adverbRegex = /^[a-z]+ly$/; // Adverbs
-      const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; // Pronouns
-      const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; // Prepositions
-      const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; // Conjunctions
-      const determinerRegex = /^(the|a|an)$/i; // Determiners
+     word = word.toLowerCase(); // Normalize to lowercase
 
-      word = word.toLowerCase(); // Normalize to lowercase
+     // Check for punctuation
+     if (word.match(/^[.,!?;:]+$/)) return `${word}/PUNCT`;
 
-      // Check for punctuation
-      if (word.match(/^[.,!?;:]+$/)) return `${word}/PUNCT`;
+     // Check for numbers
+     if (word.match(/^[0-9]+(\.[0-9]+)?$/)) return `${word}/NUM`;
 
-      // Check for numbers
-      if (word.match(/^[0-9]+(\.[0-9]+)?$/)) return `${word}/NUM`;
+     // Apply more specific rules
+     if (
+       word === 'to' &&
+       index < words.length - 1 &&
+       words[index + 1].match(verbRegex)
+     ) {
+       return `${word}/TO`; // 'to' as part of infinitive
+     }
 
-      // Apply more specific rules
-      if (
-        word === 'to' &&
-        index < words.length - 1 &&
-        words[index + 1].match(verbRegex)
-      ) {
-        return `${word}/TO`; // 'to' as part of infinitive
-      }
+     if (word.match(determinerRegex)) return `${word}/DET`;
+     if (word.match(pronounRegex)) return `${word}/PRON`;
+     if (word.match(prepositionRegex)) return `${word}/PREP`;
+     if (word.match(conjunctionRegex)) return `${word}/CONJ`;
+     if (word.match(adverbRegex)) return `${word}/ADV`;
+     if (word.match(adjectiveRegex)) return `${word}/ADJ`;
+     if (word.match(verbRegex)) return `${word}/VERB`;
+     if (word.match(nounRegex)) return `${word}/NOUN`;
 
-      if (word.match(determinerRegex)) return `${word}/DET`;
-      if (word.match(pronounRegex)) return `${word}/PRON`;
-      if (word.match(prepositionRegex)) return `${word}/PREP`;
-      if (word.match(conjunctionRegex)) return `${word}/CONJ`;
-      if (word.match(adverbRegex)) return `${word}/ADV`;
-      if (word.match(adjectiveRegex)) return `${word}/ADJ`;
-      if (word.match(verbRegex)) return `${word}/VERB`;
-      if (word.match(nounRegex)) return `${word}/NOUN`;
+     return `${word}/UNK`; // Unknown
+   });
+   return tags.join(' ');
+ };
 
-      return `${word}/UNK`; // Unknown
-    });
-    return tags.join(' ');
-  };
+ const handlePOS = () => {
+   if (inputValue) {
+     const posResult = performPOS(inputValue);
+     setIsTyping(true);
+     simulateTyping(`POS Tagging Result:\n${posResult}`);
+     setInputValue(''); // Clear the input box
+   }
+ };
 
-  const handlePOS = () => {
-    if (inputValue) {
-      const posResult = performPOS(inputValue);
-      setIsTyping(true);
-      simulateTyping(`POS Tagging Result:\n${posResult}`);
-      setInputValue(''); // Clear the input box
-    }
-  };
+ const handleNER = () => {
+   if (inputValue) {
+     const nerResult = performNER(inputValue);
+     setIsTyping(true);
+     simulateTyping(`Named Entities Found:\n${nerResult}`);
+     setInputValue(''); // Clear the input box
+   }
+ };
 
-  const handleNER = () => {
-    if (inputValue) {
-      const nerResult = performNER(inputValue);
-      setIsTyping(true);
-      simulateTyping(`Named Entities Found:\n${nerResult}`);
-      setInputValue(''); // Clear the input box
-    }
-  };
+ const performSummarization = async (text: string): Promise<string> => {
+   const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+   let summary = '';
+   let tokenCount = 0;
 
-  const performSummarization = async (text: string): Promise<string> => {
-    const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
-    let summary = '';
-    let tokenCount = 0;
+   for (const sentence of sentences) {
+     const sentenceTokens = sentence.split(/\s+/).length;
+     if (tokenCount + sentenceTokens > maxTokens) {
+       break;
+     }
+     summary += sentence + '. ';
+     tokenCount += sentenceTokens;
+   }
 
-    for (const sentence of sentences) {
-      const sentenceTokens = sentence.split(/\s+/).length;
-      if (tokenCount + sentenceTokens > maxTokens) {
-        break;
-      }
-      summary += sentence + '. ';
-      tokenCount += sentenceTokens;
-    }
+   return summary.trim();
+ };
 
-    return summary.trim();
-  };
+ const handleSummarization = () => {
+   if (inputValue) {
+     setIsTyping(true);
+     performSummarization(inputValue)
+       .then((summaryResult: string) => {
+         simulateTyping(`Text Summary (max ${maxTokens} tokens):\n${summaryResult}`);
+         setInputValue(''); // Clear the input box
+       })
+       .catch((error: Error) => {
+         console.error('Error in summarization:', error);
+         simulateTyping('An error occurred during summarization.');
+       })
+       .finally(() => {
+         setIsTyping(false);
+       });
+   }
+ };
 
-  const handleSummarization = () => {
-    if (inputValue) {
-      setIsTyping(true);
-      performSummarization(inputValue)
-        .then((summaryResult: string) => {
-          simulateTyping(`Text Summary (max ${maxTokens} tokens):\n${summaryResult}`);
-          setInputValue(''); // Clear the input box
-        })
-        .catch((error: Error) => {
-          console.error('Error in summarization:', error);
-          simulateTyping('An error occurred during summarization.');
-        })
-        .finally(() => {
-          setIsTyping(false);
-        });
-    }
-  };
+ const scrollToBottom = () => {
+   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+ };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+ useEffect(() => {
+   scrollToBottom();
+ }, [messages]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+ const handleVoiceInput = () => {
+   if ('webkitSpeechRecognition' in window) {
+     const recognition = new window.webkitSpeechRecognition();
 
-  const handleVoiceInput = () => {
-    if ('webkitSpeechRecognition' in window) {
-      const recognition = new window.webkitSpeechRecognition();
+     recognition.onstart = () => {
+       setIsListening(true);
+     };
 
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
+     recognition.onresult = (event: SpeechRecognitionEvent) => {
+       const transcript = event.results[0][0].transcript;
+       setInputValue((prevValue) => prevValue + transcript);
+     };
 
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        setInputValue((prevValue) => prevValue + transcript);
-      };
+     recognition.onend = () => {
+       setIsListening(false);
+     };
 
-      recognition.onend = () => {
-        setIsListening(false);
-      };
+     recognition.start();
+   } else {
+     alert('Speech recognition is not supported in your browser.');
+   }
+ };
 
-      recognition.start();
-    } else {
-      alert('Speech recognition is not supported in your browser.');
-    }
-  };
+ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+   const file = event.target.files?.[0];
+   if (file) {
+     const reader = new FileReader();
+     reader.onload = (e) => {
+       const img = new Image();
+       img.onload = () => {
+         const canvas = document.createElement('canvas');
+         const ctx = canvas.getContext('2d');
+         canvas.width = 100; // Thumbnail width
+         canvas.height = 100; // Thumbnail height
+         ctx?.drawImage(img, 0, 0, 100, 100);
+         const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = 100; // Thumbnail width
-          canvas.height = 100; // Thumbnail height
-          ctx?.drawImage(img, 0, 0, 100, 100);
-          const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
+         // Add image message
+         const newMessage: ChatMessage = {
+           id: Date.now().toString(),
+           sender: 'user',
+           text: 'Uploaded image:',
+           timestamp: new Date(),
+           image: thumbnailDataUrl,
+         };
+         setMessages((prevMessages) => [...prevMessages, newMessage]);
+       };
+       img.src = e.target?.result as string;
+     };
+     reader.readAsDataURL(file);
+   }
+ };
 
-          // Add image message
-          const newMessage: ChatMessage = {
-            id: Date.now().toString(),
-            sender: 'user',
-            text: 'Uploaded image:',
-            timestamp: new Date(),
-            image: thumbnailDataUrl,
-          };
-          setMessages((prevMessages) => [...prevMessages, newMessage]);
-        };
-        img.src = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+ return (
+   <div
+     className={`flex flex-col h-screen w-full ${
+       darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
+     } transition-colors duration-300`}
+   >
+     <AnimatePresence>
+       {trainingStatus === 'initializing' && (
+         <motion.div
+           className="text-center p-8"
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           exit={{ opacity: 0 }}
+         >
+           <h2 className="text-2xl font-bold mb-4">
+             Initializing AI, please wait...
+           </h2>
+           <LoadingSpinner />
+         </motion.div>
+       )}
+       {trainingStatus === 'training' && (
+         <motion.div
+           className="text-center p-8"
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           exit={{ opacity: 0 }}
+         >
+           <TerminalAnimation />
+           {trainingProgress && (
+             <motion.div
+               className="mt-4"
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.3 }}
+             >
+               <p>Epoch: {trainingProgress.epoch}/1500</p>
+               <p>Loss: {trainingProgress.loss.toFixed(4)}</p>
+               <p>
+                 Accuracy: {(trainingProgress.accuracy * 100).toFixed(2)}%
+               </p>
+             </motion.div>
+           )}
+         </motion.div>
+       )}
+       {trainingStatus === 'error' && (
+         <motion.div
+           className="text-center text-red-500 p-8"
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           exit={{ opacity: 0 }}
+         >
+           <h2 className="text-2xl font-bold mb-4">
+             An error occurred during training. Please try again later.
+           </h2>
+         </motion.div>
+       )}
+     </AnimatePresence>
+     {trainingStatus === 'complete' && (
+       <motion.div
+         className="flex flex-col h-full w-full"
+         initial={{ opacity: 0 }}
+         animate={{ opacity: 1 }}
+         transition={{ duration: 0.5 }}
+       >
+         <header className="flex justify-between items-center p-4 border-b border-gray-700 bg-opacity-90 backdrop-filter backdrop-blur-lg">
+           <h1 className="text-2xl font-bold pl-10">
+             {selectedChat ? selectedChat.title : 'New Chat'} - {selectedModel}
+           </h1>
+           <div className="flex items-center space-x-2 ">
+             {isDeveloper && (
+               <motion.button
+                 whileHover={{ scale: 1.1 }}
+                 whileTap={{ scale: 0.9 }}
+                 onClick={() => setShowSettings(true)}
+                 className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+               >
+                 <FiSettings className="text-gray-400" />
+               </motion.button>
+             )}
+             <motion.button
+               whileHover={{ scale: 1.1 }}
+               whileTap={{ scale: 0.9 }}
+               onClick={handleClearChat}
+               className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+             >
+               <FiTrash2 className="text-red-500" />
+             </motion.button>
+             <motion.button
+               whileHover={{ scale: 1.1 }}
+               whileTap={{ scale: 0.9 }}
+               onClick={() => setDarkMode(!darkMode)}
+               className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+             >
+               {darkMode ? (
+                 <FiSun className="text-yellow-500" />
+               ) : (
+                 <FiMoon className="text-gray-700" />
+               )}
+             </motion.button>
+           </div>
+         </header>
+         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+           <AnimatePresence>
+             {messages.map((message) => (
+               <motion.div
+                 key={message.id}
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, y: -20 }}
+                 transition={{ duration: 0.3 }}
+                 className={`flex ${
+                   message.sender === 'user' ? 'justify-end' : 'justify-start'
+                 }`}
+               >
+                 <div
+                   className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg shadow-md ${
+                     message.sender === 'user'
+                       ? 'bg-blue-600 text-white'
+                       : darkMode
+                       ? 'bg-gray-800 text-white'
+                       : 'bg-white text-gray-800'
+                   }`}
+                 >
+                   <p className="text-sm">{message.text}</p>
+                   {message.image && (
+                     <img
+                       src={message.image}
+                       alt="Uploaded"
+                       className="mt-2 rounded"
+                     />
+                   )}
+                   {message.confirmationType &&
+                     message.id === pendingConfirmationId && (
+                       <div className="flex space-x-2 mt-2">
+                         <motion.button
+                           whileHover={{ scale: 1.1 }}
+                           whileTap={{ scale: 0.9 }}
+                           onClick={() =>
+                             message.confirmationType === 'math'
+                               ? handleMathCalculation()
+                               : handleSummary()
+                           }
+                           className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+                         >
+                           <FiCheck />
+                         </motion.button>
+                         <motion.button
+                           whileHover={{ scale: 1.1 }}
+                           whileTap={{ scale: 0.9 }}
+                           onClick={proceedWithNormalMessage}
+                           className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                         >
+                           <FiX />
+                         </motion.button>
+                       </div>
+                     )}
+                   {message.sender === 'bot' && (
+                     <div className="mt-2 text-xs text-gray-400">
+                       {isDeveloper ? (
+                         <>
+                           <p>
+                             Accuracy:{' '}
+                             {(Math.random() * 0.2 + 0.8).toFixed(4)}
+                           </p>
+                           <p>
+                             Response time:{' '}
+                             {(Math.random() * 100 + 50).toFixed(2)}ms
+                           </p>
+                           <p>Model: {selectedModel}</p>
+                         </>
+                       ) : (
+                         <p>Model: {selectedModel}</p>
+                       )}
+                     </div>
+                   )}
+                   {message.sender === 'bot' && (
+                     <div className="flex justify-end mt-2 space-x-2">
+                       <motion.button
+                         whileHover={{ scale: 1.1 }}
+                         whileTap={{ scale: 0.9 }}
+                         onClick={() => handleFeedback(message.id, 'good')}
+                         className="text-green-500 hover:text-green-600"
+                       >
+                         <FiThumbsUp />
+                       </motion.button>
+                       <motion.button
+                         whileHover={{ scale: 1.1 }}
+                         whileTap={{ scale: 0.9 }}
+                         onClick={() => handleFeedback(message.id, 'bad')}
+                         className="text-red-500 hover:text-red-600"
+                       >
+                         <FiThumbsDown />
+                       </motion.button>
+                     </div>
+                   )}
+                 </div>
+               </motion.div>
+             ))}
+           </AnimatePresence>
+           {typingMessage !== null && (
+             <motion.div
+               className="flex justify-start"
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+             >
+               <div
+                 className={`p-3 rounded-lg shadow-md ${
+                   darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+                 }`}
+               >
+                 {typingMessage}
+                 <span className="inline-block w-1 h-4 ml-1 bg-current animate-blink"></span>
+               </div>
+             </motion.div>
+           )}
+           {isTyping && (
+             <motion.div
+               className="flex justify-start"
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+             >
+               <div
+                 className={`p-3 rounded-lg shadow-md ${
+                   darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+                 }`}
+               >
+                 <span
+                   className="inline-block w-2 h-2 bg-current rounded-full animate-bounce mr-1"
+                   style={{ animationDelay: '0.2s' }}
+                 ></span>
+                 <span
+                   className="inline-block w-2 h-2 bg-current rounded-full animate-bounce"
+                   style={{ animationDelay: '0.4s' }}
+                 ></span>
+                 <span
+                   className="inline-block w-2 h-2 bg-current rounded-full animate-bounce"
+                   style={{ animationDelay: '0.6s' }}
+                 ></span>
+               </div>
+             </motion.div>
+           )}
+           <div ref={messagesEndRef} />
+         </div>
+         <div className="border-t border-gray-700 p-4">
+           {messages.length === 0 && (
+             <motion.div
+               className="flex flex-wrap justify-center gap-2 mb-4"
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.3 }}
+             >
+               {suggestions.map((suggestion, index) => (
+                 <motion.button
+                   key={index}
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                   onClick={() => setInputValue(suggestion.text)}
+                   className={`flex items-center space-x-2 ${
+                     darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'
+                   } text-current rounded-full px-4 py-2 text-sm transition-colors duration-200`}
+                 >
+                   {suggestion.icon}
+                   <span>{suggestion.text}</span>
+                 </motion.button>
+               ))}
+             </motion.div>
+           )}
+           <div className="flex items-center space-x-2">
+             <input
+               type="text"
+               value={inputValue}
+               onChange={(e) => setInputValue(e.target.value)}
+               onKeyPress={handleKeyPress}
+               placeholder="Type a message..."
+               className={`flex-1 p-2 rounded-full ${
+                 darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+               } border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200`}
+             />
+             <motion.button
+               whileHover={{ scale: 1.1 }}
+               whileTap={{ scale: 0.9 }}
+               onClick={handleSendMessage}
+               className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+             >
+               <FiSend />
+             </motion.button>
+             {isDeveloper && (
+               <>
+                 <motion.button
+                   whileHover={{ scale: 1.1 }}
+                   whileTap={{ scale: 0.9 }}
+                   onClick={handleVoiceInput}
+                   className={`p-2 rounded-full ${
+                     isListening
+                       ? 'bg-red-600'
+                       : darkMode
+                       ? 'bg-gray-800'
+                       : 'bg-gray-200'
+                   } text-current hover:bg-gray-700 transition-colors`}
+                 >
+                   <FiMic />
+                 </motion.button>
+                 <motion.button
+                   whileHover={{ scale: 1.1 }}
+                   whileTap={{ scale: 0.9 }}
+                   onClick={() => fileInputRef.current?.click()}
+                   className={`p-2 rounded-full ${
+                     darkMode ? 'bg-gray-800' : 'bg-gray-200'
+                   } text-current hover:bg-gray-700 transition-colors`}
+                 >
+                   <FiImage />
+                 </motion.button>
+                 <input
+                   type="file"
+                   ref={fileInputRef}
+                   onChange={handleImageUpload}
+                   accept="image/*"
+                   style={{ display: 'none' }}
+                 />
+               </>
+             )}
+           </div>
+           <div className="flex items-center space-x-2 mt-2">
+             <motion.button
+               whileHover={{ scale: 1.05 }}
+               whileTap={{ scale: 0.95 }}
+               onClick={handlePOS}
+               className={`p-2 rounded-full ${
+                 darkMode ? 'bg-gray-800' : 'bg-gray-200'
+               } text-current hover:bg-gray-700 transition-colors`}
+             >
+               POS
+             </motion.button>
+             <motion.button
+               whileHover={{ scale: 1.05 }}
+               whileTap={{ scale: 0.95 }}
+               onClick={handleSummarization}
+               className={`p-2 rounded-full ${
+                 darkMode ? 'bg-gray-800' : 'bg-gray-200'
+               } text-current hover:bg-gray-700 transition-colors`}
+             >
+               Summarize
+             </motion.button>
+             <motion.button
+               whileHover={{ scale: 1.05 }}
+               whileTap={{ scale: 0.95 }}
+               onClick={handleNER}
+               className={`p-2 rounded-full ${
+                 darkMode ? 'bg-gray-800' : 'bg-gray-200'
+               } text-current hover:bg-gray-700 transition-colors`}
+             >
+               NER
+             </motion.button>
+           </div>
+         </div>
+       </motion.div>
+     )}
 
-  return (
-    <div
-      className={`flex flex-col h-screen w-full ${
-        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
-      } transition-colors duration-300`}
-    >
-      <AnimatePresence>
-        {trainingStatus === 'initializing' && (
-          <motion.div
-            className="text-center p-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <h2 className="text-2xl font-bold mb-4">
-              Initializing AI, please wait...
-            </h2>
-            <LoadingSpinner />
-          </motion.div>
-        )}
-        {trainingStatus === 'training' && (
-          <motion.div
-            className="text-center p-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <TerminalAnimation />
-            {trainingProgress && (
-              <motion.div
-                className="mt-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <p>Epoch: {trainingProgress.epoch}/1500</p>
-                <p>Loss: {trainingProgress.loss.toFixed(4)}</p>
-                <p>
-                  Accuracy: {(trainingProgress.accuracy * 100).toFixed(2)}%
-                </p>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
-        {trainingStatus === 'error' && (
-          <motion.div
-            className="text-center text-red-500 p-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <h2 className="text-2xl font-bold mb-4">
-              An error occurred during training. Please try again later.
-            </h2>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {trainingStatus === 'complete' && (
-        <motion.div
-          className="flex flex-col h-full w-full"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <header className="flex justify-between items-center p-4 border-b border-gray-700 bg-opacity-90 backdrop-filter backdrop-blur-lg">
-            <h1 className="text-2xl font-bold pl-10">
-              {selectedChat ? selectedChat.title : 'New Chat'} - {selectedModel}
-            </h1>
-            <div className="flex items-center space-x-2 ">
-              {isDeveloper && (
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowSettings(true)}
-                  className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-                >
-                  <FiSettings className="text-gray-400" />
-                </motion.button>
-              )}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleClearChat}
-                className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-              >
-                <FiTrash2 className="text-red-500" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-              >
-                {darkMode ? (
-                  <FiSun className="text-yellow-500" />
-                ) : (
-                  <FiMoon className="text-gray-700" />
-                )}
-              </motion.button>
-            </div>
-          </header>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            <AnimatePresence>
-              {messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex ${
-                    message.sender === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  <div
-                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg shadow-md ${
-                      message.sender === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : darkMode
-                        ? 'bg-gray-800 text-white'
-                        : 'bg-white text-gray-800'
-                    }`}
-                  >
-                    <p className="text-sm">{message.text}</p>
-                    {message.image && (
-                      <img
-                        src={message.image}
-                        alt="Uploaded"
-                        className="mt-2 rounded"
-                      />
-                    )}
-                    {message.confirmationType &&
-                      message.id === pendingConfirmationId && (
-                        <div className="flex space-x-2 mt-2">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() =>
-                              message.confirmationType === 'math'
-                                ? handleMathCalculation()
-                                : handleSummary()
-                            }
-                            className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
-                          >
-                            <FiCheck />
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={proceedWithNormalMessage}
-                            className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
-                          >
-                            <FiX />
-                          </motion.button>
-                        </div>
-                      )}
-                    {message.sender === 'bot' && (
-                      <div className="mt-2 text-xs text-gray-400">
-                        {isDeveloper ? (
-                          <>
-                            <p>
-                              Accuracy:{' '}
-                              {(Math.random() * 0.2 + 0.8).toFixed(4)}
-                            </p>
-                            <p>
-                              Response time:{' '}
-                              {(Math.random() * 100 + 50).toFixed(2)}ms
-                            </p>
-                            <p>Model: {selectedModel}</p>
-                          </>
-                        ) : (
-                          <p>Model: {selectedModel}</p>
-                        )}
-                      </div>
-                    )}
-                    {message.sender === 'bot' && (
-                      <div className="flex justify-end mt-2 space-x-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleFeedback(message.id, 'good')}
-                          className="text-green-500 hover:text-green-600"
-                        >
-                          <FiThumbsUp />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleFeedback(message.id, 'bad')}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          <FiThumbsDown />
-                        </motion.button>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            {typingMessage !== null && (
-              <motion.div
-                className="flex justify-start"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div
-                  className={`p-3 rounded-lg shadow-md ${
-                    darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-                  }`}
-                >
-                  {typingMessage}
-                  <span className="inline-block w-1 h-4 ml-1 bg-current animate-blink"></span>
-                </div>
-              </motion.div>
-            )}
-            {isTyping && (
-              <motion.div
-                className="flex justify-start"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div
-                  className={`p-3 rounded-lg shadow-md ${
-                    darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-                  }`}
-                >
-                  <span
-                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce mr-1"
-                    style={{ animationDelay: '0.2s' }}
-                  ></span>
-                  <span
-                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce"
-                    style={{ animationDelay: '0.4s' }}
-                  ></span>
-                  <span
-                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce"
-                    style={{ animationDelay: '0.6s' }}
-                  ></span>
-                </div>
-              </motion.div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="border-t border-gray-700 p-4">
-            {messages.length === 0 && (
-              <motion.div
-                className="flex flex-wrap justify-center gap-2 mb-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                {suggestions.map((suggestion, index) => (
-                  <motion.button
-                    key={index}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setInputValue(suggestion.text)}
-                    className={`flex items-center space-x-2 ${
-                      darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'
-                    } text-current rounded-full px-4 py-2 text-sm transition-colors duration-200`}
-                  >
-                    {suggestion.icon}
-                    <span>{suggestion.text}</span>
-                  </motion.button>
-                ))}
-              </motion.div>
-            )}
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type a message..."
-                className={`flex-1 p-2 rounded-full ${
-                  darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-                } border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200`}
-              />
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleSendMessage}
-                className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-              >
-                <FiSend />
-              </motion.button>
-              {isDeveloper && (
-                <>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleVoiceInput}
-                    className={`p-2 rounded-full ${
-                      isListening
-                        ? 'bg-red-600'
-                        : darkMode
-                        ? 'bg-gray-800'
-                        : 'bg-gray-200'
-                    } text-current hover:bg-gray-700 transition-colors`}
-                  >
-                    <FiMic />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`p-2 rounded-full ${
-                      darkMode ? 'bg-gray-800' : 'bg-gray-200'
-                    } text-current hover:bg-gray-700 transition-colors`}
-                  >
-                    <FiImage />
-                  </motion.button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                  />
-                </>
-              )}
-            </div>
-            <div className="flex items-center space-x-2 mt-2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handlePOS}
-                className={`p-2 rounded-full ${
-                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
-                } text-current hover:bg-gray-700 transition-colors`}
-              >
-                POS
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSummarization}
-                className={`p-2 rounded-full ${
-                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
-                } text-current hover:bg-gray-700 transition-colors`}
-              >
-                Summarize
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleNER}
-                className={`p-2 rounded-full ${
-                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
-                } text-current hover:bg-gray-700 transition-colors`}
-              >
-                NER
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Settings Modal */}
-      {showSettings && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className={`bg-${darkMode ? 'gray-800' : 'white'} p-6 rounded-lg w-96 shadow-xl`}
-          >
-            <h2 className="text-xl font-bold mb-4">Model Settings</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Temperature</label>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="1"
-                  step="0.1"
-                  value={temperature}
-                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                  className="w-full"
-                />
-                <span>{temperature} - {temperature <= 0.3 ? 'Normal' : temperature >= 0.8 ? 'Nonsensical' : 'Creative'}</span>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Max Tokens</label>
-                <input
-                  type="number"
-                  value={maxTokens}
-                  onChange={(e) => setMaxTokens(parseInt(e.target.value))}
-                  className={`w-full bg-${darkMode ? 'gray-700' : 'gray-100'} p-2 rounded`}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Model</label>
-                <select
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  className={`w-full bg-${darkMode ? 'gray-700' : 'gray-100'} p-2 rounded`}
-                >
-                  <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
-                  <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
-                  <option value="Mazs AI v0.90.1 pato">Mazs AI v0.90.1 pato (20ms)</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowSettings(false)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-              >
-                Close
-              </motion.button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </div>
-  );
+     {/* Settings Modal */}
+     {showSettings && (
+       <motion.div
+         initial={{ opacity: 0 }}
+         animate={{ opacity: 1 }}
+         exit={{ opacity: 0 }}
+         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+       >
+         <motion.div
+           initial={{ opacity: 0, scale: 0.9 }}
+           animate={{ opacity: 1, scale: 1 }}
+           exit={{ opacity: 0, scale: 0.9 }}
+           className={`bg-${darkMode ? 'gray-800' : 'white'} p-6 rounded-lg w-96 shadow-xl`}
+         >
+           <h2 className="text-xl font-bold mb-4">Model Settings</h2>
+           <div className="space-y-4">
+             <div>
+               <label className="block text-sm font-medium mb-1">Temperature</label>
+               <input
+                 type="range"
+                 min="0.1"
+                 max="1"
+                 step="0.1"
+                 value={temperature}
+                 onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                 className="w-full"
+               />
+               <span>{temperature} - {temperature <= 0.3 ? 'Normal' : temperature >= 0.8 ? 'Nonsensical' : 'Creative'}</span>
+             </div>
+             <div>
+               <label className="block text-sm font-medium mb-1">Max Tokens</label>
+               <input
+                 type="number"
+                 value={maxTokens}
+                 onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+                 className={`w-full bg-${darkMode ? 'gray-700' : 'gray-100'} p-2 rounded`}
+               />
+             </div>
+             <div>
+               <label className="block text-sm font-medium mb-1">Model</label>
+               <select
+                 value={selectedModel}
+                 onChange={(e) => setSelectedModel(e.target.value)}
+                 className={`w-full bg-${darkMode ? 'gray-700' : 'gray-100'} p-2 rounded`}
+               >
+                 <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
+                 <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
+                 <option value="Mazs AI v0.90.1 pato">Mazs AI v0.90.1 pato (20ms)</option>
+               </select>
+             </div>
+           </div>
+           <div className="mt-6 flex justify-end">
+             <motion.button
+               whileHover={{ scale: 1.05 }}
+               whileTap={{ scale: 0.95 }}
+               onClick={() => setShowSettings(false)}
+               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+             >
+               Close
+             </motion.button>
+           </div>
+         </motion.div>
+       </motion.div>
+     )}
+   </div>
+ );
 };
 
 export default Chat;
