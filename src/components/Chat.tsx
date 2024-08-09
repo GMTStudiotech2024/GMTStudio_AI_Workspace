@@ -13,7 +13,7 @@ import {
   FiX,
   FiSettings
 } from 'react-icons/fi';
-import { Message as ImportedMessage } from '../types';
+import { Message as ImportedMessage } from '../types'; // Make sure you have the correct import for your Message type
 
 interface ChatProps {
   selectedChat: { title: string } | null;
@@ -24,6 +24,7 @@ interface Suggestion {
   icon: React.ReactNode;
 }
 
+// Simplified Speech Recognition types
 interface SpeechRecognitionResult {
   transcript: string;
 }
@@ -39,6 +40,7 @@ interface SpeechRecognitionInstance {
   onstart: () => void;
 }
 
+// Extend the Window interface
 declare global {
   interface Window {
     webkitSpeechRecognition: {
@@ -47,6 +49,7 @@ declare global {
   }
 }
 
+// Define a local interface with a different name
 interface ChatMessage extends ImportedMessage {
   image?: string;
   inputVector?: number[];
@@ -59,6 +62,7 @@ interface TrainingProgress {
   accuracy: number;
 }
 
+// Enhanced Neural Network Class
 class EnhancedNeuralNetwork {
   private layers: number[][];
   private weights: number[][][];
@@ -73,13 +77,6 @@ class EnhancedNeuralNetwork {
   private rmspropParams: { decay: number; epsilon: number };
   private l2RegularizationRate: number;
   private activationFunctions: string[];
-  private initialLearningRate: number;
-  private learningRateDecayFactor: number;
-  private learningRateDecaySteps: number;
-  private earlyStoppingPatience: number;
-  private bestValidationLoss: number;
-  private patienceCounter: number;
-  private gradientClippingThreshold: number;
 
   constructor(
     layerSizes: number[],
@@ -88,11 +85,7 @@ class EnhancedNeuralNetwork {
     batchSize: number = 32,
     optimizer: 'adam' | 'rmsprop' | 'sgd' | 'adamw' = 'adamw',
     l2RegularizationRate: number = 0.01,
-    activationFunctions: string[] = [],
-    learningRateDecayFactor: number = 0.95,
-    learningRateDecaySteps: number = 1000,
-    earlyStoppingPatience: number = 10,
-    gradientClippingThreshold: number = 5
+    activationFunctions: string[] = []
   ) {
     this.layers = layerSizes.map((size) => new Array(size).fill(0));
     this.weights = [];
@@ -137,15 +130,9 @@ class EnhancedNeuralNetwork {
         )
       );
     }
-    this.initialLearningRate = learningRate;
-    this.learningRateDecayFactor = learningRateDecayFactor;
-    this.learningRateDecaySteps = learningRateDecaySteps;
-    this.earlyStoppingPatience = earlyStoppingPatience;
-    this.bestValidationLoss = Infinity;
-    this.patienceCounter = 0;
-    this.gradientClippingThreshold = gradientClippingThreshold;
   }
 
+  // Improved weight initialization (He initialization for ReLU and variants)
   private initializeWeight(
     fanIn: number,
     fanOut: number,
@@ -158,9 +145,9 @@ class EnhancedNeuralNetwork {
       case 'swish':
       case 'mish':
       case 'gelu':
-        return Math.random() * Math.sqrt(2 / fanIn);
+        return Math.random() * Math.sqrt(2 / fanIn); // He initialization
       default:
-        return Math.random() * Math.sqrt(2 / (fanIn + fanOut));
+        return Math.random() * Math.sqrt(2 / (fanIn + fanOut)); // Xavier initialization
     }
   }
 
@@ -246,14 +233,10 @@ class EnhancedNeuralNetwork {
     );
   }
 
-  private batchNormalization(layer: number[]): number[] {
-    const mean = layer.reduce((sum, val) => sum + val, 0) / layer.length;
-    const variance = layer.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / layer.length;
-    const epsilon = 1e-8;
-    return layer.map(val => (val - mean) / Math.sqrt(variance + epsilon));
-  }
-
-  private forwardPropagation(input: number[], isTraining: boolean = true): number[] {
+  private forwardPropagation(
+    input: number[],
+    isTraining: boolean = true
+  ): number[] {
     this.layers[0] = input;
     for (let i = 1; i < this.layers.length; i++) {
       for (let j = 0; j < this.layers[i].length; j++) {
@@ -261,14 +244,18 @@ class EnhancedNeuralNetwork {
         for (let k = 0; k < this.layers[i - 1].length; k++) {
           sum += this.layers[i - 1][k] * this.weights[i - 1][j][k];
         }
-        this.layers[i][j] = this.activation(sum, this.activationFunctions[i - 1]);
+        this.layers[i][j] =
+          i === this.layers.length - 1
+            ? sum
+            : this.activation(sum, this.activationFunctions[i - 1]);
       }
       if (isTraining && i < this.layers.length - 1) {
-        this.layers[i] = this.batchNormalization(this.layers[i]);
         this.layers[i] = this.dropout(this.layers[i]);
       }
     }
-    this.layers[this.layers.length - 1] = this.softmax(this.layers[this.layers.length - 1]);
+    this.layers[this.layers.length - 1] = this.softmax(
+      this.layers[this.layers.length - 1]
+    );
     return this.layers[this.layers.length - 1];
   }
 
@@ -308,22 +295,12 @@ class EnhancedNeuralNetwork {
     }
   }
 
-  private updateLearningRate(step: number): void {
-    this.learningRate = this.initialLearningRate * 
-      Math.pow(this.learningRateDecayFactor, Math.floor(step / this.learningRateDecaySteps));
-  }
-
-  private clipGradients(gradient: number): number {
-    return Math.max(Math.min(gradient, this.gradientClippingThreshold), -this.gradientClippingThreshold);
-  }
-
   private updateWeight(
     layerIndex: number,
     neuronIndex: number,
     weightIndex: number,
     gradient: number
   ): void {
-    gradient = this.clipGradients(gradient);
     switch (this.optimizer) {
       case 'adam':
         this.adamOptimizer(layerIndex, neuronIndex, weightIndex, gradient);
@@ -406,9 +383,8 @@ class EnhancedNeuralNetwork {
       (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay);
   }
 
-  train(inputs: number[][], targets: number[][], epochs: number, validationData?: { inputs: number[][], targets: number[][] }): number {
-    let totalLoss = 0;    
-    let step = 0;
+  train(inputs: number[][], targets: number[][], epochs: number): number {
+    let totalLoss = 0;
     for (let epoch = 0; epoch < epochs; epoch++) {
       for (let i = 0; i < inputs.length; i += this.batchSize) {
         const batchInputs = inputs.slice(i, i + this.batchSize);
@@ -418,29 +394,13 @@ class EnhancedNeuralNetwork {
           this.backPropagation(batchTargets[j]);
           totalLoss += this.calculateLoss(output, batchTargets[j]);
         }
-        this.updateLearningRate(step);
-        step++;
       }
-      
-      if (validationData) {
-        const validationLoss = this.validate(validationData.inputs, validationData.targets);
-        if (validationLoss < this.bestValidationLoss) {
-          this.bestValidationLoss = validationLoss;
-          this.patienceCounter = 0;
-        } else {
-          this.patienceCounter++;
-          if (this.patienceCounter >= this.earlyStoppingPatience) {
-            console.log(`Early stopping at epoch ${epoch}`);
-            break;
-          }
-        }
-      }
-
       if (epoch % 100 === 0) {
         console.log(`Epoch ${epoch}, Loss: ${totalLoss / inputs.length}`);
       }
+      this.learningRate *= 0.99; // Learning rate decay
     }
-    return totalLoss / inputs.length;
+    return totalLoss / inputs.length; // Return the average loss
   }
 
   predict(input: number[]): number {
@@ -455,15 +415,6 @@ class EnhancedNeuralNetwork {
     );
   }
 
-  validate(inputs: number[][], targets: number[][]): number {
-    let totalLoss = 0;
-    for (let i = 0; i < inputs.length; i++) {
-      const output = this.forwardPropagation(inputs[i], false);
-      totalLoss += this.calculateLoss(output, targets[i]);
-    }
-    return totalLoss / inputs.length;
-  }
-
   getLearningRate(): number {
     return this.learningRate;
   }
@@ -473,6 +424,7 @@ class EnhancedNeuralNetwork {
   }
 }
 
+// Function to calculate accuracy
 function calculateAccuracy(
   neuralNetwork: EnhancedNeuralNetwork,
   testData: { input: number[]; target: number[] }[]
@@ -489,44 +441,56 @@ function calculateAccuracy(
   return correctPredictions / testData.length;
 }
 
+// Expanded Training Data
 const trainingData = [
-  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  // Greetings (Class 0)
+  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
+  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
+  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
+  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "greetings"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hey"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "What's up?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Howdy"
+  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello there"
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Nice to meet you"
+
+  // Good morning (Class 1)
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good afternoon"
+  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good morning"
+  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good morning"
+  { input: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning, how are you?"
+
+  // Good evening (Class 2)
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
+  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good evening"
+  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good evening"
+  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, how are you?"
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, what's up?"
+
+  // Farewells (Class 3)
+  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "farewell"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "take care"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "have a good one"
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye, bye"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "catch you later"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "until next time"
+
+  // Weather (Class 4)
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Is it going to rain today?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the temperature outside?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Do I need an umbrella today?"
+
+  // How are you (Class 5)
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you doing?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how's it going?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How have you been?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How's your day going?"
 
   // Jokes (Class 6)
@@ -548,7 +512,7 @@ const trainingData = [
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I need assistance"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "Could you give me a hand?"
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I'm having trouble with something"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "How do I use this feature?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "How do I use this feature?"
 
   // Thank you (Class 9)
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thank you"
@@ -558,13 +522,15 @@ const trainingData = [
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "Much appreciated"
 ];
 
+// Define the type for bestHyperparameters
 interface BestHyperparameters {
   layerSizes: number[];
   learningRate: number;
   dropoutRate: number;
 }
-
-const layerSizesOptions = [[25,45,10],[25, 30,10],[25, 25, 10], [25, 20, 10], [25, 15, 10]];
+// *** Perform Hyperparameter Tuning ONLY ONCE outside the component ***
+// Define hyperparameter options
+const layerSizesOptions = [[25, 25, 10], [25, 20, 10], [25, 15, 10]];
 const learningRateOptions = [0.005, 0.05];
 const dropoutRateOptions = [0.3, 0.5];
 
@@ -574,9 +540,6 @@ let bestHyperparameters: BestHyperparameters = {
   learningRate: 0,
   dropoutRate: 0,
 };
-
-// This loop finds the best hyperparameters by training a new network for each combination
-// and evaluating its accuracy on the training data.
 for (const layerSizes of layerSizesOptions) {
   for (const learningRate of learningRateOptions) {
     for (const dropoutRate of dropoutRateOptions) {
@@ -592,9 +555,10 @@ for (const layerSizes of layerSizesOptions) {
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        10 // Number of epochs
+        50 // Number of epochs
       );
 
+      // Use trainingData for accuracy calculation since testData is not defined
       const accuracy = calculateAccuracy(neuralNetwork, trainingData);
       console.log(
         `Hyperparameters: layerSizes=${layerSizes}, learningRate=${learningRate}, dropoutRate=${dropoutRate}, accuracy=${accuracy}`
@@ -627,8 +591,9 @@ finalNeuralNetwork.train(
   trainingData.map((data) => data.target),
   250 // Number of epochs
 );
+// *** End of Hyperparameter Tuning ***
 
-
+// Enhanced Database of words for generative output
 const wordDatabase = {
   greetings: [
     'Hello',
@@ -683,20 +648,11 @@ const wordDatabase = {
     'music',
     'books',
   ],
-  adjectives: [
-    'amazing', 'brilliant', 'creative', 'diligent', 'eloquent', 'fascinating',
-    'genuine', 'harmonious', 'innovative', 'judicious', 'knowledgeable', 'luminous',
-    'meticulous', 'noble', 'optimistic', 'profound', 'quintessential', 'resilient',
-    'sophisticated', 'tenacious', 'ubiquitous', 'versatile', 'whimsical', 'zealous'
-  ],
-  adverbs: [
-    'absolutely', 'brilliantly', 'carefully', 'diligently', 'effectively',
-    'fervently', 'gracefully', 'harmoniously', 'innovatively', 'judiciously',
-    'keenly', 'luminously', 'meticulously', 'notably', 'optimistically',
-    'profoundly', 'quintessentially', 'resiliently', 'sophisticatedly', 'tenaciously'
-  ],
 };
 
+// ... (rest of the code)
+
+// Enhanced generative functions
 const generateGreeting = (timeOfDay: string): string => {
   const greetings = wordDatabase.greetings.filter((g) =>
     g.toLowerCase().includes(timeOfDay)
@@ -786,46 +742,66 @@ const generateThankYouResponse = (): string => {
   return responses[Math.floor(Math.random() * responses.length)];
 };
 
+// Update the enhancedMachineLearning function
 const enhancedMachineLearning = (input: string): string => {
-  // Preprocess the input
-  const preprocessedInput = input.toLowerCase().replace(/[^\w\s]/g, '');
-
+  // Create inputVector based on the input
   const keywords = [
-    'hello', 'hi', 'good morning', 'good evening', 'hey there',
-    'goodbye', 'bye', 'see you later', 'farewell', 'take care',
-    'have a good one', 'catch you later', 'until next time',
-    "what's the weather like", "how's the weather",
-    'tell me a joke', 'tell me a funny joke',
-    'how are you', 'how are you doing', "how's it going",
-    "what is the time", "what is the date",
-    "help me with the math", "help me find my airpods",
+    'hello',
+    'hi',
+    'good morning',
+    'good evening',
+    'hey there',
+    'goodbye',
+    'bye',
+    'see you later',
+    'farewell',
+    'take care',
+    'have a good one',
+    'catch you later',
+    'until next time',
+    "what's the weather like?",
+    "how's the weather?",
+    'tell me a joke',
+    'tell me a funny joke',
+    'how are you',
+    'how are you doing',
+    "how's it going",
+    "what is the time",
+    "what is the date",
+    "help me with the math",
+    "help me find my airpods",
     "thanks for the help",
+    
   ];
 
   const inputVector = keywords.map((keyword) =>
-    preprocessedInput.includes(keyword) ? 1 : 0
+    input.toLowerCase().includes(keyword) ? 1 : 0
   );
 
   const predictedClass = finalNeuralNetwork.predict(inputVector);
-  console.log(`Preprocessed Input: "${preprocessedInput}", Predicted class: ${predictedClass}`);
+  console.log(`Input: "${input}", Predicted class: ${predictedClass}`);
 
+  // Get the current time of day
   const hour = new Date().getHours();
   const timeOfDay =
     hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
 
+  // Contextual Responses with Word Combination and Generative Output
   const responses = {
     0: () => generateGreeting(timeOfDay),
     1: () => generateGreeting('morning'),
     2: () => generateGreeting('evening'),
     3: () => generateFarewell(),
     4: () => generateWeatherResponse(),
-    5: () => generateHowAreYouResponse(),
-    6: () => generateJoke(),
+    5: () => generateJoke(),
+    6: () => generateHowAreYouResponse(),
     7: () => generateTimeResponse(),
     8: () => generateHelpResponse(),
     9: () => generateThankYouResponse(),
   };
 
+  // Return the appropriate response based on the predicted class
+  // If the predicted class is not recognized, use the 9th response
   return (
     responses[predictedClass as keyof typeof responses]?.() || responses[9]()
   );
@@ -892,6 +868,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     { text: "What's the latest news?", icon: <FiImage /> },
   ];
 
+  // Function to get typing speed based on selected model
   const getTypingSpeed = (model: string): number => {
     switch (model) {
       case 'Mazs AI v0.90.1 anatra':
@@ -910,8 +887,20 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   useEffect(() => {
     const trainModel = async () => {
       try {
+        // Set status to 'training' before starting the epochs
         setTrainingStatus('training');
 
+        // Create your final model with the best hyperparameters
+        const finalNeuralNetwork = new EnhancedNeuralNetwork(
+          bestHyperparameters.layerSizes,
+          bestHyperparameters.learningRate,
+          bestHyperparameters.dropoutRate,
+          64, // Batch Size
+          'adamw', // Optimizer
+          0.01 // L2 Regularization Rate
+        );
+
+        // Train the final model on the full training set
         for (let epoch = 0; epoch < 1500; epoch++) {
           const loss = finalNeuralNetwork.train(
             trainingData.map((data) => data.input),
@@ -919,8 +908,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             1
           );
 
+          // Calculate accuracy using the training data instead of testData
           const accuracy = calculateAccuracy(finalNeuralNetwork, trainingData);
 
+          // Update training progress every 10 epochs
           if (epoch % 10 === 0) {
             setTrainingProgress({ epoch, loss, accuracy });
           }
@@ -933,12 +924,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       }
     };
 
+    // Use setTimeout to ensure the initial loading screen is rendered
     setTimeout(() => {
       trainModel();
     }, 0);
   }, []);
 
   useEffect(() => {
+    // Check if the user is a developer
     const storedUsername = localStorage.getItem('username');
     const storedPassword = localStorage.getItem('password');
     if (storedUsername === 'Developer' && storedPassword === 'GMTStudiotech') {
@@ -965,7 +958,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           {
             id: Date.now().toString(),
             sender: 'bot',
-            text: `${selectedModel}: ${text}`,
+            text: `${selectedModel}: ${text}`, // Add model name to the message
             timestamp: new Date(),
           },
         ]);
@@ -975,17 +968,20 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }, typingSpeed);
   };
 
+  // New function to detect math expressions
   const detectMathExpression = (text: string): string | null => {
     const mathRegex = /(\d+(\s*[+\-*/]\s*\d+)+)/;
     const match = text.match(mathRegex);
     return match ? match[0] : null;
   };
 
+  // New function to calculate math expressions
   const calculateMathExpression = (expression: string): number => {
     // eslint-disable-next-line no-new-func
     return Function(`'use strict'; return (${expression})`)();
   };
 
+  // Modified handleSendMessage function
   const handleSendMessage = async () => {
     if (inputValue.trim() === '') return;
 
@@ -1001,9 +997,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       return;
     }
 
+    // Proceed with the original message handling
     sendMessage(inputValue);
   };
 
+  // Add this new function
   const addConfirmationMessage = (type: 'math' | 'summary') => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -1016,6 +1014,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setPendingConfirmationId(newMessage.id);
   };
 
+  // New function to handle math calculation
   const handleMathCalculation = () => {
     setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
     setPendingConfirmationId(null);
@@ -1025,9 +1024,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setInputValue('');
   };
 
+  // New function to handle summary
   const handleSummary = () => {
     setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
     setPendingConfirmationId(null);
+    // Implement a basic summarization function
     const summarize = (text: string): string => {
       const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
       const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
@@ -1038,12 +1039,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setInputValue('');
   };
 
+  // New function to proceed with normal message processing
   const proceedWithNormalMessage = () => {
     setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
     setPendingConfirmationId(null);
     sendMessage(inputValue);
   };
 
+  // Helper function to send a message
   const sendMessage = (text: string) => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -1074,37 +1077,44 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     if (messageIndex !== -1 && messageIndex > 0) {
       const userMessage = messages[messageIndex - 1];
 
+      // Create a simple input vector based on the user's message
       const inputVector = createInputVector(userMessage.text);
 
+      // Adjust the target vector based on feedback
       const targetVector = new Array(10).fill(0);
       const predictedClass = finalNeuralNetwork.predict(inputVector);
       
       if (feedback === 'good') {
         targetVector[predictedClass] = 1;
       } else {
+        // For negative feedback, slightly increase probabilities for other classes
         targetVector.fill(0.1);
         targetVector[predictedClass] = 0;
       }
 
+      // Add the new training data
       trainingData.push({ input: inputVector, target: targetVector });
 
+      // Retrain the model with the updated data
       console.log('Retraining model...');
       const originalLearningRate = finalNeuralNetwork.getLearningRate();
-      finalNeuralNetwork.setLearningRate(0.1);
+      finalNeuralNetwork.setLearningRate(0.1); // Increase learning rate for retraining
+
       const loss = finalNeuralNetwork.train(
         [inputVector],
         [targetVector],
-        250
+       1000// Reduced number of epochs for faster retraining
       );
 
-      finalNeuralNetwork.setLearningRate(originalLearningRate);
+      finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
       console.log(`Retraining complete. Final loss: ${loss}`);
 
+      // Provide feedback to the user
       const feedbackMessage: ChatMessage = {
         id: Date.now().toString(),
         sender: 'bot',
         text: feedback === 'good'
-          ? "Thank you for the positive feedback! I'll keep that in mind for future responses."
+          ? 'Thank you for the positive feedback! I\'ll keep that in mind for future responses.'
           : "I apologize for the unsatisfactory response. I've adjusted my understanding and will try to improve my answers in the future.",
         timestamp: new Date(),
       };
@@ -1112,6 +1122,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
+  // Helper function to create a simple input vector
   const createInputVector = (text: string): number[] => {
     const keywords = [
       'hello', 'hi', 'good morning', 'good evening', 'hey there',
@@ -1129,21 +1140,25 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setMessages([]);
   };
 
+  // *** Named Entity Recognition (NER) - Basic Rule-Based Example ***
   const performNER = (text: string): string => {
     const entities = [];
     const words = text.split(/\s+/);
 
     for (let i = 0; i < words.length; i++) {
       const word = words[i];
-      let nextWord = words[i + 1] || '';
+      let nextWord = words[i + 1] || ''; // Change to let
 
+      // Rule 1: Capitalized words followed by titles (Mr., Ms., Dr., etc.)
       if (
         word.match(/^[A-Z][a-z]+$/) &&
         nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)
       ) {
         entities.push(`${word} ${nextWord}`);
         i++;
-      } else if (
+      }
+      // Rule 2: Sequences of Capitalized words (potential names or organizations)
+      else if (
         word.match(/^[A-Z][a-z]+$/) &&
         nextWord.match(/^[A-Z][a-z]+$/)
       ) {
@@ -1151,12 +1166,17 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         while (nextWord.match(/^[A-Z][a-z]+$/) && i < words.length - 1) {
           name += ` ${nextWord}`;
           i++;
-          nextWord = words[i + 1] || ''; 
+          nextWord = words[i + 1] || ''; // This reassignment is now valid
         }
         entities.push(name);
-      } else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
+      }
+      // Rule 3: Capitalized words at the beginning of sentences (potential names)
+      else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
         entities.push(word);
-      } else if (
+      }
+      // Rule 4: Locations - (Add a list of known locations or use a more advanced method)
+      // This is a very basic example, you'll need a better way to identify locations
+      else if (
         word.match(/^[A-Z][a-z]+$/) &&
         ['City', 'Town', 'Country'].includes(nextWord)
       ) {
@@ -1167,26 +1187,28 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
     return entities.length > 0 ? entities.join(', ') : 'No entities found';
   };
-
+  // Keep the POS tagging function and fix the regex
   const performPOS = (text: string): string => {
     const words = text.split(' ');
     const tags = words.map((word, index) => {
-      const nounRegex = /^[a-z]+(s)?$/;
-      const verbRegex = /^[a-z]+(ed|ing|s)?$/;
-      const adjectiveRegex = /^[a-z]+(er|est)?$/;
-      const adverbRegex = /^[a-z]+ly$/;
-      const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i;      const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; // Prepositions
+      // Regular expressions for different parts of speech
+      const nounRegex = /^[a-z]+(s)?$/; // Nouns (singular or plural)
+      const verbRegex = /^[a-z]+(ed|ing|s)?$/; // Verbs (past tense, present participle, 3rd person singular)
+      const adjectiveRegex = /^[a-z]+(er|est)?$/; // Adjectives (comparative, superlative)
+      const adverbRegex = /^[a-z]+ly$/; // Adverbs
+      const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; // Pronouns
+      const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; // Prepositions
       const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; // Conjunctions
       const determinerRegex = /^(the|a|an)$/i; // Determiners
- 
+
       word = word.toLowerCase(); // Normalize to lowercase
- 
+
       // Check for punctuation
       if (word.match(/^[.,!?;:]+$/)) return `${word}/PUNCT`;
- 
+
       // Check for numbers
       if (word.match(/^[0-9]+(\.[0-9]+)?$/)) return `${word}/NUM`;
- 
+
       // Apply more specific rules
       if (
         word === 'to' &&
@@ -1195,7 +1217,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       ) {
         return `${word}/TO`; // 'to' as part of infinitive
       }
- 
+
       if (word.match(determinerRegex)) return `${word}/DET`;
       if (word.match(pronounRegex)) return `${word}/PRON`;
       if (word.match(prepositionRegex)) return `${word}/PREP`;
@@ -1204,54 +1226,46 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       if (word.match(adjectiveRegex)) return `${word}/ADJ`;
       if (word.match(verbRegex)) return `${word}/VERB`;
       if (word.match(nounRegex)) return `${word}/NOUN`;
- 
+
       return `${word}/UNK`; // Unknown
     });
     return tags.join(' ');
   };
- 
+
   const handlePOS = () => {
     if (inputValue) {
       const posResult = performPOS(inputValue);
       setIsTyping(true);
       simulateTyping(`POS Tagging Result:\n${posResult}`);
-      setInputValue('');
+      setInputValue(''); // Clear the input box
     }
   };
- 
+
   const handleNER = () => {
     if (inputValue) {
       const nerResult = performNER(inputValue);
       setIsTyping(true);
       simulateTyping(`Named Entities Found:\n${nerResult}`);
-      setInputValue(''); 
+      setInputValue(''); // Clear the input box
     }
   };
- 
+
   const performSummarization = async (text: string): Promise<string> => {
+    // This is a basic example of summarization
+    // In a real-world scenario, you might want to use a more sophisticated algorithm
+    // or an external API for better results
     const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
-    let summary = '';
-    let tokenCount = 0;
- 
-    for (const sentence of sentences) {
-      const sentenceTokens = sentence.split(/\s+/).length;
-      if (tokenCount + sentenceTokens > maxTokens) {
-        break;
-      }
-      summary += sentence + '. ';
-      tokenCount += sentenceTokens;
-    }
- 
-    return summary.trim();
+    const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
+    return summary;
   };
- 
+
   const handleSummarization = () => {
     if (inputValue) {
       setIsTyping(true);
       performSummarization(inputValue)
         .then((summaryResult: string) => {
-          simulateTyping(`Text Summary (max ${maxTokens} tokens):\n${summaryResult}`);
-          setInputValue(''); 
+          simulateTyping(`Text Summary:\n${summaryResult}`);
+          setInputValue(''); // Clear the input box
         })
         .catch((error: Error) => {
           console.error('Error in summarization:', error);
@@ -1262,38 +1276,38 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         });
     }
   };
- 
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
- 
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
- 
+
   const handleVoiceInput = () => {
     if ('webkitSpeechRecognition' in window) {
       const recognition = new window.webkitSpeechRecognition();
- 
+
       recognition.onstart = () => {
         setIsListening(true);
       };
- 
+
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         setInputValue((prevValue) => prevValue + transcript);
       };
- 
+
       recognition.onend = () => {
         setIsListening(false);
       };
- 
+
       recognition.start();
     } else {
       alert('Speech recognition is not supported in your browser.');
     }
   };
- 
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -1303,11 +1317,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          canvas.width = 100; 
-          canvas.height = 100; 
+          canvas.width = 100; // Thumbnail width
+          canvas.height = 100; // Thumbnail height
           ctx?.drawImage(img, 0, 0, 100, 100);
           const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
- 
+
+          // Add image message
           const newMessage: ChatMessage = {
             id: Date.now().toString(),
             sender: 'user',
@@ -1322,11 +1337,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       reader.readAsDataURL(file);
     }
   };
- 
+
   return (
     <div
       className={`flex flex-col h-screen w-full ${
-        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
+        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-white'
       } transition-colors duration-300`}
     >
       <AnimatePresence>
@@ -1338,7 +1353,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             exit={{ opacity: 0 }}
           >
             <h2 className="text-2xl font-bold mb-4">
-              Initializing AI, please wait...
+              Initializing artificial intelligence, please wait...
             </h2>
             <LoadingSpinner />
           </motion.div>
@@ -1387,11 +1402,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <header className="flex justify-between items-center p-4 border-b border-gray-700 bg-opacity-90 backdrop-filter backdrop-blur-lg">
+          <div className="flex justify-between items-center p-4 border-b border-gray-700">
             <h1 className="text-2xl font-bold pl-10">
               {selectedChat ? selectedChat.title : 'New Chat'} - {selectedModel}
             </h1>
-            <div className="flex items-center space-x-2 ">
+            <div className="flex items-center space-x-2">
               {isDeveloper && (
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -1423,7 +1438,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 )}
               </motion.button>
             </div>
-          </header>
+          </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <AnimatePresence>
               {messages.map((message) => (
@@ -1438,15 +1453,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   }`}
                 >
                   <div
-                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg shadow-md ${
+                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg ${
                       message.sender === 'user'
                         ? 'bg-blue-600 text-white'
-                        : darkMode
-                        ? 'bg-gray-800 text-white'
-                        : 'bg-white text-gray-800'
+                        : 'bg-gray-700 text-white'
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
+                    {message.text}
                     {message.image && (
                       <img
                         src={message.image}
@@ -1454,31 +1467,26 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                         className="mt-2 rounded"
                       />
                     )}
-                    {message.confirmationType &&
-                      message.id === pendingConfirmationId && (
-                        <div className="flex space-x-2 mt-2">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() =>
-                              message.confirmationType === 'math'
-                                ? handleMathCalculation()
-                                : handleSummary()
-                            }
-                            className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
-                          >
-                            <FiCheck />
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={proceedWithNormalMessage}
-                            className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
-                          >
-                            <FiX />
-                          </motion.button>
-                        </div>
-                      )}
+                    {message.confirmationType && message.id === pendingConfirmationId && (
+                      <div className="flex space-x-2 mt-2">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => message.confirmationType === 'math' ? handleMathCalculation() : handleSummary()}
+                          className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+                        >
+                          <FiCheck />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={proceedWithNormalMessage}
+                          className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                        >
+                          <FiX />
+                        </motion.button>
+                      </div>
+                    )}
                     {message.sender === 'bot' && (
                       <div className="mt-2 text-xs text-gray-400">
                         {isDeveloper ? (
@@ -1491,10 +1499,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               Response time:{' '}
                               {(Math.random() * 100 + 50).toFixed(2)}ms
                             </p>
-                            <p>Model: {selectedModel}</p>
+                            <p>
+                              Model: Mazs AI v0.90.1 
+                            </p>
                           </>
                         ) : (
-                          <p>Model: {selectedModel}</p>
+                          <p>Model: Mazs AI v0.90.1 anatra</p>
                         )}
                       </div>
                     )}
@@ -1529,13 +1539,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <div
-                  className={`p-3 rounded-lg shadow-md ${
-                    darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-                  }`}
-                >
+                <div className="bg-gray-700 text-white p-3 rounded-lg">
                   {typingMessage}
-                  <span className="inline-block w-1 h-4 ml-1 bg-current animate-blink"></span>
+                  <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
                 </div>
               </motion.div>
             )}
@@ -1546,22 +1552,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <div
-                  className={`p-3 rounded-lg shadow-md ${
-                    darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-                  }`}
-                >
+                <div className="bg-gray-700 text-white p-3 rounded-lg">
                   <span
-                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce mr-1"
+                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
                     style={{ animationDelay: '0.2s' }}
                   ></span>
                   <span
-                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce"
+                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
                     style={{ animationDelay: '0.4s' }}
-                  ></span>
-                  <span
-                    className="inline-block w-2 h-2 bg-current rounded-full animate-bounce"
-                    style={{ animationDelay: '0.6s' }}
                   ></span>
                 </div>
               </motion.div>
@@ -1582,9 +1580,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setInputValue(suggestion.text)}
-                    className={`flex items-center space-x-2 ${
-                      darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'
-                    } text-current rounded-full px-4 py-2 text-sm transition-colors duration-200`}
+                    className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm transition-colors duration-200"
                   >
                     {suggestion.icon}
                     <span>{suggestion.text}</span>
@@ -1599,15 +1595,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type a message..."
-                className={`flex-1 p-2 rounded-full ${
-                  darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-                } border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200`}
+                className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
               />
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleSendMessage}
-                className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="p-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
               >
                 <FiSend />
               </motion.button>
@@ -1617,13 +1611,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={handleVoiceInput}
-                    className={`p-2 rounded-full ${
-                      isListening
-                        ? 'bg-red-600'
-                        : darkMode
-                        ? 'bg-gray-800'
-                        : 'bg-gray-200'
-                    } text-current hover:bg-gray-700 transition-colors`}
+                    className={`p-2 rounded ${
+                      isListening ? 'bg-red-600' : 'bg-gray-800'
+                    } text-white hover:bg-gray-700 transition-colors`}
                   >
                     <FiMic />
                   </motion.button>
@@ -1631,9 +1621,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`p-2 rounded-full ${
-                      darkMode ? 'bg-gray-800' : 'bg-gray-200'
-                    } text-current hover:bg-gray-700 transition-colors`}
+                    className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
                   >
                     <FiImage />
                   </motion.button>
@@ -1652,9 +1640,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handlePOS}
-                className={`p-2 rounded-full ${
-                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
-                } text-current hover:bg-gray-700 transition-colors`}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
               >
                 POS
               </motion.button>
@@ -1662,9 +1648,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSummarization}
-                className={`p-2 rounded-full ${
-                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
-                } text-current hover:bg-gray-700 transition-colors`}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
               >
                 Summarize
               </motion.button>
@@ -1672,9 +1656,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNER}
-                className={`p-2 rounded-full ${
-                  darkMode ? 'bg-gray-800' : 'bg-gray-200'
-                } text-current hover:bg-gray-700 transition-colors`}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
               >
                 NER
               </motion.button>
@@ -1682,20 +1664,15 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           </div>
         </motion.div>
       )}
- 
+
       {/* Settings Modal */}
       {showSettings && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`bg-${darkMode ? 'gray-800' : 'white'} p-6 rounded-lg w-96 shadow-xl`}
+            className="bg-gray-800 p-6 rounded-lg w-96"
           >
             <h2 className="text-xl font-bold mb-4">Model Settings</h2>
             <div className="space-y-4">
@@ -1718,7 +1695,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   type="number"
                   value={maxTokens}
                   onChange={(e) => setMaxTokens(parseInt(e.target.value))}
-                  className={`w-full bg-${darkMode ? 'gray-700' : 'gray-100'} p-2 rounded`}
+                  className="w-full bg-gray-700 p-2 rounded"
                 />
               </div>
               <div>
@@ -1726,7 +1703,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className={`w-full bg-${darkMode ? 'gray-700' : 'gray-100'} p-2 rounded`}
+                  className="w-full bg-gray-700 p-2 rounded"
                 >
                   <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
                   <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
@@ -1745,10 +1722,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               </motion.button>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </div>
   );
- };
- 
- export default Chat;
+};
+
+export default Chat;
