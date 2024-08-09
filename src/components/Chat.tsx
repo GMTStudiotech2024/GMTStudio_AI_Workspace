@@ -78,6 +78,8 @@ class EnhancedNeuralNetwork {
   private rmspropParams: { decay: number; epsilon: number };
   private l2RegularizationRate: number;
   private activationFunctions: string[];
+  private attentionWeights: number[][] = []; // Initialize with an empty array
+  private useAttention: boolean;
 
   constructor(
     layerSizes: number[],
@@ -86,7 +88,8 @@ class EnhancedNeuralNetwork {
     batchSize: number = 32,
     optimizer: 'adam' | 'rmsprop' | 'sgd' | 'adamw' = 'adamw',
     l2RegularizationRate: number = 0.01,
-    activationFunctions: string[] = []
+    activationFunctions: string[] = [],
+    useAttention: boolean = false
   ) {
     this.layers = layerSizes.map((size) => new Array(size).fill(0));
     this.weights = [];
@@ -131,9 +134,14 @@ class EnhancedNeuralNetwork {
         )
       );
     }
+    this.useAttention = useAttention;
+    if (this.useAttention) {
+      this.attentionWeights = Array.from({ length: layerSizes[layerSizes.length - 2] }, () =>
+        Array(layerSizes[layerSizes.length - 1]).fill(0).map(() => Math.random())
+      );
+    }
   }
 
-  // Improved weight initialization (He initialization for ReLU and variants)
   private initializeWeight(
     fanIn: number,
     fanOut: number,
@@ -234,16 +242,27 @@ class EnhancedNeuralNetwork {
     );
   }
 
-  private forwardPropagation(
-    input: number[],
-    isTraining: boolean = true
-  ): number[] {
+  private attentionMechanism(input: number[]): number[] {
+    if (!this.useAttention) return input;
+
+    const attentionScores = this.attentionWeights.map(weights =>
+      weights.reduce((sum, weight, i) => sum + weight * input[i], 0)
+    );
+    const softmaxScores = this.softmax(attentionScores);
+    return input.map((value, i) => value * softmaxScores[i]);
+  }
+
+  private forwardPropagation(input: number[], isTraining: boolean = true): number[] {
     this.layers[0] = input;
     for (let i = 1; i < this.layers.length; i++) {
+      let layerInput = this.layers[i - 1];
+      if (i === this.layers.length - 1 && this.useAttention) {
+        layerInput = this.attentionMechanism(layerInput);
+      }
       for (let j = 0; j < this.layers[i].length; j++) {
         let sum = this.biases[i - 1][j];
-        for (let k = 0; k < this.layers[i - 1].length; k++) {
-          sum += this.layers[i - 1][k] * this.weights[i - 1][j][k];
+        for (let k = 0; k < layerInput.length; k++) {
+          sum += layerInput[k] * this.weights[i - 1][j][k];
         }
         this.layers[i][j] =
           i === this.layers.length - 1
@@ -286,12 +305,32 @@ class EnhancedNeuralNetwork {
     }
 
     for (let i = 1; i < this.layers.length; i++) {
+      let layerInput = this.layers[i - 1];
+      if (i === this.layers.length - 1 && this.useAttention) {
+        layerInput = this.attentionMechanism(layerInput);
+      }
       for (let j = 0; j < this.layers[i].length; j++) {
-        for (let k = 0; k < this.layers[i - 1].length; k++) {
-          const gradient = deltas[i][j] * this.layers[i - 1][k];
+        for (let k = 0; k < layerInput.length; k++) {
+          const gradient = deltas[i][j] * layerInput[k];
           this.updateWeight(i - 1, j, k, gradient);
         }
         this.biases[i - 1][j] += this.learningRate * deltas[i][j];
+      }
+    }
+
+    if (this.useAttention) {
+      this.updateAttentionWeights(deltas[this.layers.length - 1]);
+    }
+  }
+
+  private updateAttentionWeights(outputDeltas: number[]): void {
+    const attentionDeltas = this.attentionWeights.map((weights, i) =>
+      weights.map((weight, j) => weight * outputDeltas[j] * this.layers[this.layers.length - 2][i])
+    );
+
+    for (let i = 0; i < this.attentionWeights.length; i++) {
+      for (let j = 0; j < this.attentionWeights[i].length; j++) {
+        this.attentionWeights[i][j] += this.learningRate * attentionDeltas[i][j];
       }
     }
   }
@@ -381,27 +420,30 @@ class EnhancedNeuralNetwork {
       this.weights[layerIndex][neuronIndex][weightIndex];
     this.weights[layerIndex][neuronIndex][weightIndex] +=
       this.learningRate *
-      (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay);
-  }
+      (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay)  }
 
   train(inputs: number[][], targets: number[][], epochs: number): number {
     let totalLoss = 0;
     for (let epoch = 0; epoch < epochs; epoch++) {
+      let epochLoss = 0;
       for (let i = 0; i < inputs.length; i += this.batchSize) {
         const batchInputs = inputs.slice(i, i + this.batchSize);
         const batchTargets = targets.slice(i, i + this.batchSize);
+        let batchLoss = 0;
         for (let j = 0; j < batchInputs.length; j++) {
           const output = this.forwardPropagation(batchInputs[j], true);
           this.backPropagation(batchTargets[j]);
-          totalLoss += this.calculateLoss(output, batchTargets[j]);
+          batchLoss += this.calculateLoss(output, batchTargets[j]);
         }
+        epochLoss += batchLoss / batchInputs.length;
       }
+      totalLoss = epochLoss / (inputs.length / this.batchSize);
       if (epoch % 100 === 0) {
-        console.log(`Epoch ${epoch}, Loss: ${totalLoss / inputs.length}`);
+        console.log(`Epoch ${epoch}, Loss: ${totalLoss}`);
       }
       this.learningRate *= 0.99; // Learning rate decay
     }
-    return totalLoss / inputs.length; // Return the average loss
+    return totalLoss;
   }
 
   predict(input: number[]): number {
