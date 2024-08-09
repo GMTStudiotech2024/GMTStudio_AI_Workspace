@@ -173,18 +173,11 @@ class EnhancedNeuralNetwork {
       case 'elu':
         return x >= 0 ? x : Math.exp(x) - 1;
       case 'swish':
-        return x * this.activation(x, 'sigmoid');
+        return x / (1 + Math.exp(-x));
       case 'mish':
         return x * Math.tanh(Math.log(1 + Math.exp(x)));
       case 'gelu':
-        return (
-          0.5 *
-          x *
-          (1 +
-            Math.tanh(
-              Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))
-            ))
-        );
+        return 0.5 * x * (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))));
       default:
         return x;
     }
