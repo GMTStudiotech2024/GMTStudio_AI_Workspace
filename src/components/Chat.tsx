@@ -943,7 +943,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           bestHyperparameters.dropoutRate,
           64, // Batch Size
           'adamw', // Optimizer
-          0.01 // L2 Regularization Rate
+          0.01, // L2 Regularization Rate
+          ['relu', 'relu', 'softmax'], // Activation functions
+          true // Use attention mechanism
         );
 
         // Train the final model on the full training set
