@@ -11,7 +11,8 @@ import {
   FiTrash2,
   FiCheck,
   FiX,
-  FiSettings
+  FiSettings,
+  FiPause
 } from 'react-icons/fi';
 import { Message as ImportedMessage } from '../types'; // Make sure you have the correct import for your Message type
 
@@ -861,6 +862,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [detectedMathExpression, setDetectedMathExpression] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [stopGenerating, setStopGenerating] = useState<(() => void) | null>(null);
+  const [partialMessage, setPartialMessage] = useState<string | null>(null);
 
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FiSun /> },
@@ -945,11 +949,23 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   const simulateTyping = (text: string) => {
     let index = 0;
+    let isCancelled = false;
     setTypingMessage('');
+    setIsGenerating(true);
+    setPartialMessage(null);
 
     const typingInterval = setInterval(() => {
+      if (isCancelled) {
+        clearInterval(typingInterval);
+        return;
+      }
+
       if (index < text.length) {
-        setTypingMessage((prev) => prev + text.charAt(index));
+        setTypingMessage((prev) => {
+          const newMessage = prev + text.charAt(index);
+          setPartialMessage(newMessage);
+          return newMessage;
+        });
         index++;
       } else {
         clearInterval(typingInterval);
@@ -958,14 +974,44 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           {
             id: Date.now().toString(),
             sender: 'bot',
-            text: `${selectedModel}: ${text}`, // Add model name to the message
+            text: `${selectedModel}: ${text}`,
             timestamp: new Date(),
           },
         ]);
         setTypingMessage(null);
+        setPartialMessage(null);
         setIsTyping(false);
+        setIsBotResponding(false);
+        setIsGenerating(false);
+        setStopGenerating(null);
       }
     }, typingSpeed);
+
+    const stopTyping = () => {
+      isCancelled = true;
+      clearInterval(typingInterval);
+      setIsGenerating(false);
+      setIsTyping(false);
+      setIsBotResponding(false);
+      setStopGenerating(null);
+      if (partialMessage) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: Date.now().toString(),
+            sender: 'bot',
+            text: `${selectedModel}: ${partialMessage} [Response interrupted]`,
+            timestamp: new Date(),
+          },
+        ]);
+        setTypingMessage(null);
+        setPartialMessage(null);
+      }
+    };
+
+    setStopGenerating(() => stopTyping);
+
+    return stopTyping;
   };
 
   // New function to detect math expressions
@@ -981,9 +1027,21 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     return Function(`'use strict'; return (${expression})`)();
   };
 
+  const [isBotResponding, setIsBotResponding] = useState(false);
+
   // Modified handleSendMessage function
   const handleSendMessage = async () => {
-    if (inputValue.trim() === '') return;
+    if (inputValue.trim() === '' && !isGenerating) return;
+
+    if (isGenerating && stopGenerating) {
+      // Stop the bot's response generation
+      stopGenerating();
+      return;
+    }
+
+    if (isGenerating) {
+      return; // Don't allow sending a new message while generating
+    }
 
     const mathExpression = detectMathExpression(inputValue);
     if (mathExpression) {
@@ -1058,6 +1116,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
     setInputValue('');
     setIsTyping(true);
+    setIsBotResponding(true);
 
     setTimeout(() => {
       const botResponse = enhancedMachineLearning(newMessage.text);
@@ -1065,11 +1124,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }, 1000);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
 
   const handleFeedback = (messageId: string, feedback: 'good' | 'bad') => {
     const messageIndex = messages.findIndex((message) => message.id === messageId);
@@ -1593,17 +1647,26 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type a message..."
-                className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !isBotResponding) {
+                    handleSendMessage();
+                  }
+                }}
+                placeholder={isBotResponding ? "Please wait for the bot's response..." : "Type a message..."}
+                className={`flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
+                  isBotResponding && !isGenerating ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={isBotResponding && !isGenerating}
               />
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleSendMessage}
-                className="p-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className={`p-2 rounded ${
+                  isGenerating ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                } text-white transition-colors`}
               >
-                <FiSend />
+                {isGenerating ? <FiPause /> : <FiSend />}
               </motion.button>
               {isDeveloper && (
                 <>
