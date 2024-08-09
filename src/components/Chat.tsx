@@ -564,7 +564,7 @@ interface BestHyperparameters {
   dropoutRate: number;
 }
 
-const layerSizesOptions = [[25, 25, 10], [25, 20, 10], [25, 15, 10]];
+const layerSizesOptions = [[25,45,10],[25, 30,10],[25, 25, 10], [25, 20, 10], [25, 15, 10]];
 const learningRateOptions = [0.005, 0.05];
 const dropoutRateOptions = [0.3, 0.5];
 
@@ -592,7 +592,7 @@ for (const layerSizes of layerSizesOptions) {
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        50 // Number of epochs
+        10 // Number of epochs
       );
 
       const accuracy = calculateAccuracy(neuralNetwork, trainingData);
@@ -682,6 +682,18 @@ const wordDatabase = {
     'movies',
     'music',
     'books',
+  ],
+  adjectives: [
+    'amazing', 'brilliant', 'creative', 'diligent', 'eloquent', 'fascinating',
+    'genuine', 'harmonious', 'innovative', 'judicious', 'knowledgeable', 'luminous',
+    'meticulous', 'noble', 'optimistic', 'profound', 'quintessential', 'resilient',
+    'sophisticated', 'tenacious', 'ubiquitous', 'versatile', 'whimsical', 'zealous'
+  ],
+  adverbs: [
+    'absolutely', 'brilliantly', 'carefully', 'diligently', 'effectively',
+    'fervently', 'gracefully', 'harmoniously', 'innovatively', 'judiciously',
+    'keenly', 'luminously', 'meticulously', 'notably', 'optimistically',
+    'profoundly', 'quintessentially', 'resiliently', 'sophisticatedly', 'tenaciously'
   ],
 };
 
@@ -775,41 +787,27 @@ const generateThankYouResponse = (): string => {
 };
 
 const enhancedMachineLearning = (input: string): string => {
+  // Preprocess the input
+  const preprocessedInput = input.toLowerCase().replace(/[^\w\s]/g, '');
+
   const keywords = [
-    'hello',
-    'hi',
-    'good morning',
-    'good evening',
-    'hey there',
-    'goodbye',
-    'bye',
-    'see you later',
-    'farewell',
-    'take care',
-    'have a good one',
-    'catch you later',
-    'until next time',
-    "what's the weather like?",
-    "how's the weather?",
-    'tell me a joke',
-    'tell me a funny joke',
-    'how are you',
-    'how are you doing',
-    "how's it going",
-    "what is the time",
-    "what is the date",
-    "help me with the math",
-    "help me find my airpods",
+    'hello', 'hi', 'good morning', 'good evening', 'hey there',
+    'goodbye', 'bye', 'see you later', 'farewell', 'take care',
+    'have a good one', 'catch you later', 'until next time',
+    "what's the weather like", "how's the weather",
+    'tell me a joke', 'tell me a funny joke',
+    'how are you', 'how are you doing', "how's it going",
+    "what is the time", "what is the date",
+    "help me with the math", "help me find my airpods",
     "thanks for the help",
-    
   ];
 
   const inputVector = keywords.map((keyword) =>
-    input.toLowerCase().includes(keyword) ? 1 : 0
+    preprocessedInput.includes(keyword) ? 1 : 0
   );
 
   const predictedClass = finalNeuralNetwork.predict(inputVector);
-  console.log(`Input: "${input}", Predicted class: ${predictedClass}`);
+  console.log(`Preprocessed Input: "${preprocessedInput}", Predicted class: ${predictedClass}`);
 
   const hour = new Date().getHours();
   const timeOfDay =
