@@ -64,6 +64,253 @@ interface TrainingProgress {
 }
 
 // Enhanced Neural Network Class
+// Add these new types and interfaces
+type Tensor1D = number[];
+type Tensor2D = number[][];
+
+interface TransformerConfig {
+  inputDim: number;
+  outputDim: number;
+  numHeads: number;
+  numLayers: number;
+  dropoutRate: number;
+}
+
+// Add this new class for the Transformer
+class Transformer {
+  private positionEncoding: Tensor2D;
+  private layers: TransformerLayer[];
+  private config: TransformerConfig;
+  private outputLayer: Dense;
+
+  constructor(config: TransformerConfig) {
+    this.config = config;
+    this.positionEncoding = this.createPositionEncoding(1000, config.inputDim);
+    this.layers = Array(config.numLayers).fill(null).map(() => new TransformerLayer(config));
+    this.outputLayer = new Dense(config.outputDim);
+  }
+
+  forward(input: Tensor2D): Tensor2D {
+    const inputWithPosition = this.addPositionalEncoding(input);
+    let output = inputWithPosition;
+    for (const layer of this.layers) {
+      output = layer.forward(output);
+    }
+    return this.outputLayer.forward(output);
+  }
+
+  private addPositionalEncoding(input: Tensor2D): Tensor2D {
+    return input.map((seq, i) => 
+      seq.map((val, j) => val + this.positionEncoding[i % 1000][j % this.config.inputDim])
+    );
+  }
+
+  private createPositionEncoding(maxLen: number, dim: number): Tensor2D {
+    const positionEncoding: Tensor2D = [];
+    for (let pos = 0; pos < maxLen; pos++) {
+      const row: Tensor1D = [];
+      for (let i = 0; i < dim; i++) {
+        if (i % 2 === 0) {
+          row.push(Math.sin(pos / Math.pow(10000, i / dim)));
+        } else {
+          row.push(Math.cos(pos / Math.pow(10000, (i - 1) / dim)));
+        }
+      }
+      positionEncoding.push(row);
+    }
+    return positionEncoding;
+  }
+}
+
+class TransformerLayer {
+  private multiHeadAttention: MultiHeadAttention;
+  private feedForward: FeedForward;
+  private layerNorm1: LayerNormalization;
+  private layerNorm2: LayerNormalization;
+  private dropout: Dropout;
+
+  constructor(config: TransformerConfig) {
+    this.multiHeadAttention = new MultiHeadAttention(config);
+    this.feedForward = new FeedForward(config);
+    this.layerNorm1 = new LayerNormalization(config.inputDim);
+    this.layerNorm2 = new LayerNormalization(config.inputDim);
+    this.dropout = new Dropout(config.dropoutRate);
+  }
+
+  forward(input: Tensor2D): Tensor2D {
+    const attended = this.multiHeadAttention.forward(input);
+    const normalized1 = this.layerNorm1.forward(input.map((row, i) => row.map((val, j) => val + attended[i][j])));
+    const ffOutput = this.feedForward.forward(normalized1);
+    const dropped = this.dropout.forward(ffOutput);
+    return this.layerNorm2.forward(normalized1.map((row, i) => row.map((val, j) => val + dropped[i][j])));
+  }
+}
+
+class LayerNormalization {
+  private gamma: number[];
+  private beta: number[];
+  private epsilon: number;
+
+  constructor(inputDim: number, epsilon: number = 1e-8) {
+    this.gamma = new Array(inputDim).fill(1);
+    this.beta = new Array(inputDim).fill(0);
+    this.epsilon = epsilon;
+  }
+
+  forward(input: Tensor2D): Tensor2D {
+    const mean = input.map(row => row.reduce((a, b) => a + b, 0) / row.length);
+    const variance = input.map((row, i) => row.reduce((a, b) => a + Math.pow(b - mean[i], 2), 0) / row.length);
+    return input.map((row, i) => row.map((val, j) => 
+      this.gamma[j] * (val - mean[i]) / Math.sqrt(variance[i] + this.epsilon) + this.beta[j]
+    ));
+  }
+}
+
+class Dense {
+  private weights: Tensor2D;
+  private bias: number[];
+
+  constructor(outputDim: number) {
+    this.weights = Array(outputDim).fill(null).map(() => Array(outputDim).fill(0).map(() => Math.random() - 0.5));
+    this.bias = Array(outputDim).fill(0);
+  }
+
+  forward(input: Tensor2D): Tensor2D {
+    return input.map(row => 
+      this.weights.map((wRow, i) => 
+        row.reduce((sum, val, j) => sum + val * wRow[j], 0) + this.bias[i]
+      )
+    );
+  }
+}
+
+class Dropout {
+  private rate: number;
+
+  constructor(rate: number) {
+    this.rate = rate;
+  }
+
+  forward(input: Tensor2D): Tensor2D {
+    return input.map(row => 
+      row.map(val => Math.random() > this.rate ? val / (1 - this.rate) : 0)
+    );
+  }
+}
+
+class MultiHeadAttention {
+  private config: TransformerConfig;
+  private weights: {
+    query: Tensor2D;
+    key: Tensor2D;
+    value: Tensor2D;
+    output: Tensor2D;
+  };
+
+  constructor(config: TransformerConfig) {
+    this.config = config;
+    const dim = config.inputDim;
+    this.weights = {
+      query: this.initializeWeight(dim, dim),
+      key: this.initializeWeight(dim, dim),
+      value: this.initializeWeight(dim, dim),
+      output: this.initializeWeight(dim, dim),
+    };
+  }
+
+  forward(input: Tensor2D): Tensor2D {
+
+    const query = this.linearTransform(input, this.weights.query);
+    const key = this.linearTransform(input, this.weights.key);
+    const value = this.linearTransform(input, this.weights.value);
+
+    const scores = this.dotProduct(query, this.transpose(key));
+    const scaledScores = this.scale(scores, Math.sqrt(this.config.inputDim / this.config.numHeads));
+    const attentionWeights = this.softmax(scaledScores);
+
+    const attended = this.dotProduct(attentionWeights, value);
+    const output = this.linearTransform(attended, this.weights.output);
+
+    return output;
+  }
+
+  private initializeWeight(rows: number, cols: number): Tensor2D {
+    return Array(rows).fill(null).map(() => 
+      Array(cols).fill(null).map(() => Math.random() - 0.5)
+    );
+  }
+
+  private linearTransform(input: Tensor2D, weight: Tensor2D): Tensor2D {
+    return input.map(row => 
+      weight.map(wRow => 
+        row.reduce((sum, val, i) => sum + val * wRow[i], 0)
+      )
+    );
+  }
+
+  private dotProduct(a: Tensor2D, b: Tensor2D): Tensor2D {
+    return a.map(rowA => 
+      b[0].map((_, j) => 
+        rowA.reduce((sum, val, k) => sum + val * b[k][j], 0)
+      )
+    );
+  }
+
+  private transpose(matrix: Tensor2D): Tensor2D {
+    return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
+  }
+
+  private scale(matrix: Tensor2D, factor: number): Tensor2D {
+    return matrix.map(row => row.map(val => val / factor));
+  }
+
+  private softmax(matrix: Tensor2D): Tensor2D {
+    return matrix.map(row => {
+      const expValues = row.map(Math.exp);
+      const sumExp = expValues.reduce((a, b) => a + b, 0);
+      return expValues.map(val => val / sumExp);
+    });
+  }
+}
+
+class FeedForward {
+  private weights: {
+    hidden: Tensor2D;
+    output: Tensor2D;
+  };
+
+
+  constructor(config: TransformerConfig) {
+    const dim = config.inputDim;
+    this.weights = {
+      hidden: this.initializeWeight(dim, dim * 4),
+      output: this.initializeWeight(dim * 4, dim),
+    };
+  }
+
+
+  forward(input: Tensor2D): Tensor2D {
+    const hidden = this.linearTransform(input, this.weights.hidden);
+    const activated = hidden.map(row => row.map(val => Math.max(0, val))); // ReLU
+    const output = this.linearTransform(activated, this.weights.output);
+    return output;
+  }
+
+  private initializeWeight(rows: number, cols: number): Tensor2D {
+    return Array(rows).fill(null).map(() => 
+      Array(cols).fill(null).map(() => Math.random() - 0.5)
+    );
+  }
+
+  private linearTransform(input: Tensor2D, weight: Tensor2D): Tensor2D {
+    return input.map(row => 
+      weight[0].map((_, j) => 
+        row.reduce((sum, val, k) => sum + val * weight[k][j], 0)
+      )
+    );
+  }
+}
+
 class EnhancedNeuralNetwork {
   private layers: number[][];
   private weights: number[][][];
@@ -80,6 +327,7 @@ class EnhancedNeuralNetwork {
   private activationFunctions: string[];
   private attentionWeights: number[][] = []; // Initialize with an empty array
   private useAttention: boolean;
+  private transformer: Transformer | null = null;
 
   constructor(
     layerSizes: number[],
@@ -89,7 +337,8 @@ class EnhancedNeuralNetwork {
     optimizer: 'adam' | 'rmsprop' | 'sgd' | 'adamw' = 'adamw',
     l2RegularizationRate: number = 0.01,
     activationFunctions: string[] = [],
-    useAttention: boolean = false
+    useAttention: boolean = false,
+    useTransformer: boolean = false
   ) {
     this.layers = layerSizes.map((size) => new Array(size).fill(0));
     this.weights = [];
@@ -139,6 +388,17 @@ class EnhancedNeuralNetwork {
       this.attentionWeights = Array.from({ length: layerSizes[layerSizes.length - 2] }, () =>
         Array(layerSizes[layerSizes.length - 1]).fill(0).map(() => Math.random())
       );
+    }
+
+    if (useTransformer) {
+      const transformerConfig: TransformerConfig = {
+        inputDim: layerSizes[0],
+        outputDim: layerSizes[layerSizes.length - 1],
+        numHeads: 4,
+        numLayers: 2,
+        dropoutRate: this.dropoutRate
+      };
+      this.transformer = new Transformer(transformerConfig);
     }
   }
 
@@ -245,8 +505,18 @@ class EnhancedNeuralNetwork {
     return input.map((value, i) => value * softmaxScores[i]);
   }
 
+  private useTransformerIfAvailable(input: number[]): number[] {
+    if (this.transformer) {
+      // Convert input to 2D tensor
+      const inputTensor: Tensor2D = [input];
+      const output = this.transformer.forward(inputTensor);
+      return output[0]; // Return the first (and only) row of the output
+    }
+    return input; // Return original input if transformer is not available
+  }
   private forwardPropagation(input: number[], isTraining: boolean = true): number[] {
-    this.layers[0] = input;
+    const transformedInput = this.useTransformerIfAvailable(input);
+    this.layers[0] = transformedInput;
     for (let i = 1; i < this.layers.length; i++) {
       let layerInput = this.layers[i - 1];
       if (i === this.layers.length - 1 && this.useAttention) {
@@ -915,9 +1185,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       case 'Mazs AI v0.90.1 canard':
         return 30;
       case 'Mazs AI v0.90.1 pato':
-        return 20;
+        return 10;
       default:
-        return 40;
+        return 50;
     }
   };
 
@@ -942,7 +1212,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         );
 
         // Train the final model on the full training set
-        for (let epoch = 0; epoch < 1500; epoch++) {
+        for (let epoch = 0; epoch < 500; epoch++) {
           const loss = finalNeuralNetwork.train(
             trainingData.map((data) => data.input),
             trainingData.map((data) => data.target),
@@ -1194,7 +1464,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       const loss = finalNeuralNetwork.train(
         [inputVector],
         [targetVector],
-       1000// Reduced number of epochs for faster retraining
+       100// Reduced number of epochs for faster retraining
       );
 
       finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
@@ -1232,12 +1502,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   };
 
   // *** Named Entity Recognition (NER) - Basic Rule-Based Example ***
-  const performNER = (text: string): string => {
+const performNER = (text: string): string => {
     const entities = [];
-    const words = text.split(/\s+/);
+  const words = text.split(/\s+/);
 
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
       let nextWord = words[i + 1] || ''; // Change to let
 
       // Rule 1: Capitalized words followed by titles (Mr., Ms., Dr., etc.)
@@ -1273,14 +1543,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       ) {
         entities.push(word);
         i++;
-      }
     }
+  }
 
-    return entities.length > 0 ? entities.join(', ') : 'No entities found';
-  };
+  return entities.length > 0 ? entities.join(', ') : 'No entities found';
+};
   // Keep the POS tagging function and fix the regex
-  const performPOS = (text: string): string => {
-    const words = text.split(' ');
+const performPOS = (text: string): string => {
+  const words = text.split(' ');
     const tags = words.map((word, index) => {
       // Regular expressions for different parts of speech
       const nounRegex = /^[a-z]+(s)?$/; // Nouns (singular or plural)
@@ -1319,9 +1589,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       if (word.match(nounRegex)) return `${word}/NOUN`;
 
       return `${word}/UNK`; // Unknown
-    });
-    return tags.join(' ');
-  };
+  });
+  return tags.join(' ');
+};
 
   const handlePOS = () => {
     if (inputValue) {
@@ -1341,11 +1611,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
-  const performSummarization = async (text: string): Promise<string> => {
+const performSummarization = async (text: string): Promise<string> => {
     // This is a basic example of summarization
     // In a real-world scenario, you might want to use a more sophisticated algorithm
     // or an external API for better results
-    const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+  const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
     const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
     return summary;
   };
@@ -1394,7 +1664,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       };
 
       recognition.start();
-    } else {
+      } else {
       alert('Speech recognition is not supported in your browser.');
     }
   };
