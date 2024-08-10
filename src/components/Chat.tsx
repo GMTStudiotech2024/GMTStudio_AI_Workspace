@@ -14,7 +14,8 @@ import {
   FiSettings,
   FiPause
 } from 'react-icons/fi';
-import { Message as ImportedMessage } from '../types'; // Make sure you have the correct import for your Message type
+import { Message as ImportedMessage } from '../types'; 
+import { NlpManager } from 'node-nlp-typescript';
 
 interface ChatProps {
   selectedChat: { title: string } | null;
@@ -25,7 +26,6 @@ interface Suggestion {
   icon: React.ReactNode;
 }
 
-// Simplified Speech Recognition types
 interface SpeechRecognitionResult {
   transcript: string;
 }
@@ -41,7 +41,6 @@ interface SpeechRecognitionInstance {
   onstart: () => void;
 }
 
-// Extend the Window interface
 declare global {
   interface Window {
     webkitSpeechRecognition: {
@@ -50,7 +49,6 @@ declare global {
   }
 }
 
-// Define a local interface with a different name
 interface ChatMessage extends ImportedMessage {
   image?: string;
   inputVector?: number[];
@@ -63,8 +61,6 @@ interface TrainingProgress {
   accuracy: number;
 }
 
-// Enhanced Neural Network Class
-// Add these new types and interfaces
 type Tensor1D = number[];
 type Tensor2D = number[][];
 
@@ -76,7 +72,6 @@ interface TransformerConfig {
   dropoutRate: number;
 }
 
-// Add this new class for the Transformer
 class Transformer {
   private positionEncoding: Tensor2D;
   private layers: TransformerLayer[];
@@ -291,7 +286,7 @@ class FeedForward {
 
   forward(input: Tensor2D): Tensor2D {
     const hidden = this.linearTransform(input, this.weights.hidden);
-    const activated = hidden.map(row => row.map(val => Math.max(0, val))); // ReLU
+    const activated = hidden.map(row => row.map(val => Math.max(0, val))); 
     const output = this.linearTransform(activated, this.weights.output);
     return output;
   }
@@ -325,7 +320,7 @@ class EnhancedNeuralNetwork {
   private rmspropParams: { decay: number; epsilon: number };
   private l2RegularizationRate: number;
   private activationFunctions: string[];
-  private attentionWeights: number[][] = []; // Initialize with an empty array
+  private attentionWeights: number[][] = []; 
   private useAttention: boolean;
   private transformer: Transformer | null = null;
 
@@ -414,9 +409,9 @@ class EnhancedNeuralNetwork {
       case 'swish':
       case 'mish':
       case 'gelu':
-        return Math.random() * Math.sqrt(2 / fanIn); // He initialization
+        return Math.random() * Math.sqrt(2 / fanIn);
       default:
-        return Math.random() * Math.sqrt(2 / (fanIn + fanOut)); // Xavier initialization
+        return Math.random() * Math.sqrt(2 / (fanIn + fanOut)); 
     }
   }
 
@@ -507,12 +502,11 @@ class EnhancedNeuralNetwork {
 
   private useTransformerIfAvailable(input: number[]): number[] {
     if (this.transformer) {
-      // Convert input to 2D tensor
       const inputTensor: Tensor2D = [input];
       const output = this.transformer.forward(inputTensor);
-      return output[0]; // Return the first (and only) row of the output
+      return output[0]; 
     }
-    return input; // Return original input if transformer is not available
+    return input;
   }
   private forwardPropagation(input: number[], isTraining: boolean = true): number[] {
     const transformedInput = this.useTransformerIfAvailable(input);
@@ -683,7 +677,8 @@ class EnhancedNeuralNetwork {
       this.weights[layerIndex][neuronIndex][weightIndex];
     this.weights[layerIndex][neuronIndex][weightIndex] +=
       this.learningRate *
-      (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay)  }
+      (mHat / (Math.sqrt(vHat) + epsilon) - weightDecay);
+  }
 
   train(inputs: number[][], targets: number[][], epochs: number): number {
     let totalLoss = 0;
@@ -704,7 +699,7 @@ class EnhancedNeuralNetwork {
       if (epoch % 100 === 0) {
         console.log(`Epoch ${epoch}, Loss: ${totalLoss}`);
       }
-      this.learningRate *= 0.99; // Learning rate decay
+      this.learningRate *= 0.99; 
     }
     return totalLoss;
   }
@@ -730,7 +725,6 @@ class EnhancedNeuralNetwork {
   }
 }
 
-// Function to calculate accuracy
 function calculateAccuracy(
   neuralNetwork: EnhancedNeuralNetwork,
   testData: { input: number[]; target: number[] }[]
@@ -747,95 +741,87 @@ function calculateAccuracy(
   return correctPredictions / testData.length;
 }
 
-// Expanded Training Data
 const trainingData = [
-  // Greetings (Class 0)
-  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hello"
-  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hi"
-  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "hey there"
-  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "greetings"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hey"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "What's up?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Howdy"
-  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello there"
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Nice to meet you"
+  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
 
-  // Good morning (Class 1)
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "good morning"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good afternoon"
-  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good morning"
-  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good morning"
-  { input: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, // "Good morning, how are you?"
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
 
-  // Good evening (Class 2)
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "good evening"
-  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hello, good evening"
-  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Hi, good evening"
-  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, how are you?"
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, // "Good evening, what's up?"
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
 
-  // Farewells (Class 3)
-  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "bye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "see you later"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "farewell"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "take care"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "have a good one"
-  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "goodbye, bye"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "catch you later"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, // "until next time"
+  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
 
   // Weather (Class 4)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "what's the weather like?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "how's the weather?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Is it going to rain today?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "What's the temperature outside?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, // "Do I need an umbrella today?"
-
-  // How are you (Class 5)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how are you doing?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "how's it going?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How have you been?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, // "How's your day going?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  //How are you (Class 5)
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, 
 
   // Jokes (Class 6)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a joke"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "tell me a funny joke"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Do you know any jokes?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "Make me laugh"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, // "I need a good laugh"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
 
-  // Time (Class 7)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "what time is it?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "do you have the time?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What's the current time?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "Can you tell me the time?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, // "What hour is it?"
-
+  //Time (Class 7)
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
   // Help (Class 8)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "can you help me?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I need assistance"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "Could you give me a hand?"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "I'm having trouble with something"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, // "How do I use this feature?"
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
 
-  // Thank you (Class 9)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thank you"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "thanks a lot"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "I appreciate your help"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "That's very kind of you"
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, // "Much appreciated"
+  //Thank you (Class 9)
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
 ];
 
-// Define the type for bestHyperparameters
+
 interface BestHyperparameters {
   layerSizes: number[];
   learningRate: number;
   dropoutRate: number;
 }
-// *** Perform Hyperparameter Tuning ONLY ONCE outside the component ***
-// Define hyperparameter options
+
 const layerSizesOptions = [[25, 25, 10], [25, 20, 10], [25, 15, 10]];
 const learningRateOptions = [0.005, 0.05];
 const dropoutRateOptions = [0.3, 0.5];
@@ -846,6 +832,7 @@ let bestHyperparameters: BestHyperparameters = {
   learningRate: 0,
   dropoutRate: 0,
 };
+
 for (const layerSizes of layerSizesOptions) {
   for (const learningRate of learningRateOptions) {
     for (const dropoutRate of dropoutRateOptions) {
@@ -853,18 +840,17 @@ for (const layerSizes of layerSizesOptions) {
         layerSizes,
         learningRate,
         dropoutRate,
-        64, // Batch Size
-        'adamw', // Optimizer
-        0.01 // L2 Regularization Rate
+        64, 
+        'adamw', 
+        0.01 
       );
 
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        50 // Number of epochs
+        50 
       );
 
-      // Use trainingData for accuracy calculation since testData is not defined
       const accuracy = calculateAccuracy(neuralNetwork, trainingData);
       console.log(
         `Hyperparameters: layerSizes=${layerSizes}, learningRate=${learningRate}, dropoutRate=${dropoutRate}, accuracy=${accuracy}`
@@ -881,25 +867,22 @@ for (const layerSizes of layerSizesOptions) {
 console.log('Best Hyperparameters:', bestHyperparameters);
 console.log('Best Accuracy:', bestAccuracy);
 
-// Create your final model with the best hyperparameters
 const finalNeuralNetwork = new EnhancedNeuralNetwork(
   bestHyperparameters.layerSizes,
   bestHyperparameters.learningRate,
   bestHyperparameters.dropoutRate,
-  64, // Batch Size
-  'adamw', // Optimizer
-  0.01 // L2 Regularization Rate
+  64,
+  'adamw', 
+  0.01 
 );
 
-// Train the final model on the full training set
 finalNeuralNetwork.train(
   trainingData.map((data) => data.input),
   trainingData.map((data) => data.target),
-  250 // Number of epochs
+  250 
 );
-// *** End of Hyperparameter Tuning ***
 
-// Enhanced Database of words for generative output
+
 const wordDatabase = {
   greetings: [
     'Hello',
@@ -956,9 +939,7 @@ const wordDatabase = {
   ],
 };
 
-// ... (rest of the code)
 
-// Enhanced generative functions
 const generateGreeting = (timeOfDay: string): string => {
   const greetings = wordDatabase.greetings.filter((g) =>
     g.toLowerCase().includes(timeOfDay)
@@ -1092,7 +1073,6 @@ const enhancedMachineLearning = (input: string): string => {
   const timeOfDay =
     hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
 
-  // Contextual Responses with Word Combination and Generative Output
   const responses = {
     0: () => generateGreeting(timeOfDay),
     1: () => generateGreeting('morning'),
@@ -1106,8 +1086,6 @@ const enhancedMachineLearning = (input: string): string => {
     9: () => generateThankYouResponse(),
   };
 
-  // Return the appropriate response based on the predicted class
-  // If the predicted class is not recognized, use the 9th response
   return (
     responses[predictedClass as keyof typeof responses]?.() || responses[9]()
   );
@@ -1177,7 +1155,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     { text: "What's the latest news?", icon: <FiImage /> },
   ];
 
-  // Function to get typing speed based on selected model
   const getTypingSpeed = (model: string): number => {
     switch (model) {
       case 'Mazs AI v0.90.1 anatra':
@@ -1196,22 +1173,19 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   useEffect(() => {
     const trainModel = async () => {
       try {
-        // Set status to 'training' before starting the epochs
         setTrainingStatus('training');
 
-        // Create your final model with the best hyperparameters
         const finalNeuralNetwork = new EnhancedNeuralNetwork(
           bestHyperparameters.layerSizes,
           bestHyperparameters.learningRate,
           bestHyperparameters.dropoutRate,
-          64, // Batch Size
-          'adamw', // Optimizer
-          0.01, // L2 Regularization Rate
-          ['relu', 'relu', 'softmax'], // Activation functions
-          true // Use attention mechanism
+          64, 
+          'adamw', 
+          0.01,
+          ['relu', 'relu', 'softmax'], 
+          true 
         );
 
-        // Train the final model on the full training set
         for (let epoch = 0; epoch < 500; epoch++) {
           const loss = finalNeuralNetwork.train(
             trainingData.map((data) => data.input),
@@ -1219,10 +1193,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             1
           );
 
-          // Calculate accuracy using the training data instead of testData
           const accuracy = calculateAccuracy(finalNeuralNetwork, trainingData);
 
-          // Update training progress every 10 epochs
           if (epoch % 10 === 0) {
             setTrainingProgress({ epoch, loss, accuracy });
           }
@@ -1235,14 +1207,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       }
     };
 
-    // Use setTimeout to ensure the initial loading screen is rendered
     setTimeout(() => {
       trainModel();
     }, 0);
   }, []);
 
   useEffect(() => {
-    // Check if the user is a developer
     const storedUsername = localStorage.getItem('username');
     const storedPassword = localStorage.getItem('password');
     if (storedUsername === 'Developer' && storedPassword === 'GMTStudiotech') {
@@ -1321,33 +1291,52 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     return stopTyping;
   };
 
-  // New function to detect math expressions
   const detectMathExpression = (text: string): string | null => {
     const mathRegex = /(\d+(\s*[+\-*/]\s*\d+)+)/;
     const match = text.match(mathRegex);
     return match ? match[0] : null;
   };
 
-  // New function to calculate math expressions
   const calculateMathExpression = (expression: string): number => {
-    // eslint-disable-next-line no-new-func
     return Function(`'use strict'; return (${expression})`)();
   };
 
   const [isBotResponding, setIsBotResponding] = useState(false);
 
-  // Modified handleSendMessage function
+  const [nlpManager, setNlpManager] = useState<NlpManager | null>(null);
+
+  useEffect(() => {
+    const initNlpManager = async () => {
+      const manager = new NlpManager({ languages: ['en'], forceNER: true });
+      
+      // Add some basic intents and documents
+      manager.addDocument('en', 'hello', 'greetings');
+      manager.addDocument('en', 'hi there', 'greetings');
+      manager.addDocument('en', 'what\'s the weather like?', 'weather');
+      manager.addDocument('en', 'tell me a joke', 'joke');
+
+      // Add some answers
+      manager.addAnswer('en', 'greetings', 'Hello! How can I assist you today?');
+      manager.addAnswer('en', 'weather', 'I\'m sorry, I don\'t have real-time weather data. You might want to check a weather app for accurate information.');
+      manager.addAnswer('en', 'joke', 'Why don\'t scientists trust atoms? Because they make up everything!');
+
+      await manager.train();
+      setNlpManager(manager);
+    };
+
+    initNlpManager();
+  }, []);
+
   const handleSendMessage = async () => {
     if (inputValue.trim() === '' && !isGenerating) return;
 
     if (isGenerating && stopGenerating) {
-      // Stop the bot's response generation
       stopGenerating();
       return;
     }
 
     if (isGenerating) {
-      return; // Don't allow sending a new message while generating
+      return; 
     }
 
     const mathExpression = detectMathExpression(inputValue);
@@ -1362,11 +1351,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       return;
     }
 
-    // Proceed with the original message handling
-    sendMessage(inputValue);
+    if (selectedModel === "Mazs AI v1.5 anatra" && nlpManager) {
+      const response = await nlpManager.process('en', inputValue);
+      sendMessage(inputValue, response.answer || "I'm not sure how to respond to that.");
+    } else {
+      sendMessage(inputValue);
+    }
   };
 
-  // Add this new function
   const addConfirmationMessage = (type: 'math' | 'summary') => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -1379,7 +1371,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setPendingConfirmationId(newMessage.id);
   };
 
-  // New function to handle math calculation
   const handleMathCalculation = () => {
     setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
     setPendingConfirmationId(null);
@@ -1389,11 +1380,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setInputValue('');
   };
 
-  // New function to handle summary
   const handleSummary = () => {
     setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
     setPendingConfirmationId(null);
-    // Implement a basic summarization function
     const summarize = (text: string): string => {
       const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
       const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
@@ -1404,15 +1393,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setInputValue('');
   };
 
-  // New function to proceed with normal message processing
   const proceedWithNormalMessage = () => {
     setMessages(prevMessages => prevMessages.filter(msg => msg.id !== pendingConfirmationId));
     setPendingConfirmationId(null);
     sendMessage(inputValue);
   };
 
-  // Helper function to send a message
-  const sendMessage = (text: string) => {
+  const sendMessage = (text: string, botResponse?: string) => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -1426,8 +1413,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setIsBotResponding(true);
 
     setTimeout(() => {
-      const botResponse = enhancedMachineLearning(newMessage.text);
-      simulateTyping(botResponse);
+      if (botResponse) {
+        simulateTyping(botResponse);
+      } else {
+        const defaultBotResponse = enhancedMachineLearning(newMessage.text);
+        simulateTyping(defaultBotResponse);
+      }
     }, 1000);
   };
 
@@ -1438,39 +1429,33 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     if (messageIndex !== -1 && messageIndex > 0) {
       const userMessage = messages[messageIndex - 1];
 
-      // Create a simple input vector based on the user's message
       const inputVector = createInputVector(userMessage.text);
 
-      // Adjust the target vector based on feedback
       const targetVector = new Array(10).fill(0);
       const predictedClass = finalNeuralNetwork.predict(inputVector);
       
       if (feedback === 'good') {
         targetVector[predictedClass] = 1;
       } else {
-        // For negative feedback, slightly increase probabilities for other classes
         targetVector.fill(0.1);
         targetVector[predictedClass] = 0;
       }
 
-      // Add the new training data
       trainingData.push({ input: inputVector, target: targetVector });
 
-      // Retrain the model with the updated data
       console.log('Retraining model...');
       const originalLearningRate = finalNeuralNetwork.getLearningRate();
-      finalNeuralNetwork.setLearningRate(0.1); // Increase learning rate for retraining
+      finalNeuralNetwork.setLearningRate(0.1); 
 
       const loss = finalNeuralNetwork.train(
         [inputVector],
         [targetVector],
-       100// Reduced number of epochs for faster retraining
+       1000
       );
 
-      finalNeuralNetwork.setLearningRate(originalLearningRate); // Reset learning rate
+      finalNeuralNetwork.setLearningRate(originalLearningRate); 
       console.log(`Retraining complete. Final loss: ${loss}`);
 
-      // Provide feedback to the user
       const feedbackMessage: ChatMessage = {
         id: Date.now().toString(),
         sender: 'bot',
@@ -1483,7 +1468,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
-  // Helper function to create a simple input vector
+
   const createInputVector = (text: string): number[] => {
     const keywords = [
       'hello', 'hi', 'good morning', 'good evening', 'hey there',
@@ -1501,16 +1486,15 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setMessages([]);
   };
 
-  // *** Named Entity Recognition (NER) - Basic Rule-Based Example ***
+
 const performNER = (text: string): string => {
     const entities = [];
   const words = text.split(/\s+/);
 
   for (let i = 0; i < words.length; i++) {
     const word = words[i];
-      let nextWord = words[i + 1] || ''; // Change to let
+      let nextWord = words[i + 1] || ''; 
 
-      // Rule 1: Capitalized words followed by titles (Mr., Ms., Dr., etc.)
       if (
         word.match(/^[A-Z][a-z]+$/) &&
         nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)
@@ -1518,7 +1502,6 @@ const performNER = (text: string): string => {
         entities.push(`${word} ${nextWord}`);
         i++;
       }
-      // Rule 2: Sequences of Capitalized words (potential names or organizations)
       else if (
         word.match(/^[A-Z][a-z]+$/) &&
         nextWord.match(/^[A-Z][a-z]+$/)
@@ -1527,16 +1510,13 @@ const performNER = (text: string): string => {
         while (nextWord.match(/^[A-Z][a-z]+$/) && i < words.length - 1) {
           name += ` ${nextWord}`;
           i++;
-          nextWord = words[i + 1] || ''; // This reassignment is now valid
+          nextWord = words[i + 1] || ''; 
         }
         entities.push(name);
       }
-      // Rule 3: Capitalized words at the beginning of sentences (potential names)
       else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
         entities.push(word);
       }
-      // Rule 4: Locations - (Add a list of known locations or use a more advanced method)
-      // This is a very basic example, you'll need a better way to identify locations
       else if (
         word.match(/^[A-Z][a-z]+$/) &&
         ['City', 'Town', 'Country'].includes(nextWord)
@@ -1548,35 +1528,31 @@ const performNER = (text: string): string => {
 
   return entities.length > 0 ? entities.join(', ') : 'No entities found';
 };
-  // Keep the POS tagging function and fix the regex
-const performPOS = (text: string): string => {
+
+  const performPOS = (text: string): string => {
   const words = text.split(' ');
     const tags = words.map((word, index) => {
-      // Regular expressions for different parts of speech
-      const nounRegex = /^[a-z]+(s)?$/; // Nouns (singular or plural)
-      const verbRegex = /^[a-z]+(ed|ing|s)?$/; // Verbs (past tense, present participle, 3rd person singular)
-      const adjectiveRegex = /^[a-z]+(er|est)?$/; // Adjectives (comparative, superlative)
-      const adverbRegex = /^[a-z]+ly$/; // Adverbs
-      const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; // Pronouns
-      const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; // Prepositions
-      const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; // Conjunctions
-      const determinerRegex = /^(the|a|an)$/i; // Determiners
+      const nounRegex = /^[a-z]+(s)?$/;
+      const verbRegex = /^[a-z]+(ed|ing|s)?$/; 
+      const adjectiveRegex = /^[a-z]+(er|est)?$/; 
+      const adverbRegex = /^[a-z]+ly$/; 
+      const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; 
+      const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; 
+      const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; 
+      const determinerRegex = /^(the|a|an)$/i; 
 
-      word = word.toLowerCase(); // Normalize to lowercase
+      word = word.toLowerCase(); 
 
-      // Check for punctuation
       if (word.match(/^[.,!?;:]+$/)) return `${word}/PUNCT`;
 
-      // Check for numbers
       if (word.match(/^[0-9]+(\.[0-9]+)?$/)) return `${word}/NUM`;
 
-      // Apply more specific rules
       if (
         word === 'to' &&
         index < words.length - 1 &&
         words[index + 1].match(verbRegex)
       ) {
-        return `${word}/TO`; // 'to' as part of infinitive
+        return `${word}/TO`; 
       }
 
       if (word.match(determinerRegex)) return `${word}/DET`;
@@ -1588,7 +1564,7 @@ const performPOS = (text: string): string => {
       if (word.match(verbRegex)) return `${word}/VERB`;
       if (word.match(nounRegex)) return `${word}/NOUN`;
 
-      return `${word}/UNK`; // Unknown
+      return `${word}/UNK`;
   });
   return tags.join(' ');
 };
@@ -1598,7 +1574,7 @@ const performPOS = (text: string): string => {
       const posResult = performPOS(inputValue);
       setIsTyping(true);
       simulateTyping(`POS Tagging Result:\n${posResult}`);
-      setInputValue(''); // Clear the input box
+      setInputValue(''); 
     }
   };
 
@@ -1607,14 +1583,11 @@ const performPOS = (text: string): string => {
       const nerResult = performNER(inputValue);
       setIsTyping(true);
       simulateTyping(`Named Entities Found:\n${nerResult}`);
-      setInputValue(''); // Clear the input box
+      setInputValue(''); 
     }
   };
 
 const performSummarization = async (text: string): Promise<string> => {
-    // This is a basic example of summarization
-    // In a real-world scenario, you might want to use a more sophisticated algorithm
-    // or an external API for better results
   const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
     const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
     return summary;
@@ -1626,7 +1599,7 @@ const performSummarization = async (text: string): Promise<string> => {
       performSummarization(inputValue)
         .then((summaryResult: string) => {
           simulateTyping(`Text Summary:\n${summaryResult}`);
-          setInputValue(''); // Clear the input box
+          setInputValue(''); 
         })
         .catch((error: Error) => {
           console.error('Error in summarization:', error);
@@ -1678,12 +1651,11 @@ const performSummarization = async (text: string): Promise<string> => {
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          canvas.width = 100; // Thumbnail width
-          canvas.height = 100; // Thumbnail height
+          canvas.width = 100; 
+          canvas.height = 100;
           ctx?.drawImage(img, 0, 0, 100, 100);
           const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
 
-          // Add image message
           const newMessage: ChatMessage = {
             id: Date.now().toString(),
             sender: 'user',
@@ -1941,8 +1913,7 @@ const performSummarization = async (text: string): Promise<string> => {
                     className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
                     style={{ animationDelay: '0.4s' }}
                   ></span>
-                  <span
-                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
+                  <span                   className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
                     style={{ animationDelay: '0.6s' }}
                   ></span>
                 </div>
@@ -2104,6 +2075,7 @@ const performSummarization = async (text: string): Promise<string> => {
                   <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
                   <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
                   <option value="Mazs AI v0.90.1 pato">Mazs AI v0.90.1 pato (20ms)</option>
+                  <option value="Mazs AI v1.5 anatra">Mazs AI v1.5 anatra</option>
                 </select>
               </div>
             </div>
