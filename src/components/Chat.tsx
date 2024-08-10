@@ -15,7 +15,6 @@ import {
   FiPause
 } from 'react-icons/fi';
 import { Message as ImportedMessage } from '../types'; 
-import { NlpManager } from 'node-nlp-typescript';
 
 interface ChatProps {
   selectedChat: { title: string } | null;
@@ -1303,30 +1302,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   const [isBotResponding, setIsBotResponding] = useState(false);
 
-  const [nlpManager, setNlpManager] = useState<NlpManager | null>(null);
-
-  useEffect(() => {
-    const initNlpManager = async () => {
-      const manager = new NlpManager({ languages: ['en'], forceNER: true });
-      
-      // Add some basic intents and documents
-      manager.addDocument('en', 'hello', 'greetings');
-      manager.addDocument('en', 'hi there', 'greetings');
-      manager.addDocument('en', 'what\'s the weather like?', 'weather');
-      manager.addDocument('en', 'tell me a joke', 'joke');
-
-      // Add some answers
-      manager.addAnswer('en', 'greetings', 'Hello! How can I assist you today?');
-      manager.addAnswer('en', 'weather', 'I\'m sorry, I don\'t have real-time weather data. You might want to check a weather app for accurate information.');
-      manager.addAnswer('en', 'joke', 'Why don\'t scientists trust atoms? Because they make up everything!');
-
-      await manager.train();
-      setNlpManager(manager);
-    };
-
-    initNlpManager();
-  }, []);
-
   const handleSendMessage = async () => {
     if (inputValue.trim() === '' && !isGenerating) return;
 
@@ -1351,12 +1326,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       return;
     }
 
-    if (selectedModel === "Mazs AI v1.5 anatra" && nlpManager) {
-      const response = await nlpManager.process('en', inputValue);
-      sendMessage(inputValue, response.answer || "I'm not sure how to respond to that.");
-    } else {
-      sendMessage(inputValue);
-    }
+    sendMessage(inputValue);
   };
 
   const addConfirmationMessage = (type: 'math' | 'summary') => {
@@ -1399,7 +1369,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     sendMessage(inputValue);
   };
 
-  const sendMessage = (text: string, botResponse?: string) => {
+  const sendMessage = (text: string) => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -1413,12 +1383,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setIsBotResponding(true);
 
     setTimeout(() => {
-      if (botResponse) {
-        simulateTyping(botResponse);
-      } else {
-        const defaultBotResponse = enhancedMachineLearning(newMessage.text);
-        simulateTyping(defaultBotResponse);
-      }
+      const botResponse = enhancedMachineLearning(newMessage.text);
+      simulateTyping(botResponse);
     }, 1000);
   };
 
@@ -2075,7 +2041,6 @@ const performSummarization = async (text: string): Promise<string> => {
                   <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
                   <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
                   <option value="Mazs AI v0.90.1 pato">Mazs AI v0.90.1 pato (20ms)</option>
-                  <option value="Mazs AI v1.5 anatra">Mazs AI v1.5 anatra</option>
                 </select>
               </div>
             </div>
