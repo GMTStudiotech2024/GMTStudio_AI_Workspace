@@ -12,7 +12,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if ((username === 'demo' && password === 'demo') || (username === 'Developer' && password === 'GMTStudiotech')) {
-      console.log('Logged in as:', username); // Add this line
+      console.log('Logged in as:', username);
+      localStorage.setItem('userType', username === 'demo' ? 'demo' : 'developer');
       onLogin(username, password);
     } else {
       setError('Invalid credentials. Please use correct username and password.');

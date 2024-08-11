@@ -953,7 +953,7 @@ const generateGreeting = (timeOfDay: string): string => {
     ];
   const topic =
     wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
-  return `${greeting}! ${howAreYou} this ${timeOfDay}? I hope you're having a great day so far. Is there anything specific you'd like to chat about, perhaps ${topic}?`;
+  return `${greeting}! ${howAreYou} this ${timeOfDay}? I hope you're having a great day so far. Is there anything specific you'd like to chat about, perhaps ${topic}? You can make me search for information by input the topic and press search button next to the "paperplane" button.`;
 };
 
 const generateFarewell = (): string => {
@@ -977,7 +977,7 @@ const generateWeatherResponse = (): string => {
     ];
   const topic =
     wordDatabase.topics[Math.floor(Math.random() * wordDatabase.topics.length)];
-  return `I'm sorry, but I don't have real-time weather data. However, I can tell you that ${weatherQuery} is an important factor in daily life. If you need accurate weather information, I recommend checking a reliable weather service or app. In the meantime, would you like to chat about how ${topic} might be affected by different weather conditions?`;
+  return `I'm sorry, but I don't have real-time weather data. However, I can tell you that ${weatherQuery} is an important factor in daily life. If you need accurate weather information, I recommend checking a reliable weather service or app. In the meantime, would you like to chat about how ${topic} might be affected by different weather conditions?You can make me search for information by input the topic and press search button next to the "paperplane" button.`;
 };
 
 const generateJoke = (): string => {
@@ -997,23 +997,23 @@ const generateJoke = (): string => {
 
 const generateHowAreYouResponse = (): string => {
   const responses = [
-    "I'm functioning at optimal capacity, which I suppose is the AI equivalent of feeling great! How about you? Is there anything exciting happening in your day?",
-    "As an AI, I don't have feelings, but I'm operating efficiently and ready to assist you! What's on your mind today?",
-    "I'm here and ready to help! How can I assist you today? Is there a particular topic you'd like to discuss or explore?",
-    "I'm doing well, thank you for asking! How about you? Is there anything specific you'd like to chat about or any questions you have?",
-    "I'm always excited to learn new things from our conversations. What's been the most interesting part of your day so far?",
+    "I'm functioning at optimal capacity, which I suppose is the AI equivalent of feeling great! How about you? You can make me search for information by input the topic and press search button next to the 'paperplane' button.",
+    "As an AI, I don't have feelings, but I'm operating efficiently and ready to assist you! What's on your mind today?You can make me search for information by input the topic and press search button next to the paperplane button.",
+    "I'm here and ready to help! How can I assist you today? Is there a particular topic you'd like to discuss or explore?You can make me search for information by input the topic and press search button next to the paperplane button.",
+    "I'm doing well, thank you for asking! How about you? Is there anything specific you'd like to chat about or any questions you have?You can make me search for information by input the topic and press search button next to the paperplane button.",
+    "I'm always excited to learn new things from our conversations. What's been the most interesting part of your day so far?You can make me search for information by input the topic and press search button next to the paperplane button.",
   ];
   return responses[Math.floor(Math.random() * responses.length)];
 };
 
 const generateTimeResponse = (): string => {
   const currentTime = new Date().toLocaleTimeString();
-  return `The current time is ${currentTime}. Time is such a fascinating concept, isn't it? Is there anything time-related you'd like to discuss, like time management or the philosophy of time?`;
+  return `The current time is ${currentTime}. `;
 };
 
 const generateHelpResponse = (): string => {
   const topics = wordDatabase.topics.slice(0, 3);
-  return `I'd be happy to help! I can assist with a variety of topics. For example, we could discuss ${topics.join(', ')}, or any other subject you're interested in. What would you like help with?`;
+  return `I'd be happy to help! I can assist with a variety of topics. For example, we could discuss ${topics.join(', ')}, or any other subject you're interested in. You can make me search for information by input the topic and press search button next to the "paperplane" button.`;
 };
 
 const generateThankYouResponse = (): string => {
@@ -1049,7 +1049,7 @@ const enhancedMachineLearning = (input: string): string => {
   const jokeKeywords = ['joke', 'funny', 'humor', 'laugh'];
   const howAreYou = ['how are you', 'how\'s it going', 'what\'s up'];
   const timeKeywords = ['time', 'clock', 'hour'];
-  const dateKeywords = ['date', 'day', 'month', 'year'];
+  const dateKeywords = ['date', 'day', 'month', 'year', 'tomorrow'];
   const mathKeywords = ['math', 'calculate', 'sum', 'multiply', 'divide'];
   const helpKeywords = ['help', 'assist', 'support'];
   const thankYouKeywords = ['thank', 'thanks', 'appreciate'];
@@ -1103,7 +1103,7 @@ const enhancedMachineLearning = (input: string): string => {
     return generateThankYouResponse();
   }
   if (dateKeywords.some(word => inputLower.includes(word))) {
-    return generateDateResponse();
+    return generateDateResponse(input);
   }
   if (mathKeywords.some(word => inputLower.includes(word))) {
     return "I can help you with math! What calculation do you need?";
@@ -1119,25 +1119,34 @@ const enhancedMachineLearning = (input: string): string => {
     3: () => generateJoke(),
     4: () => generateHowAreYouResponse(),
     5: () => generateTimeResponse(),
-    6: () => generateDateResponse(),
-    7: () => "I can help you with math! What calculation do you need?",
+    6: () => generateDateResponse(input),
+    7: () => "If you want to learn about anything, you will need to type in the topic, and press search button.",
     8: () => generateHelpResponse(),
     9: () => generateThankYouResponse(),
   };
 
   // Check if the predicted class is valid
   if (predictedClass >= 0 && predictedClass < Object.keys(responses).length) {
-    return responses[predictedClass as keyof typeof responses]();
-  } else {
-    return generateDontUnderstandResponse();
+    const response = responses[predictedClass as keyof typeof responses]();
+    return response;
   }
+  // If we reach here, either the class was invalid or the response wasn't informative
+  return generateDontUnderstandResponse();
 };
 
 // Add this new function for date responses
-const generateDateResponse = (): string => {
+const generateDateResponse = (input: string): string => {
   const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
   const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  return `Today's date is ${today.toLocaleDateString('en-US', options)}.`;
+
+  if (input.toLowerCase().includes('tomorrow')) {
+    return `Tomorrow's date will be ${tomorrow.toLocaleDateString('en-US', options)}.`;
+  } else {
+    return `Today's date is ${today.toLocaleDateString('en-US', options)}.`;
+  }
 };
 const generateTopicResponse = (): string => {
   const topics = wordDatabase.topics.slice(0, 3);
@@ -1476,10 +1485,46 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setIsTyping(true);
     setIsBotResponding(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const botResponse = enhancedMachineLearning(newMessage.text);
-      simulateTyping(botResponse);
+      console.log("Bot response:", botResponse); // Debugging line
+
+      // Check if the response is actually informative
+      if (!isResponseInformative(botResponse)) {
+        console.log("Response not informative, triggering search"); // Debugging line
+        const searchResults = await handleHighQualitySearch(newMessage.text);
+        if (searchResults.length > 0) {
+          const summary = generateSummaryFromSearchResults(searchResults);
+          simulateTyping(`I found some information that might help: ${summary}`);
+        } else {
+          simulateTyping("I'm sorry, but I couldn't find any relevant information about that. Could you please rephrase your question or ask about something else?");
+        }
+      } else {
+        simulateTyping(botResponse);
+      }
     }, 1000);
+  };
+
+  // New function to check if the response is informative
+  const isResponseInformative = (response: string): boolean => {
+    const uninformativePatterns = [
+      /i don't (understand|know)/i,
+      /i'm (sorry|afraid)/i,
+      /i couldn't find/i,
+      /can you (rephrase|clarify)/i,
+      /what (specifically|exactly) (do you|are you) (mean|asking|referring to)/i,
+      /could you (please )?(provide more|give more) (context|information|details)/i,
+      /i'm not sure (what|how) to (respond|answer)/i,
+      /can you (be more specific|elaborate)/i,
+      /The current time is/i, // For time-related responses that don't answer the question
+    ];
+
+    return !uninformativePatterns.some(pattern => pattern.test(response));
+  };
+
+  const generateSummaryFromSearchResults = (results: SearchResult[]): string => {
+    const topResults = results.slice(0, 2);
+    return topResults.map(result => `${result.title}: ${stripHtml(result.snippet)}`).join(' ');
   };
 
   const handleSearch = async () => {
