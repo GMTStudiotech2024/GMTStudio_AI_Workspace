@@ -1494,27 +1494,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       if (searchResults.length > 0) {
         wikiSummary = `Here's what I found on Wikipedia about "${inputValue}":\n\n`;
         searchResults.forEach((result) => {
-          wikiSummary += `**${result.title}**\n${result.snippet}\n\n`;
+          wikiSummary += `**${result.title}**\n${stripHtml(result.snippet)}\n\n`;
         });
       }
 
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        sender: 'bot',
-        text: wikiSummary,
-        timestamp: new Date(),
-      };
-
-      setMessages((prevMessages) => [...prevMessages, newMessage]); 
+      simulateTyping(wikiSummary);
     } catch (error) {
       console.error('Error fetching or analyzing Wiki data:', error);
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        sender: 'bot',
-        text: 'I had trouble accessing information for that. Please try again later.',
-        timestamp: new Date(),
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]); 
+      simulateTyping('I had trouble accessing information for that. Please try again later.');
     } finally {
       setIsTyping(false);
       setIsBotResponding(false);
