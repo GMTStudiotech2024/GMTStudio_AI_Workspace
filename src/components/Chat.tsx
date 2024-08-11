@@ -1502,7 +1502,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
       let response = '';
       if (summary) {
-        response = `It seems that you want to know about "${inputValue}". here is the explanaion : ${generateSummaryResponse(summary)}`;
+        response = `It seems that you want to know about "${inputValue}" ${generateSummaryResponse(summary)}`;
         
         // Add analysis based on memory
         if (searchMemory.length > 1) {
@@ -1525,7 +1525,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const generateSummaryResponse = (summary: string): string => {
     const sentences = summary.split('. ');
     const shortSummary = sentences.slice(0, 2).join('. ');
-    return `The key points are: ${shortSummary}. This gives us a general idea, but there's more to explore if you're interested.`;
+    return `${shortSummary}. This gives us a general idea, but there's more to explore if you're interested.`;
   };
 
   const generateAnalysis = (memory: string[]): string => {
