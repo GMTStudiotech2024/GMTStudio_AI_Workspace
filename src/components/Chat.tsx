@@ -1234,6 +1234,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [isHighQualitySearch, setIsHighQualitySearch] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchMemory, setSearchMemory] = useState<string[]>([]);
 
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FiSun /> },
@@ -1490,22 +1491,63 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     try {
       const searchResults = await handleHighQualitySearch(inputValue);
 
-      let wikiSummary = 'I couldn\'t find any information on Wikipedia about that.';
+      let summary = '';
       if (searchResults.length > 0) {
-        wikiSummary = `Here's what I found on Wikipedia about "${inputValue}":\n\n`;
-        searchResults.forEach((result) => {
-          wikiSummary += `**${result.title}**\n${stripHtml(result.snippet)}\n\n`;
-        });
+        const topResults = searchResults.slice(0, 3); // Get top 3 results
+        summary = topResults.map(result => `${result.title}: ${stripHtml(result.snippet)}`).join(' ');
+        
+        // Add to memory
+        setSearchMemory(prevMemory => [...prevMemory.slice(-4), summary]);
       }
 
-      simulateTyping(wikiSummary);
+      let response = '';
+      if (summary) {
+        response = `It seems that you want to know about "${inputValue}". here is the explanaion : ${generateSummaryResponse(summary)}`;
+        
+        // Add analysis based on memory
+        if (searchMemory.length > 1) {
+          response += ` Interestingly, this relates to our previous searches. ${generateAnalysis(searchMemory)}`;
+        }
+      } else {
+        response = `I'm sorry, but I couldn't find any reliable information about "${inputValue}". Would you like to try a different search term?`;
+      }
+
+      simulateTyping(response);
     } catch (error) {
-      console.error('Error fetching or analyzing Wiki data:', error);
-      simulateTyping('I had trouble accessing information for that. Please try again later.');
+      console.error('Error fetching or analyzing data:', error);
+      simulateTyping('I encountered an issue while searching for that information. Could we try again in a moment?');
     } finally {
       setIsTyping(false);
       setIsBotResponding(false);
     }
+  };
+
+  const generateSummaryResponse = (summary: string): string => {
+    const sentences = summary.split('. ');
+    const shortSummary = sentences.slice(0, 2).join('. ');
+    return `The key points are: ${shortSummary}. This gives us a general idea, but there's more to explore if you're interested.`;
+  };
+
+  const generateAnalysis = (memory: string[]): string => {
+    const recentSearches = memory.slice(-2);
+    return `It seems we've been exploring topics related to ${recentSearches.join(' and ')}. This could indicate a broader interest in ${guessTheme(recentSearches)}. Would you like to delve deeper into any specific aspect?`;
+  };
+
+  const guessTheme = (searches: string[]): string => {
+    const commonWords = searches.join(' ').toLowerCase().split(' ');
+    const themes = {
+      technology: ['ai', 'computer', 'software', 'hardware', 'internet'],
+      science: ['physics', 'chemistry', 'biology', 'research', 'experiment'],
+      history: ['ancient', 'war', 'civilization', 'century', 'era'],
+      // Add more themes as needed
+    };
+
+    for (const [theme, keywords] of Object.entries(themes)) {
+      if (keywords.some(keyword => commonWords.includes(keyword))) {
+        return theme;
+      }
+    }
+    return 'various interconnected subjects';
   };
 
   const handleFeedback = (messageId: string, feedback: 'good' | 'bad') => {
