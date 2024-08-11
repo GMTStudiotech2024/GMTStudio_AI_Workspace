@@ -1215,7 +1215,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(150);
-  const [selectedModel, setSelectedModel] = useState('Mazs AI v0.90.1 anatra');
+  const [selectedModel, setSelectedModel] = useState('Mazs AI v1.0 anatra');
   const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
