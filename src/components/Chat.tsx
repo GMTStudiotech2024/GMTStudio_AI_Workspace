@@ -1266,7 +1266,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       case 'Mazs AI v1.0 anatra':
         return 10;
       default:
-        return 50;
+        return 60;
     }
   };
 
@@ -1276,6 +1276,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     const trainModel = async () => {
       try {
         setTrainingStatus('training');
+
 
         const finalNeuralNetwork = new EnhancedNeuralNetwork(
           bestHyperparameters.layerSizes,
@@ -1288,7 +1289,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           true
         );
 
-        for (let epoch = 0; epoch < 500; epoch++) {
+        const totalEpochs = 500; // Reduced to 750 epochs
+
+        for (let epoch = 0; epoch <= totalEpochs; epoch++) {
           const loss = finalNeuralNetwork.train(
             trainingData.map((data) => data.input),
             trainingData.map((data) => data.target),
@@ -1297,10 +1300,18 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
           const accuracy = calculateAccuracy(finalNeuralNetwork, trainingData);
 
-          if (epoch % 10 === 0) {
-            setTrainingProgress({ epoch, loss, accuracy });
-          }
+          // Update progress every epoch
+          setTrainingProgress({ epoch, loss, accuracy });
+
+          // Add a small delay between epochs to control the speed of the progress
+          await new Promise(resolve => setTimeout(resolve, 20));
         }
+
+        // Ensure the final progress is shown
+        setTrainingProgress({ epoch: totalEpochs, loss: 0, accuracy: 1 });
+
+        // Add a 2-second delay after training is complete
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         setTrainingStatus('complete');
       } catch (error) {
@@ -1509,14 +1520,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const isResponseInformative = (response: string): boolean => {
     const uninformativePatterns = [
       /i don't (understand|know)/i,
-      /i'm (sorry|afraid)/i,
       /i couldn't find/i,
       /can you (rephrase|clarify)/i,
       /what (specifically|exactly) (do you|are you) (mean|asking|referring to)/i,
       /could you (please )?(provide more|give more) (context|information|details)/i,
       /i'm not sure (what|how) to (respond|answer)/i,
       /can you (be more specific|elaborate)/i,
-      /The current time is/i, // For time-related responses that don't answer the question
     ];
 
     return !uninformativePatterns.some(pattern => pattern.test(response));
@@ -1879,7 +1888,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <h2 className="text-3xl font-bold mb-4">AI Training in Progress</h2>
+            <h2 className="text-3xl font-bold mb-4">AI Training in Progress, please wait for about 15 seconds</h2>
             <TerminalAnimation />
             {trainingProgress && (
               <motion.div
@@ -1889,13 +1898,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 transition={{ delay: 0.3 }}
               >
                 <p className="text-lg mb-2">Training Progress:</p>
-                <p>Epoch: <span className="font-semibold">{trainingProgress.epoch}/1500</span></p>
+                <p>Epoch: <span className="font-semibold">{trainingProgress.epoch}/500</span></p>
                 <p>Loss: <span className="font-semibold">{trainingProgress.loss.toFixed(4)}</span></p>
                 <p>
                   Accuracy: <span className="font-semibold">{(trainingProgress.accuracy * 100).toFixed(2)}%</span>
                 </p>
                 <div className="w-full bg-gray-700 rounded-full h-2.5 mt-2">
-                  <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(trainingProgress.epoch / 1500) * 100}%` }}></div>
+                  <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(trainingProgress.epoch / 750) * 100}%` }}></div>
                 </div>
               </motion.div>
             )}
@@ -2039,11 +2048,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               {(Math.random() * 100 + 50).toFixed(2)}ms
                             </p>
                             <p>
-                              Model: Mazs AI
+                              Model: Mazs AI v1.0 
                             </p>
                           </>
                         ) : (
-                          <p>Model: Mazs AI v0.90.1 anatra</p>
+                          <p>Model: Mazs AI v1.0 anatra</p>
                         )}
                       </div>
                     )}

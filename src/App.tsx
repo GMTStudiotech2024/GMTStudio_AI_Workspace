@@ -67,7 +67,7 @@ const App: React.FC = () => {
         <main className="flex-1 flex flex-col overflow-hidden">
           <header className="hidden md:flex justify-between items-center p-4 border-b border-mediumGrey bg-darkGrey">
             <div className="text-2xl font-bold flex items-center space-x-2">
-              <span className="pl-10">Mazs AI v0.90.1</span>
+              <span className="pl-10">Mazs AI v1.0</span>
             </div>
             <button
               onClick={toggleSettingsModal}
@@ -81,7 +81,7 @@ const App: React.FC = () => {
             <UpdateInfoModal
               onClose={toggleSettingsModal}
               title="Latest Updates"
-              version="v0.90.1"
+              version="v1.0"
               description="AI improvements"
             />
           )}
