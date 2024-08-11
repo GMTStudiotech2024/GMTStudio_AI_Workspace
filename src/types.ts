@@ -17,3 +17,5 @@ export interface Suggestion {
     category: 'Personal' | 'Work';
     timestamp: Date;
   }
+  export type Tensor1D = number[];
+export type Tensor2D = number[][];

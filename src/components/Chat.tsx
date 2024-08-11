@@ -1161,6 +1161,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       case 'Mazs AI v0.90.1 canard':
         return 30;
       case 'Mazs AI v0.90.1 pato':
+        return 20;
+      case 'Mazs AI v1.0 anatra':
         return 10;
       default:
         return 50;
@@ -1998,6 +2000,7 @@ const performSummarization = async (text: string): Promise<string> => {
         </motion.div>
       )}
 
+
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -2041,6 +2044,7 @@ const performSummarization = async (text: string): Promise<string> => {
                   <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
                   <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
                   <option value="Mazs AI v0.90.1 pato">Mazs AI v0.90.1 pato (20ms)</option>
+                  <option value="Mazs AI v1.0 anatra">Mazs AI v1.0 anatra (10ms)</option>
                 </select>
               </div>
             </div>
@@ -2060,5 +2064,6 @@ const performSummarization = async (text: string): Promise<string> => {
     </div>
   );
 };
+
 
 export default Chat;
