@@ -1904,7 +1904,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   Accuracy: <span className="font-semibold">{(trainingProgress.accuracy * 100).toFixed(2)}%</span>
                 </p>
                 <div className="w-full bg-gray-700 rounded-full h-2.5 mt-2">
-                  <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(trainingProgress.epoch / 750) * 100}%` }}></div>
+                  <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(trainingProgress.epoch / 500) * 100}%` }}></div>
                 </div>
               </motion.div>
             )}
