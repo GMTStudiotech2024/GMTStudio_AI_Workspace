@@ -1192,23 +1192,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     </motion.div>
   );
 
-  const TerminalAnimation: React.FC = () => (
-    <motion.div
-      className="terminal-animation"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="terminal-text">AI Training in Progress</div>
-      <motion.div
-        className="terminal-progress"
-        initial={{ width: 0 }}
-        animate={{ width: '100%' }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-    </motion.div>
-  );
-
   const stripHtml = (html: string): string => {
     const tmp = document.createElement("DIV");
     tmp.innerHTML = html;
@@ -1889,7 +1872,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             exit={{ opacity: 0 }}
           >
             <h2 className="text-3xl font-bold mb-4">AI Training in Progress, please wait for about 15 seconds</h2>
-            <TerminalAnimation />
             {trainingProgress && (
               <motion.div
                 className="mt-6 bg-gray-800 p-4 rounded-lg shadow-lg"
