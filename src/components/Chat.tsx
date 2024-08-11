@@ -741,6 +741,7 @@ function calculateAccuracy(
 
   return correctPredictions / testData.length;
 }
+
 const trainingData = [
   { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
   { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
@@ -1199,6 +1200,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     </motion.div>
   );
 
+  const stripHtml = (html: string): string => {
+    const tmp = document.createElement("DIV");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
+  };
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [pendingConfirmationId, setPendingConfirmationId] = useState<string | null>(null);
@@ -1455,7 +1462,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     sendMessage(inputValue);
   };
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = (text: string) => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -1468,29 +1475,51 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setIsTyping(true);
     setIsBotResponding(true);
 
-    try {
-      // 1. Perform Wiki Search
-      const searchResults = await handleHighQualitySearch(newMessage.text);
-
-      // 2. Analyze Search Results (using a simplified approach here)
-      let wikiSummary = '';
-      if (searchResults.length > 0) {
-        wikiSummary = searchResults[0].snippet; // Use the snippet of the first result
-      }
-
-      // 3. Generate Response based on Wiki Summary
-      let botResponse = enhancedMachineLearning(newMessage.text);
-      if (wikiSummary) {
-        botResponse += `\n\nHere's some information I found from Wikipedia:\n${wikiSummary}`;
-      }
-
+    setTimeout(() => {
+      const botResponse = enhancedMachineLearning(newMessage.text);
       simulateTyping(botResponse);
-    } catch (error) {
-      console.error('Error fetching or analyzing Wiki data:', error);
-      simulateTyping('I had trouble accessing information for that. Please try again later.');
-    }
+    }, 1000);
   };
 
+  const handleSearch = async () => {
+    if (inputValue.trim() === '') return;
+
+    setIsTyping(true);
+    setIsBotResponding(true);
+
+    try {
+      const searchResults = await handleHighQualitySearch(inputValue);
+
+      let wikiSummary = 'I couldn\'t find any information on Wikipedia about that.';
+      if (searchResults.length > 0) {
+        wikiSummary = `Here's what I found on Wikipedia about "${inputValue}":\n\n`;
+        searchResults.forEach((result) => {
+          wikiSummary += `**${result.title}**\n${result.snippet}\n\n`;
+        });
+      }
+
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        sender: 'bot',
+        text: wikiSummary,
+        timestamp: new Date(),
+      };
+
+      setMessages((prevMessages) => [...prevMessages, newMessage]); 
+    } catch (error) {
+      console.error('Error fetching or analyzing Wiki data:', error);
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        sender: 'bot',
+        text: 'I had trouble accessing information for that. Please try again later.',
+        timestamp: new Date(),
+      };
+      setMessages((prevMessages) => [...prevMessages, newMessage]); 
+    } finally {
+      setIsTyping(false);
+      setIsBotResponding(false);
+    }
+  };
 
   const handleFeedback = (messageId: string, feedback: 'good' | 'bad') => {
     const messageIndex = messages.findIndex((message) => message.id === messageId);
@@ -1564,8 +1593,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
       if (
         word.match(/^[A-Z][a-z]+$/) &&
-        nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)
-      ) {
+        nextWord.match(/^(Mr\.|Ms\.|Dr\.|Mrs\.)$/i)      ) {
         entities.push(`${word} ${nextWord}`);
         i++;
       } else if (
@@ -1675,13 +1703,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const handleVoiceInput = () => {
     if ('webkitSpeechRecognition' in window) {
@@ -1806,7 +1827,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             )}
           </motion.div>
         )}
-        {trainingStatus === 'error' && (
+              {trainingStatus === 'error' && (
           <motion.div
             className="text-center text-red-500 p-8"
             initial={{ opacity: 0 }}
@@ -1825,7 +1846,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             </button>
           </motion.div>
         )}
-       </AnimatePresence>
+      </AnimatePresence>
       {trainingStatus === 'complete' && (
         <motion.div
           className="flex flex-col h-full w-full"
@@ -1937,14 +1958,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                           <>
                             <p>
                               Accuracy:{' '}
-                              {(Math.random() * 0.2 + 0.8).toFixed(4)}
+                              {(Math.random() * 0.2 + 0.8).toFixed(2)}
                             </p>
                             <p>
                               Response time:{' '}
                               {(Math.random() * 100 + 50).toFixed(2)}ms
                             </p>
                             <p>
-                              Model: Mazs AI 
+                              Model: Mazs AI
                             </p>
                           </>
                         ) : (
@@ -2065,6 +2086,18 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               >
                 {isGenerating ? <FiPause /> : <FiSend />}
               </motion.button>
+
+              {/* Search Button */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleSearch}
+                className="p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                title="Search Wikipedia"
+              >
+                <FiSearch />
+              </motion.button>
+
               {isDeveloper && (
                 <>
                   <motion.button
@@ -2201,7 +2234,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             {searchResults.map((result) => (
               <div key={result.pageid} className="search-result bg-gray-700 p-4 rounded">
                 <h3 className="text-lg font-semibold">{result.title}</h3>
-                <p dangerouslySetInnerHTML={{ __html: result.snippet }} className="mt-2 text-sm" />
+                <p className="mt-2 text-sm">{stripHtml(result.snippet)}</p>
               </div>
             ))}
           </div>
@@ -2211,6 +2244,5 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     </div>
   );
 };
-
 
 export default Chat;
