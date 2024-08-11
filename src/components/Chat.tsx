@@ -1247,7 +1247,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       case 'Mazs AI v0.90.1 pato':
         return 20;
       case 'Mazs AI v1.0 anatra':
-        return 10;
+        return 50;
       default:
         return 60;
     }
