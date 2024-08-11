@@ -12,7 +12,8 @@ import {
   FiCheck,
   FiX,
   FiSettings,
-  FiPause
+  FiPause,
+  FiSearch,
 } from 'react-icons/fi';
 import { Message as ImportedMessage } from '../types'; 
 
@@ -743,42 +744,42 @@ function calculateAccuracy(
 const trainingData = [
   { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
   { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
   { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
   { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
 
   { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
   { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
   { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
 
   { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
   { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
   { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
   { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
 
-  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
   { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
 
   // Weather (Class 4)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
   //How are you (Class 5)
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
@@ -1028,67 +1029,146 @@ const generateThankYouResponse = (): string => {
   return responses[Math.floor(Math.random() * responses.length)];
 };
 
+const generateDontUnderstandResponse = (): string => {
+  const responses = [
+    "I'm sorry, but I don't understand your input. Could you please rephrase or ask something else?",
+    "I'm having trouble understanding what you mean. Can you try asking in a different way?",
+    "I apologize, but I'm not sure how to respond to that. Is there another way you could phrase your question?",
+    "I'm afraid I don't have enough information to answer that. Could you provide more context or ask a different question?",
+    "That's a bit beyond my current capabilities. Is there something else I can help you with?",
+  ];
+  return responses[Math.floor(Math.random() * responses.length)];
+};
+
 // Update the enhancedMachineLearning function
 const enhancedMachineLearning = (input: string): string => {
-  // Create inputVector based on the input
-  const keywords = [
-    'hello',
-    'hi',
-    'good morning',
-    'good evening',
-    'hey there',
-    'goodbye',
-    'bye',
-    'see you later',
-    'farewell',
-    'take care',
-    'have a good one',
-    'catch you later',
-    'until next time',
-    "what's the weather like?",
-    "how's the weather?",
-    'tell me a joke',
-    'tell me a funny joke',
-    'how are you',
-    'how are you doing',
-    "how's it going",
-    "what is the time",
-    "what is the date",
-    "help me with the math",
-    "help me find my airpods",
-    "thanks for the help",
-    
-  ];
+  const inputLower = input.toLowerCase();
 
-  const inputVector = keywords.map((keyword) =>
-    input.toLowerCase().includes(keyword) ? 1 : 0
-  );
+  // More specific keyword groups
+  const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
+  const farewells = ['goodbye', 'bye', 'see you', 'farewell', 'take care'];
+  const weatherKeywords = ['weather', 'temperature', 'forecast', 'rain', 'sunny', 'cloudy'];
+  const jokeKeywords = ['joke', 'funny', 'humor', 'laugh'];
+  const howAreYou = ['how are you', 'how\'s it going', 'what\'s up'];
+  const timeKeywords = ['time', 'clock', 'hour'];
+  const dateKeywords = ['date', 'day', 'month', 'year'];
+  const mathKeywords = ['math', 'calculate', 'sum', 'multiply', 'divide'];
+  const helpKeywords = ['help', 'assist', 'support'];
+  const thankYouKeywords = ['thank', 'thanks', 'appreciate'];
+  const topics = ['weather', 'news', 'sports', 'technology', 'movies', 'music', 'books'];
+  
+
+  // Create a more detailed input vector
+  const inputVector = [
+    greetings.some(word => inputLower.includes(word)) ? 1 : 0,
+    farewells.some(word => inputLower.includes(word)) ? 1 : 0,
+    weatherKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
+    jokeKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
+    howAreYou.some(phrase => inputLower.includes(phrase)) ? 1 : 0,
+    timeKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
+    dateKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
+    mathKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
+    helpKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
+    thankYouKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
+  ];
 
   const predictedClass = finalNeuralNetwork.predict(inputVector);
   console.log(`Input: "${input}", Predicted class: ${predictedClass}`);
 
   // Get the current time of day
   const hour = new Date().getHours();
-  const timeOfDay =
-    hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+  const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+
+  // Additional check for farewells
+  if (farewells.some(word => inputLower.includes(word))) {
+    return generateFarewell();
+  }
+if (greetings.some(word => inputLower.includes(word))) {
+  return generateGreeting(timeOfDay);
+}
+if (weatherKeywords.some(word => inputLower.includes(word))) {
+  return generateWeatherResponse();
+} 
+if (jokeKeywords.some(word => inputLower.includes(word))) {
+  return generateJoke();
+}
+if (howAreYou.some(phrase => inputLower.includes(phrase))) {
+  return generateHowAreYouResponse();
+}
+if (timeKeywords.some(word => inputLower.includes(word))) {
+  return generateTimeResponse();
+}
+if (helpKeywords.some(word => inputLower.includes(word))) {
+  return generateHelpResponse();
+}
+if (thankYouKeywords.some(word => inputLower.includes(word))) {
+  return generateThankYouResponse();
+}
+if (dateKeywords.some(word => inputLower.includes(word))) {
+  return generateDateResponse();
+}
+if (mathKeywords.some(word => inputLower.includes(word))) {
+  return "I can help you with math! What calculation do you need?";
+}
+if (topics.some(word => inputLower.includes(word))) {
+  return generateTopicResponse();
+}
 
   const responses = {
     0: () => generateGreeting(timeOfDay),
-    1: () => generateGreeting('morning'),
-    2: () => generateGreeting('evening'),
-    3: () => generateFarewell(),
-    4: () => generateWeatherResponse(),
-    5: () => generateJoke(),
-    6: () => generateHowAreYouResponse(),
-    7: () => generateTimeResponse(),
+    1: () => generateFarewell(),
+    2: () => generateWeatherResponse(),
+    3: () => generateJoke(),
+    4: () => generateHowAreYouResponse(),
+    5: () => generateTimeResponse(),
+    6: () => generateDateResponse(),
+    7: () => "I can help you with math! What calculation do you need?",
     8: () => generateHelpResponse(),
     9: () => generateThankYouResponse(),
   };
 
-  return (
-    responses[predictedClass as keyof typeof responses]?.() || responses[9]()
-  );
+  // Check if the predicted class is valid
+  if (predictedClass >= 0 && predictedClass < Object.keys(responses).length) {
+    return responses[predictedClass as keyof typeof responses]();
+  } else {
+    return generateDontUnderstandResponse();
+  }
 };
+
+// Add this new function for date responses
+const generateDateResponse = (): string => {
+  const today = new Date();
+  const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  return `Today's date is ${today.toLocaleDateString('en-US', options)}.`;
+};
+const generateTopicResponse = (): string => {
+  const topics = wordDatabase.topics.slice(0, 3);
+  return `I'd be happy to help! I can assist with a variety of topics. For example, we could discuss ${topics.join(', ')}, or any other subject you're interested in. What would you like help with?`;
+};
+
+interface ChatMessage {
+  id: string;
+  sender: 'user' | 'bot';
+  text: string;
+  timestamp: Date;
+  image?: string;
+  confirmationType?: 'math' | 'summary';
+}
+interface ChatProps {
+  selectedChat: { title: string } | null;
+}
+
+interface Suggestion {
+  text: string;
+  icon: React.ReactNode;
+}
+
+interface TrainingProgress {
+  epoch: number;
+  loss: number;
+  accuracy: number;
+}
+
 
 const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const LoadingSpinner: React.FC = () => (
@@ -1147,13 +1227,20 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [stopGenerating, setStopGenerating] = useState<(() => void) | null>(null);
   const [partialMessage, setPartialMessage] = useState<string | null>(null);
+  const [isHighQualitySearch, setIsHighQualitySearch] = useState(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FiSun /> },
     { text: 'Tell me a joke', icon: <FiImage /> },
     { text: "What's the latest news?", icon: <FiImage /> },
   ];
-
+  interface SearchResult {
+    pageid: number;
+    title: string;
+    snippet: string;
+  }
   const getTypingSpeed = (model: string): number => {
     switch (model) {
       case 'Mazs AI v0.90.1 anatra':
@@ -1505,7 +1592,7 @@ const performNER = (text: string): string => {
       const adjectiveRegex = /^[a-z]+(er|est)?$/; 
       const adverbRegex = /^[a-z]+ly$/; 
       const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; 
-      const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; 
+                  const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; 
       const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; 
       const determinerRegex = /^(the|a|an)$/i; 
 
@@ -1639,6 +1726,25 @@ const performSummarization = async (text: string): Promise<string> => {
     }
   };
 
+  const handleHighQualitySearch = async (query: string) => {
+    setSearchQuery(query);
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
+    
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setSearchResults(data.query.search);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+      setSearchResults([]);
+    }
+  };
+
   return (
     <div
       className={`flex flex-col h-screen w-full ${
@@ -1754,6 +1860,15 @@ const performSummarization = async (text: string): Promise<string> => {
                   <FiMoon className="text-gray-700 text-xl" />
                 )}
               </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsHighQualitySearch(!isHighQualitySearch)}
+                className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+                title="Toggle High Quality Search"
+              >
+                <FiSearch className="text-gray-400 text-xl" />
+              </motion.button>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -1818,7 +1933,7 @@ const performSummarization = async (text: string): Promise<string> => {
                               {(Math.random() * 100 + 50).toFixed(2)}ms
                             </p>
                             <p>
-                              Model: Mazs AI v0.90.1 
+                              Model: Mazs AI 
                             </p>
                           </>
                         ) : (
@@ -1849,8 +1964,7 @@ const performSummarization = async (text: string): Promise<string> => {
                       </div>
                     )}
                   </div>
-                </motion.div>
-              ))}
+                </motion.div>              ))}
             </AnimatePresence>
             {typingMessage !== null && (
               <motion.div
@@ -1863,8 +1977,7 @@ const performSummarization = async (text: string): Promise<string> => {
                   {typingMessage}
                   <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
                 </div>
-              </motion.div>
-            )}
+              </motion.div>            )}
             {isTyping && (
               <motion.div
                 className="flex justify-start"
@@ -2061,6 +2174,26 @@ const performSummarization = async (text: string): Promise<string> => {
           </motion.div>
         </div>
       )}
+      {isHighQualitySearch && (
+        <div className="high-quality-search mt-4 p-4 bg-gray-800 rounded-lg">
+          <input
+            type="text"
+            value={searchQuery}
+            placeholder="Search Wikipedia..."
+            onChange={(e) => handleHighQualitySearch(e.target.value)}
+            className="w-full p-2 rounded bg-gray-700 text-white"
+          />
+          <div className="search-results mt-4 space-y-4">
+            {searchResults.map((result) => (
+              <div key={result.pageid} className="search-result bg-gray-700 p-4 rounded">
+                <h3 className="text-lg font-semibold">{result.title}</h3>
+                <p dangerouslySetInnerHTML={{ __html: result.snippet }} className="mt-2 text-sm" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
