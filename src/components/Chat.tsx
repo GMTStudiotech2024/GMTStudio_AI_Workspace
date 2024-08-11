@@ -15,7 +15,7 @@ import {
   FiPause,
   FiSearch,
 } from 'react-icons/fi';
-import { Message as ImportedMessage } from '../types'; 
+import { Message as ImportedMessage } from '../types';
 
 interface ChatProps {
   selectedChat: { title: string } | null;
@@ -95,7 +95,7 @@ class Transformer {
   }
 
   private addPositionalEncoding(input: Tensor2D): Tensor2D {
-    return input.map((seq, i) => 
+    return input.map((seq, i) =>
       seq.map((val, j) => val + this.positionEncoding[i % 1000][j % this.config.inputDim])
     );
   }
@@ -155,7 +155,7 @@ class LayerNormalization {
   forward(input: Tensor2D): Tensor2D {
     const mean = input.map(row => row.reduce((a, b) => a + b, 0) / row.length);
     const variance = input.map((row, i) => row.reduce((a, b) => a + Math.pow(b - mean[i], 2), 0) / row.length);
-    return input.map((row, i) => row.map((val, j) => 
+    return input.map((row, i) => row.map((val, j) =>
       this.gamma[j] * (val - mean[i]) / Math.sqrt(variance[i] + this.epsilon) + this.beta[j]
     ));
   }
@@ -171,8 +171,8 @@ class Dense {
   }
 
   forward(input: Tensor2D): Tensor2D {
-    return input.map(row => 
-      this.weights.map((wRow, i) => 
+    return input.map(row =>
+      this.weights.map((wRow, i) =>
         row.reduce((sum, val, j) => sum + val * wRow[j], 0) + this.bias[i]
       )
     );
@@ -187,7 +187,7 @@ class Dropout {
   }
 
   forward(input: Tensor2D): Tensor2D {
-    return input.map(row => 
+    return input.map(row =>
       row.map(val => Math.random() > this.rate ? val / (1 - this.rate) : 0)
     );
   }
@@ -230,22 +230,22 @@ class MultiHeadAttention {
   }
 
   private initializeWeight(rows: number, cols: number): Tensor2D {
-    return Array(rows).fill(null).map(() => 
+    return Array(rows).fill(null).map(() =>
       Array(cols).fill(null).map(() => Math.random() - 0.5)
     );
   }
 
   private linearTransform(input: Tensor2D, weight: Tensor2D): Tensor2D {
-    return input.map(row => 
-      weight.map(wRow => 
+    return input.map(row =>
+      weight.map(wRow =>
         row.reduce((sum, val, i) => sum + val * wRow[i], 0)
       )
     );
   }
 
   private dotProduct(a: Tensor2D, b: Tensor2D): Tensor2D {
-    return a.map(rowA => 
-      b[0].map((_, j) => 
+    return a.map(rowA =>
+      b[0].map((_, j) =>
         rowA.reduce((sum, val, k) => sum + val * b[k][j], 0)
       )
     );
@@ -286,20 +286,20 @@ class FeedForward {
 
   forward(input: Tensor2D): Tensor2D {
     const hidden = this.linearTransform(input, this.weights.hidden);
-    const activated = hidden.map(row => row.map(val => Math.max(0, val))); 
+    const activated = hidden.map(row => row.map(val => Math.max(0, val)));
     const output = this.linearTransform(activated, this.weights.output);
     return output;
   }
 
   private initializeWeight(rows: number, cols: number): Tensor2D {
-    return Array(rows).fill(null).map(() => 
+    return Array(rows).fill(null).map(() =>
       Array(cols).fill(null).map(() => Math.random() - 0.5)
     );
   }
 
   private linearTransform(input: Tensor2D, weight: Tensor2D): Tensor2D {
-    return input.map(row => 
-      weight[0].map((_, j) => 
+    return input.map(row =>
+      weight[0].map((_, j) =>
         row.reduce((sum, val, k) => sum + val * weight[k][j], 0)
       )
     );
@@ -320,7 +320,7 @@ class EnhancedNeuralNetwork {
   private rmspropParams: { decay: number; epsilon: number };
   private l2RegularizationRate: number;
   private activationFunctions: string[];
-  private attentionWeights: number[][] = []; 
+  private attentionWeights: number[][] = [];
   private useAttention: boolean;
   private transformer: Transformer | null = null;
 
@@ -411,7 +411,7 @@ class EnhancedNeuralNetwork {
       case 'gelu':
         return Math.random() * Math.sqrt(2 / fanIn);
       default:
-        return Math.random() * Math.sqrt(2 / (fanIn + fanOut)); 
+        return Math.random() * Math.sqrt(2 / (fanIn + fanOut));
     }
   }
 
@@ -504,10 +504,11 @@ class EnhancedNeuralNetwork {
     if (this.transformer) {
       const inputTensor: Tensor2D = [input];
       const output = this.transformer.forward(inputTensor);
-      return output[0]; 
+      return output[0];
     }
     return input;
   }
+
   private forwardPropagation(input: number[], isTraining: boolean = true): number[] {
     const transformedInput = this.useTransformerIfAvailable(input);
     this.layers[0] = transformedInput;
@@ -699,7 +700,7 @@ class EnhancedNeuralNetwork {
       if (epoch % 100 === 0) {
         console.log(`Epoch ${epoch}, Loss: ${totalLoss}`);
       }
-      this.learningRate *= 0.99; 
+      this.learningRate *= 0.99;
     }
     return totalLoss;
   }
@@ -740,81 +741,79 @@ function calculateAccuracy(
 
   return correctPredictions / testData.length;
 }
-
 const trainingData = [
-  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { input: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { input: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
 
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }, 
 
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0] }, 
 
-  { input: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }, 
 
   // Weather (Class 4)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0] }, 
   //How are you (Class 5)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] }, 
 
   // Jokes (Class 6)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }, 
 
   //Time (Class 7)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] }, 
   // Help (Class 8)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] }, 
 
   //Thank you (Class 9)
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
-  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,0,0,0,0,0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }, 
 ];
-
 
 interface BestHyperparameters {
   layerSizes: number[];
@@ -840,15 +839,15 @@ for (const layerSizes of layerSizesOptions) {
         layerSizes,
         learningRate,
         dropoutRate,
-        64, 
-        'adamw', 
-        0.01 
+        64,
+        'adamw',
+        0.01
       );
 
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        50 
+        50
       );
 
       const accuracy = calculateAccuracy(neuralNetwork, trainingData);
@@ -872,16 +871,15 @@ const finalNeuralNetwork = new EnhancedNeuralNetwork(
   bestHyperparameters.learningRate,
   bestHyperparameters.dropoutRate,
   64,
-  'adamw', 
-  0.01 
+  'adamw',
+  0.01
 );
 
 finalNeuralNetwork.train(
   trainingData.map((data) => data.input),
   trainingData.map((data) => data.target),
-  250 
+  250
 );
-
 
 const wordDatabase = {
   greetings: [
@@ -938,7 +936,6 @@ const wordDatabase = {
     'books',
   ],
 };
-
 
 const generateGreeting = (timeOfDay: string): string => {
   const greetings = wordDatabase.greetings.filter((g) =>
@@ -1056,7 +1053,7 @@ const enhancedMachineLearning = (input: string): string => {
   const helpKeywords = ['help', 'assist', 'support'];
   const thankYouKeywords = ['thank', 'thanks', 'appreciate'];
   const topics = ['weather', 'news', 'sports', 'technology', 'movies', 'music', 'books'];
-  
+
 
   // Create a more detailed input vector
   const inputVector = [
@@ -1083,36 +1080,36 @@ const enhancedMachineLearning = (input: string): string => {
   if (farewells.some(word => inputLower.includes(word))) {
     return generateFarewell();
   }
-if (greetings.some(word => inputLower.includes(word))) {
-  return generateGreeting(timeOfDay);
-}
-if (weatherKeywords.some(word => inputLower.includes(word))) {
-  return generateWeatherResponse();
-} 
-if (jokeKeywords.some(word => inputLower.includes(word))) {
-  return generateJoke();
-}
-if (howAreYou.some(phrase => inputLower.includes(phrase))) {
-  return generateHowAreYouResponse();
-}
-if (timeKeywords.some(word => inputLower.includes(word))) {
-  return generateTimeResponse();
-}
-if (helpKeywords.some(word => inputLower.includes(word))) {
-  return generateHelpResponse();
-}
-if (thankYouKeywords.some(word => inputLower.includes(word))) {
-  return generateThankYouResponse();
-}
-if (dateKeywords.some(word => inputLower.includes(word))) {
-  return generateDateResponse();
-}
-if (mathKeywords.some(word => inputLower.includes(word))) {
-  return "I can help you with math! What calculation do you need?";
-}
-if (topics.some(word => inputLower.includes(word))) {
-  return generateTopicResponse();
-}
+  if (greetings.some(word => inputLower.includes(word))) {
+    return generateGreeting(timeOfDay);
+  }
+  if (weatherKeywords.some(word => inputLower.includes(word))) {
+    return generateWeatherResponse();
+  }
+  if (jokeKeywords.some(word => inputLower.includes(word))) {
+    return generateJoke();
+  }
+  if (howAreYou.some(phrase => inputLower.includes(phrase))) {
+    return generateHowAreYouResponse();
+  }
+  if (timeKeywords.some(word => inputLower.includes(word))) {
+    return generateTimeResponse();
+  }
+  if (helpKeywords.some(word => inputLower.includes(word))) {
+    return generateHelpResponse();
+  }
+  if (thankYouKeywords.some(word => inputLower.includes(word))) {
+    return generateThankYouResponse();
+  }
+  if (dateKeywords.some(word => inputLower.includes(word))) {
+    return generateDateResponse();
+  }
+  if (mathKeywords.some(word => inputLower.includes(word))) {
+    return "I can help you with math! What calculation do you need?";
+  }
+  if (topics.some(word => inputLower.includes(word))) {
+    return generateTopicResponse();
+  }
 
   const responses = {
     0: () => generateGreeting(timeOfDay),
@@ -1267,11 +1264,11 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           bestHyperparameters.layerSizes,
           bestHyperparameters.learningRate,
           bestHyperparameters.dropoutRate,
-          64, 
-          'adamw', 
+          64,
+          'adamw',
           0.01,
-          ['relu', 'relu', 'softmax'], 
-          true 
+          ['relu', 'relu', 'softmax'],
+          true
         );
 
         for (let epoch = 0; epoch < 500; epoch++) {
@@ -1458,7 +1455,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     sendMessage(inputValue);
   };
 
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -1471,10 +1468,27 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setIsTyping(true);
     setIsBotResponding(true);
 
-    setTimeout(() => {
-      const botResponse = enhancedMachineLearning(newMessage.text);
+    try {
+      // 1. Perform Wiki Search
+      const searchResults = await handleHighQualitySearch(newMessage.text);
+
+      // 2. Analyze Search Results (using a simplified approach here)
+      let wikiSummary = '';
+      if (searchResults.length > 0) {
+        wikiSummary = searchResults[0].snippet; // Use the snippet of the first result
+      }
+
+      // 3. Generate Response based on Wiki Summary
+      let botResponse = enhancedMachineLearning(newMessage.text);
+      if (wikiSummary) {
+        botResponse += `\n\nHere's some information I found from Wikipedia:\n${wikiSummary}`;
+      }
+
       simulateTyping(botResponse);
-    }, 1000);
+    } catch (error) {
+      console.error('Error fetching or analyzing Wiki data:', error);
+      simulateTyping('I had trouble accessing information for that. Please try again later.');
+    }
   };
 
 
@@ -1488,7 +1502,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
       const targetVector = new Array(10).fill(0);
       const predictedClass = finalNeuralNetwork.predict(inputVector);
-      
+
       if (feedback === 'good') {
         targetVector[predictedClass] = 1;
       } else {
@@ -1500,15 +1514,15 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
       console.log('Retraining model...');
       const originalLearningRate = finalNeuralNetwork.getLearningRate();
-      finalNeuralNetwork.setLearningRate(0.1); 
+      finalNeuralNetwork.setLearningRate(0.1);
 
       const loss = finalNeuralNetwork.train(
         [inputVector],
         [targetVector],
-       1000
+        1000
       );
 
-      finalNeuralNetwork.setLearningRate(originalLearningRate); 
+      finalNeuralNetwork.setLearningRate(originalLearningRate);
       console.log(`Retraining complete. Final loss: ${loss}`);
 
       const feedbackMessage: ChatMessage = {
@@ -1522,7 +1536,6 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       setMessages((prevMessages) => [...prevMessages, feedbackMessage]);
     }
   };
-
 
   const createInputVector = (text: string): number[] => {
     const keywords = [
@@ -1541,14 +1554,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     setMessages([]);
   };
 
-
-const performNER = (text: string): string => {
+  const performNER = (text: string): string => {
     const entities = [];
-  const words = text.split(/\s+/);
+    const words = text.split(/\s+/);
 
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i];
-      let nextWord = words[i + 1] || ''; 
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      let nextWord = words[i + 1] || '';
 
       if (
         word.match(/^[A-Z][a-z]+$/) &&
@@ -1556,8 +1568,7 @@ const performNER = (text: string): string => {
       ) {
         entities.push(`${word} ${nextWord}`);
         i++;
-      }
-      else if (
+      } else if (
         word.match(/^[A-Z][a-z]+$/) &&
         nextWord.match(/^[A-Z][a-z]+$/)
       ) {
@@ -1565,38 +1576,36 @@ const performNER = (text: string): string => {
         while (nextWord.match(/^[A-Z][a-z]+$/) && i < words.length - 1) {
           name += ` ${nextWord}`;
           i++;
-          nextWord = words[i + 1] || ''; 
+          nextWord = words[i + 1] || '';
         }
         entities.push(name);
-      }
-      else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
+      } else if (i === 0 && word.match(/^[A-Z][a-z]+$/)) {
         entities.push(word);
-      }
-      else if (
+      } else if (
         word.match(/^[A-Z][a-z]+$/) &&
         ['City', 'Town', 'Country'].includes(nextWord)
       ) {
         entities.push(word);
         i++;
+      }
     }
-  }
 
-  return entities.length > 0 ? entities.join(', ') : 'No entities found';
-};
+    return entities.length > 0 ? entities.join(', ') : 'No entities found';
+  };
 
   const performPOS = (text: string): string => {
-  const words = text.split(' ');
+    const words = text.split(' ');
     const tags = words.map((word, index) => {
       const nounRegex = /^[a-z]+(s)?$/;
-      const verbRegex = /^[a-z]+(ed|ing|s)?$/; 
-      const adjectiveRegex = /^[a-z]+(er|est)?$/; 
-      const adverbRegex = /^[a-z]+ly$/; 
-      const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i; 
-                  const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i; 
-      const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i; 
-      const determinerRegex = /^(the|a|an)$/i; 
+      const verbRegex = /^[a-z]+(ed|ing|s)?$/;
+      const adjectiveRegex = /^[a-z]+(er|est)?$/;
+      const adverbRegex = /^[a-z]+ly$/;
+      const pronounRegex = /^(I|you|he|she|it|we|they|me|him|her|us|them)$/i;
+      const prepositionRegex = /^(in|on|at|to|from|by|with|of|for)$/i;
+      const conjunctionRegex = /^(and|but|or|nor|so|yet)$/i;
+      const determinerRegex = /^(the|a|an)$/i;
 
-      word = word.toLowerCase(); 
+      word = word.toLowerCase();
 
       if (word.match(/^[.,!?;:]+$/)) return `${word}/PUNCT`;
 
@@ -1607,7 +1616,7 @@ const performNER = (text: string): string => {
         index < words.length - 1 &&
         words[index + 1].match(verbRegex)
       ) {
-        return `${word}/TO`; 
+        return `${word}/TO`;
       }
 
       if (word.match(determinerRegex)) return `${word}/DET`;
@@ -1620,16 +1629,16 @@ const performNER = (text: string): string => {
       if (word.match(nounRegex)) return `${word}/NOUN`;
 
       return `${word}/UNK`;
-  });
-  return tags.join(' ');
-};
+    });
+    return tags.join(' ');
+  };
 
   const handlePOS = () => {
     if (inputValue) {
       const posResult = performPOS(inputValue);
       setIsTyping(true);
       simulateTyping(`POS Tagging Result:\n${posResult}`);
-      setInputValue(''); 
+      setInputValue('');
     }
   };
 
@@ -1638,12 +1647,12 @@ const performNER = (text: string): string => {
       const nerResult = performNER(inputValue);
       setIsTyping(true);
       simulateTyping(`Named Entities Found:\n${nerResult}`);
-      setInputValue(''); 
+      setInputValue('');
     }
   };
 
-const performSummarization = async (text: string): Promise<string> => {
-  const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+  const performSummarization = async (text: string): Promise<string> => {
+    const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
     const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
     return summary;
   };
@@ -1654,7 +1663,7 @@ const performSummarization = async (text: string): Promise<string> => {
       performSummarization(inputValue)
         .then((summaryResult: string) => {
           simulateTyping(`Text Summary:\n${summaryResult}`);
-          setInputValue(''); 
+          setInputValue('');
         })
         .catch((error: Error) => {
           console.error('Error in summarization:', error);
@@ -1692,7 +1701,7 @@ const performSummarization = async (text: string): Promise<string> => {
       };
 
       recognition.start();
-      } else {
+    } else {
       alert('Speech recognition is not supported in your browser.');
     }
   };
@@ -1706,7 +1715,7 @@ const performSummarization = async (text: string): Promise<string> => {
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          canvas.width = 100; 
+          canvas.width = 100;
           canvas.height = 100;
           ctx?.drawImage(img, 0, 0, 100, 100);
           const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
@@ -1726,22 +1735,24 @@ const performSummarization = async (text: string): Promise<string> => {
     }
   };
 
-  const handleHighQualitySearch = async (query: string) => {
+  const handleHighQualitySearch = async (query: string): Promise<SearchResult[]> => {
     setSearchQuery(query);
     if (!query.trim()) {
       setSearchResults([]);
-      return;
+      return [];
     }
 
     const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
-    
+
     try {
       const response = await fetch(url);
       const data = await response.json();
       setSearchResults(data.query.search);
+      return data.query.search;
     } catch (error) {
       console.error('Error fetching search results:', error);
       setSearchResults([]);
+      return [];
     }
   };
 
@@ -1814,7 +1825,7 @@ const performSummarization = async (text: string): Promise<string> => {
             </button>
           </motion.div>
         )}
-      </AnimatePresence>
+       </AnimatePresence>
       {trainingStatus === 'complete' && (
         <motion.div
           className="flex flex-col h-full w-full"
@@ -1964,7 +1975,8 @@ const performSummarization = async (text: string): Promise<string> => {
                       </div>
                     )}
                   </div>
-                </motion.div>              ))}
+                </motion.div>
+              ))}
             </AnimatePresence>
             {typingMessage !== null && (
               <motion.div
@@ -1977,7 +1989,8 @@ const performSummarization = async (text: string): Promise<string> => {
                   {typingMessage}
                   <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
                 </div>
-              </motion.div>            )}
+              </motion.div>
+            )}
             {isTyping && (
               <motion.div
                 className="flex justify-start"
@@ -1994,7 +2007,8 @@ const performSummarization = async (text: string): Promise<string> => {
                     className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
                     style={{ animationDelay: '0.4s' }}
                   ></span>
-                  <span                   className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
+                  <span
+                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
                     style={{ animationDelay: '0.6s' }}
                   ></span>
                 </div>
