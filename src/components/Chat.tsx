@@ -8,7 +8,6 @@ import {
   FiMoon,
   FiThumbsUp,
   FiThumbsDown,
-  FiTrash2,
   FiCheck,
   FiX,
   FiSettings,
@@ -17,6 +16,7 @@ import {
   FiSmile,
   FiGlobe,
   FiCpu,
+  FiEdit,
 } from 'react-icons/fi';
 import { Message as ImportedMessage } from '../types';
 import logo from '../assets/GMTStudio_.png';
@@ -1226,12 +1226,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [stopGenerating, setStopGenerating] = useState<(() => void) | null>(null);
   const [partialMessage, setPartialMessage] = useState<string | null>(null);
-  const [isHighQualitySearch, setIsHighQualitySearch] = useState(false);
+  const [isHighQualitySearch] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchMemory, setSearchMemory] = useState<string[]>([]);
 
   const [showInitialView, setShowInitialView] = useState(true);
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FiSun /> },
@@ -1951,7 +1952,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 className="p-2 rounded-full hover:bg-gray-700 transition-colors"
                 title="Clear Chat"
               >
-                <FiTrash2 className="text-red-500 text-xl" />
+                <FiEdit className="text-white-500 text-xl" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -1966,41 +1967,77 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   <FiMoon className="text-gray-700 text-xl" />
                 )}
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsHighQualitySearch(!isHighQualitySearch)}
-                className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-                title="Toggle High Quality Search"
-              >
-                <FiSearch className="text-gray-400 text-xl" />
-              </motion.button>
+
             </div>
           </div>
           <div className="flex-1 flex flex-col">
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {showInitialView ? (
                 <div className="h-full flex flex-col items-center justify-center">
-                  <img src={logo} alt="Your Icon" className="w-24 h-24 mb-8" />
-                  <div className="w-full max-w-2xl">
-                    <div className="grid grid-cols-2 gap-4">
+                  <motion.img
+                    src={logo}
+                    alt="Your Icon"
+                    className="w-32 h-32 mb-8"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                  />
+                  <motion.h2
+                    className="text-3xl font-bold mb-6 text-center"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    Welcome to GMTStudio AI Studio
+                  </motion.h2>
+                  <motion.p
+                    className="text-xl mb-8 text-center text-gray-300 max-w-lg"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                  </motion.p>
+                  <div className="w-full max-w-3xl">
+                    <motion.div
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                    >
                       {suggestions.map((suggestion, index) => (
                         <motion.button
                           key={index}
-                          whileHover={{ scale: 1.05 }}
+                          whileHover={{ scale: 1.05, backgroundColor: "#4A5568" }}
                           whileTap={{ scale: 0.95 }}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 * index }}
                           onClick={() => {
                             setInputValue(suggestion.text);
                             handleSendMessage();
                           }}
-                          className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg px-4 py-3 text-sm transition-colors duration-200"
+                          className="flex items-center justify-start space-x-3 bg-gray-800 text-white rounded-lg px-6 py-4 text-sm transition-all duration-200 shadow-lg hover:shadow-xl border border-gray-700"
                         >
-                          {suggestion.icon}
-                          <span>{suggestion.text}</span>
+                          <div className="text-2xl">{suggestion.icon}</div>
+                          <span className="flex-1 text-left font-medium">{suggestion.text}</span>
                         </motion.button>
                       ))}
-                    </div>
+                    </motion.div>
                   </div>
+                  <motion.div
+                    className="mt-12 text-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                  >
+                    <p className="text-gray-400 mb-2">You can use advanced Search, type in the topic you want to know about and click search button next to the send button </p>
+                    <button
+                      onClick={() => setShowCustomInput(true)}
+                      className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                    >
+                      Ask a custom question
+                    </button>
+                  </motion.div>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center">
@@ -2341,6 +2378,48 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Custom Input Modal */}
+      {showCustomInput && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-gray-800 p-6 rounded-lg w-96"
+          >
+            <h2 className="text-xl font-bold mb-4">Ask a Custom Question</h2>
+            <textarea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Type your question here..."
+              className="w-full h-32 p-2 bg-gray-700 text-white rounded mb-4"
+            />
+            <div className="flex justify-end space-x-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowCustomInput(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  handleSendMessage();
+                  setShowCustomInput(false);
+                  setShowInitialView(false);
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              >
+                Send
+              </motion.button>
+            </div>
+          </motion.div>
         </div>
       )}
 
