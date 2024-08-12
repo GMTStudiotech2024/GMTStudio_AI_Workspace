@@ -14,9 +14,12 @@ import {
   FiSettings,
   FiPause,
   FiSearch,
+  FiSmile,
+  FiGlobe,
+  FiCpu,
 } from 'react-icons/fi';
 import { Message as ImportedMessage } from '../types';
-
+import logo from '../assets/GMTStudio_.png';
 interface ChatProps {
   selectedChat: { title: string } | null;
 }
@@ -1228,10 +1231,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchMemory, setSearchMemory] = useState<string[]>([]);
 
+  const [showInitialView, setShowInitialView] = useState(true);
+
   const suggestions: Suggestion[] = [
     { text: "What's the weather like today?", icon: <FiSun /> },
-    { text: 'Tell me a joke', icon: <FiImage /> },
-    { text: "What's the latest news?", icon: <FiImage /> },
+    { text: 'Tell me a joke', icon: <FiSmile /> },
+    { text: "What's the latest news?", icon: <FiGlobe /> },
+    { text: "What is AI", icon: <FiCpu /> },
   ];
   interface SearchResult {
     pageid: number;
@@ -1410,6 +1416,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     if (isGenerating) {
       return; 
     }
+
+    setShowInitialView(false);
 
     const mathExpression = detectMathExpression(inputValue);
     if (mathExpression) {
@@ -1647,6 +1655,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   const handleClearChat = () => {
     setMessages([]);
+    setShowInitialView(true);
   };
 
   const performNER = (text: string): string => {
@@ -1845,10 +1854,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   return (
     <div
-      className={`flex flex-col h-screen w-full ${
-        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
-      } transition-colors duration-300`}
-    >
+    className={`flex flex-col h-screen w-full ${
+      darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
+    } transition-colors duration-300`}
+  >
       <AnimatePresence>
         {trainingStatus === 'initializing' && (
           <motion.div
@@ -1968,258 +1977,287 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               </motion.button>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            <AnimatePresence>
-              {messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex ${
-                    message.sender === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  <div
-                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg shadow-md ${
-                      message.sender === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-white'
-                    }`}
-                  >
-                    <p className="text-sm mb-1">{message.sender === 'user' ? 'You' : 'AI'}</p>
-                    <p>{message.text}</p>
-                    {message.image && (
-                      <img
-                        src={message.image}
-                        alt="Uploaded"
-                        className="mt-2 rounded max-w-full h-auto"
-                      />
-                    )}
-                    {message.confirmationType && message.id === pendingConfirmationId && (
-                      <div className="flex space-x-2 mt-2">
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {showInitialView ? (
+                <div className="h-full flex flex-col items-center justify-center">
+                  <img src={logo} alt="Your Icon" className="w-24 h-24 mb-8" />
+                  <div className="w-full max-w-2xl">
+                    <div className="grid grid-cols-2 gap-4">
+                      {suggestions.map((suggestion, index) => (
                         <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => message.confirmationType === 'math' ? handleMathCalculation() : handleSummary()}
-                          className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+                          key={index}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            setInputValue(suggestion.text);
+                            handleSendMessage();
+                          }}
+                          className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg px-4 py-3 text-sm transition-colors duration-200"
                         >
-                          <FiCheck />
+                          {suggestion.icon}
+                          <span>{suggestion.text}</span>
                         </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center">
+                  <p className="text-xl mb-4">Your chat is empty. Start a conversation!</p>
+                  <div className="w-full max-w-2xl">
+                    <div className="grid grid-cols-2 gap-4">
+                      {suggestions.map((suggestion, index) => (
                         <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={proceedWithNormalMessage}
-                          className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                          key={index}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            setInputValue(suggestion.text);
+                            handleSendMessage();
+                          }}
+                          className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg px-4 py-3 text-sm transition-colors duration-200"
                         >
-                          <FiX />
+                          {suggestion.icon}
+                          <span>{suggestion.text}</span>
                         </motion.button>
-                      </div>
-                    )}
-                    {message.sender === 'bot' && (
-                      <div className="mt-2 text-xs text-gray-400">
-                        {isDeveloper ? (
-                          <>
-                            <p>
-                              Accuracy:{' '}
-                              {(Math.random() * 0.2 + 0.8).toFixed(2)}
-                            </p>
-                            <p>
-                              Response time:{' '}
-                              {(Math.random() * 100 + 50).toFixed(2)}ms
-                            </p>
-                            <p>
-                              Model: Mazs AI v1.0 
-                            </p>
-                          </>
-                        ) : (
-                          <p>Model: Mazs AI v1.0 anatra</p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <AnimatePresence>
+                  {messages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className={`flex ${
+                        message.sender === 'user' ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      <div
+                        className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg shadow-md ${
+                          message.sender === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-700 text-white'
+                        }`}
+                      >
+                        <p className="text-sm mb-1">{message.sender === 'user' ? 'You' : 'AI'}</p>
+                        <p>{message.text}</p>
+                        {message.image && (
+                          <img
+                            src={message.image}
+                            alt="Uploaded"
+                            className="mt-2 rounded max-w-full h-auto"
+                          />
+                        )}
+                        {message.confirmationType && message.id === pendingConfirmationId && (
+                          <div className="flex space-x-2 mt-2">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => message.confirmationType === 'math' ? handleMathCalculation() : handleSummary()}
+                              className="p-2 rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+                            >
+                              <FiCheck />
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={proceedWithNormalMessage}
+                              className="p-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                            >
+                              <FiX />
+                            </motion.button>
+                          </div>
+                        )}
+                        {message.sender === 'bot' && (
+                          <div className="mt-2 text-xs text-gray-400">
+                            {isDeveloper ? (
+                              <>
+                                <p>
+                                  Accuracy:{' '}
+                                  {(Math.random() * 0.2 + 0.8).toFixed(2)}
+                                </p>
+                                <p>
+                                  Response time:{' '}
+                                  {(Math.random() * 100 + 50).toFixed(2)}ms
+                                </p>
+                                <p>
+                                  Model: Mazs AI v1.0 
+                                </p>
+                              </>
+                            ) : (
+                              <p>Model: Mazs AI v1.0 anatra</p>
+                            )}
+                          </div>
+                        )}
+                        {message.sender === 'bot' && (
+                          <div className="flex justify-end mt-2 space-x-2">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleFeedback(message.id, 'good')}
+                              className="text-green-500 hover:text-green-600"
+                              title="Thumbs Up"
+                            >
+                              <FiThumbsUp />
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleFeedback(message.id, 'bad')}
+                              className="text-red-500 hover:text-red-600"
+                              title="Thumbs Down"
+                            >
+                              <FiThumbsDown />
+                            </motion.button>
+                          </div>
                         )}
                       </div>
-                    )}
-                    {message.sender === 'bot' && (
-                      <div className="flex justify-end mt-2 space-x-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleFeedback(message.id, 'good')}
-                          className="text-green-500 hover:text-green-600"
-                          title="Thumbs Up"
-                        >
-                          <FiThumbsUp />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleFeedback(message.id, 'bad')}
-                          className="text-red-500 hover:text-red-600"
-                          title="Thumbs Down"
-                        >
-                          <FiThumbsDown />
-                        </motion.button>
-                      </div>
-                    )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
+              {typingMessage !== null && (
+                <motion.div
+                  className="flex justify-start"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="bg-gray-700 text-white p-3 rounded-lg shadow-md">
+                    {typingMessage}
+                    <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
                   </div>
                 </motion.div>
-              ))}
-            </AnimatePresence>
-            {typingMessage !== null && (
-              <motion.div
-                className="flex justify-start"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div className="bg-gray-700 text-white p-3 rounded-lg shadow-md">
-                  {typingMessage}
-                  <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
-                </div>
-              </motion.div>
-            )}
-            {isTyping && (
-              <motion.div
-                className="flex justify-start"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div className="bg-gray-700 text-white p-3 rounded-lg shadow-md">
-                  <span
-                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
-                    style={{ animationDelay: '0.2s' }}
-                  ></span>
-                  <span
-                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
-                    style={{ animationDelay: '0.4s' }}
-                  ></span>
-                  <span
-                    className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
-                    style={{ animationDelay: '0.6s' }}
-                  ></span>
-                </div>
-              </motion.div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="border-t border-gray-700 p-4">
-            {messages.length === 0 && (
-              <motion.div
-                className="flex flex-wrap justify-center gap-2 mb-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                {suggestions.map((suggestion, index) => (
-                  <motion.button
-                    key={index}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setInputValue(suggestion.text)}
-                    className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm transition-colors duration-200"
-                  >
-                    {suggestion.icon}
-                    <span>{suggestion.text}</span>
-                  </motion.button>
-                ))}
-              </motion.div>
-            )}
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !isBotResponding) {
-                    handleSendMessage();
-                  }
-                }}
-                placeholder={isBotResponding ? "Please wait for the bot's response..." : "Type a message..."}
-                className={`flex-1 p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
-                  isBotResponding && !isGenerating ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                disabled={isBotResponding && !isGenerating}
-              />
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleSendMessage}
-                className={`p-3 rounded-lg ${
-                  isGenerating ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
-                } text-white transition-colors`}
-                title={isGenerating ? "Stop Generating" : "Send Message"}
-              >
-                {isGenerating ? <FiPause /> : <FiSend />}
-              </motion.button>
-
-              {/* Search Button */}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleSearch}
-                className="p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                title="Search Wikipedia"
-              >
-                <FiSearch />
-              </motion.button>
-
-              {isDeveloper && (
-                <>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleVoiceInput}
-                    className={`p-3 rounded-lg ${
-                      isListening ? 'bg-red-600' : 'bg-gray-800'
-                    } text-white hover:bg-gray-700 transition-colors`}
-                    title={isListening ? "Stop Listening" : "Start Voice Input"}
-                  >
-                    <FiMic />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-3 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-                    title="Upload Image"
-                  >
-                    <FiImage />
-                  </motion.button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                  />
-                </>
               )}
+              {isTyping && (
+                <motion.div
+                  className="flex justify-start"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="bg-gray-700 text-white p-3 rounded-lg shadow-md">
+                    <span
+                      className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
+                      style={{ animationDelay: '0.2s' }}
+                    ></span>
+                    <span
+                      className="inline-block w-2 h-2 bg-white rounded-full animate-bounce mr-1"
+                      style={{ animationDelay: '0.4s' }}
+                    ></span>
+                    <span
+                      className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
+                      style={{ animationDelay: '0.6s' }}
+                    ></span>
+                  </div>
+                </motion.div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
-            <div className="flex items-center space-x-2 mt-2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handlePOS}
-                className="p-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-              >
-                POS
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSummarization}
-                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-              >
-                Summarize
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleNER}
-                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-              >
-                NER
-              </motion.button>
+            <div className="border-t border-gray-700 p-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !isBotResponding) {
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder={isBotResponding ? "Please wait for the bot's response..." : "Type a message..."}
+                  className={`flex-1 p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
+                    isBotResponding && !isGenerating ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  disabled={isBotResponding && !isGenerating}
+                />
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleSendMessage}
+                  className={`p-3 rounded-lg ${
+                    isGenerating ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                  } text-white transition-colors`}
+                  title={isGenerating ? "Stop Generating" : "Send Message"}
+                >
+                  {isGenerating ? <FiPause /> : <FiSend />}
+                </motion.button>
+
+                {/* Search Button */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleSearch}
+                  className="p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                  title="Search Wikipedia"
+                >
+                  <FiSearch />
+                </motion.button>
+
+                {isDeveloper && (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleVoiceInput}
+                      className={`p-3 rounded-lg ${
+                        isListening ? 'bg-red-600' : 'bg-gray-800'
+                      } text-white hover:bg-gray-700 transition-colors`}
+                      title={isListening ? "Stop Listening" : "Start Voice Input"}
+                    >
+                      <FiMic />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-3 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                      title="Upload Image"
+                    >
+                      <FiImage />
+                    </motion.button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                    />
+                  </>
+                )}
+              </div>
+              <div className="flex items-center space-x-2 mt-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handlePOS}
+                  className="p-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                >
+                  POS
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleSummarization}
+                  className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                >
+                  Summarize
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleNER}
+                  className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                >
+                  NER
+                </motion.button>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -2269,7 +2307,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   <option value="Mazs AI v0.90.1 anatra">Mazs AI v0.90.1 anatra (40ms)</option>
                   <option value="Mazs AI v0.90.1 canard">Mazs AI v0.90.1 canard (30ms)</option>
                   <option value="Mazs AI v0.90.1 pato">Mazs AI v0.90.1 pato (20ms)</option>
-                  <option value="Mazs AI v1.0 anatra">Mazs AI v1.0 anatra (10ms)</option>
+                  <option value="Mazs AI v1.0 anatra">Mazs AI v1.0 anatra (50ms)</option>
                 </select>
               </div>
             </div>
