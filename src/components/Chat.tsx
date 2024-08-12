@@ -1531,6 +1531,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   const handleSearch = async () => {
     if (inputValue.trim() === '') return;
 
+    setShowInitialView(false);  // Add this line to hide the initial view
     setIsTyping(true);
     setIsBotResponding(true);
 
@@ -1539,10 +1540,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
       let summary = '';
       if (searchResults.length > 0) {
-        const topResults = searchResults.slice(0, 3); // Get top 3 results
+        const topResults = searchResults.slice(0, 3);
         summary = topResults.map(result => `${result.title}: ${stripHtml(result.snippet)}`).join(' ');
         
-        // Add to memory
         setSearchMemory(prevMemory => [...prevMemory.slice(-4), summary]);
       }
 
@@ -1550,13 +1550,21 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       if (summary) {
         response = `It seems that you want to know about "${inputValue}" ${generateSummaryResponse(summary)}`;
         
-        // Add analysis based on memory
         if (searchMemory.length > 1) {
           response += ` Interestingly, this relates to our previous searches. ${generateAnalysis(searchMemory)}`;
         }
       } else {
         response = `I'm sorry, but I couldn't find any reliable information about "${inputValue}". Would you like to try a different search term?`;
       }
+
+      // Add this block to create a new message
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        sender: 'user',
+        text: `Search: ${inputValue}`,
+        timestamp: new Date(),
+      };
+      setMessages(prevMessages => [...prevMessages, newMessage]);
 
       simulateTyping(response);
     } catch (error) {
@@ -1565,6 +1573,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     } finally {
       setIsTyping(false);
       setIsBotResponding(false);
+      setInputValue('');  // Clear the input after search
     }
   };
 
@@ -1855,12 +1864,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
   return (
     <div
-    className={`flex flex-col h-screen w-full ${
+      className={`flex flex-col h-screen w-full ${
       darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-400  text-gray-800'
-    } transition-colors duration-300`}
-  >
+      } transition-colors duration-300`}
+    >
       <AnimatePresence>
-        {trainingStatus === 'initializing' && (
+      {trainingStatus === 'initializing' && (
           <motion.div
             className="text-center p-8"
             initial={{ opacity: 0 }}
@@ -1871,10 +1880,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               Initializing Artificial Intelligence
             </h2>
             <p className="text-lg mb-6">Please wait while we prepare your AI assistant...</p>
-            <LoadingSpinner />
+          <LoadingSpinner />
           </motion.div>
-        )}
-        {trainingStatus === 'training' && (
+      )}
+      {trainingStatus === 'training' && (
           <motion.div
             className="text-center p-8"
             initial={{ opacity: 0 }}
@@ -1882,7 +1891,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             exit={{ opacity: 0 }}
           >
             <h2 className="text-3xl font-bold mb-4">AI Training in Progress, please wait for about 15 seconds</h2>
-            {trainingProgress && (
+          {trainingProgress && (
               <motion.div
                 className="mt-6 bg-gray-800 p-4 rounded-lg shadow-lg"
                 initial={{ opacity: 0, y: 20 }}
@@ -1897,7 +1906,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 </p>
                 <div className="w-full bg-gray-700 rounded-full h-2.5 mt-2">
                   <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(trainingProgress.epoch / 500) * 100}%` }}></div>
-                </div>
+            </div>
               </motion.div>
             )}
           </motion.div>
@@ -1970,8 +1979,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
             </div>
           </div>
-          <div className="flex-1 flex flex-col">
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto">
+            <div className="flex flex-col p-4 space-y-4">
               {showInitialView ? (
                 <div className="h-full flex flex-col items-center justify-center">
                   <motion.img
@@ -2004,27 +2013,27 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.6 }}
                     >
-                      {suggestions.map((suggestion, index) => (
-                        <motion.button
-                          key={index}
-                          whileHover={{ scale: 1.05, backgroundColor: "#4A5568" }}
-                          whileTap={{ scale: 0.95 }}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.1 * index }}
-                          onClick={() => {
-                            setInputValue(suggestion.text);
+                  {suggestions.map((suggestion, index) => (
+                    <motion.button
+                      key={index}
+                      whileHover={{ scale: 1.05, backgroundColor: "#4A5568" }}
+                      whileTap={{ scale: 0.95 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * index }}
+                      onClick={() => {
+                        setInputValue(suggestion.text);
                             handleSendMessage();
-                          }}
-                          className="flex items-center justify-start space-x-3 bg-gray-800 text-white rounded-lg px-6 py-4 text-sm transition-all duration-200 shadow-lg hover:shadow-xl border border-gray-700"
-                        >
-                          <div className="text-2xl">{suggestion.icon}</div>
-                          <span className="flex-1 text-left font-medium">{suggestion.text}</span>
-                        </motion.button>
-                      ))}
+                      }}
+                      className="flex items-center justify-start space-x-3 bg-gray-800 text-white rounded-lg px-6 py-4 text-sm transition-all duration-200 shadow-lg hover:shadow-xl border border-gray-700"
+                    >
+                      <div className="text-2xl">{suggestion.icon}</div>
+                      <span className="flex-1 text-left font-medium">{suggestion.text}</span>
+                    </motion.button>
+                  ))}
                     </motion.div>
-                  </div>
-                  <motion.div
+                </div>
+                <motion.div
                     className="mt-12 text-center"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -2046,7 +2055,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     <div className="grid grid-cols-2 gap-4">
                       {suggestions.map((suggestion, index) => (
                         <motion.button
-                          key={index}
+                  key={index}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => {
@@ -2067,27 +2076,27 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   {messages.map((message) => (
                     <motion.div
                       key={message.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
                       className={`flex ${
-                        message.sender === 'user' ? 'justify-end' : 'justify-start'
-                      }`}
-                    >
+                    message.sender === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
                       <div
                         className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-lg shadow-md ${
-                          message.sender === 'user'
+                        message.sender === 'user'
                             ? 'bg-blue-600 text-white'
                             : 'bg-gray-700 text-white'
-                        }`}
-                      >
+                      }`}
+                    >
                         <p className="text-sm mb-1">{message.sender === 'user' ? 'You' : 'AI'}</p>
                         <p>{message.text}</p>
                         {message.image && (
-                          <img
-                            src={message.image}
-                            alt="Uploaded"
+                        <img
+                          src={message.image}
+                          alt="Uploaded"
                             className="mt-2 rounded max-w-full h-auto"
                           />
                         )}
@@ -2109,8 +2118,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                             >
                               <FiX />
                             </motion.button>
-                          </div>
-                        )}
+                            </div>
+                          )}
                         {message.sender === 'bot' && (
                           <div className="mt-2 text-xs text-gray-400">
                             {isDeveloper ? (
@@ -2129,10 +2138,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               </>
                             ) : (
                               <p>Model: Mazs AI v1.0 anatra</p>
-                            )}
-                          </div>
+                      )}
+                    </div>
                         )}
-                        {message.sender === 'bot' && (
+                    {message.sender === 'bot' && (
                           <div className="flex justify-end mt-2 space-x-2">
                             <motion.button
                               whileHover={{ scale: 1.1 }}
@@ -2153,8 +2162,8 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               <FiThumbsDown />
                             </motion.button>
                           </div>
-                        )}
-                      </div>
+                    )}
+                  </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -2169,7 +2178,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   <div className="bg-gray-700 text-white p-3 rounded-lg shadow-md">
                     {typingMessage}
                     <span className="inline-block w-1 h-4 ml-1 bg-white animate-blink"></span>
-                  </div>
+                      </div>
                 </motion.div>
               )}
               {isTyping && (
@@ -2192,109 +2201,109 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                       className="inline-block w-2 h-2 bg-white rounded-full animate-bounce"
                       style={{ animationDelay: '0.6s' }}
                     ></span>
-                  </div>
+                    </div>
                 </motion.div>
               )}
               <div ref={messagesEndRef} />
             </div>
-            <div className="border-t border-gray-700 p-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !isBotResponding) {
-                      handleSendMessage();
-                    }
-                  }}
-                  placeholder={isBotResponding ? "Please wait for the bot's response..." : "Type a message..."}
-                  className={`flex-1 p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
-                    isBotResponding && !isGenerating ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  disabled={isBotResponding && !isGenerating}
-                />
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleSendMessage}
-                  className={`p-3 rounded-lg ${
-                    isGenerating ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
-                  } text-white transition-colors`}
-                  title={isGenerating ? "Stop Generating" : "Send Message"}
-                >
-                  {isGenerating ? <FiPause /> : <FiSend />}
-                </motion.button>
+          </div>
+          <div className="border-t border-gray-700 p-4 pt-1">
+            <div className="flex items-center space-x-2 pb-3">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !isBotResponding) {
+                    handleSendMessage();
+                  }
+                }}
+                placeholder={isBotResponding ? "Please wait for the bot's response..." : "Type a message..."}
+                className={`flex-1 p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
+                  isBotResponding && !isGenerating ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={isBotResponding && !isGenerating}
+              />
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleSendMessage}
+                className={`p-3 rounded-lg ${
+                  isGenerating ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                } text-white transition-colors`}
+                title={isGenerating ? "Stop Generating" : "Send Message"}
+              >
+                {isGenerating ? <FiPause /> : <FiSend />}
+              </motion.button>
 
-                {/* Search Button */}
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleSearch}
-                  className="p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                  title="Search Wikipedia"
-                >
-                  <FiSearch />
-                </motion.button>
+              {/* Search Button */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleSearch}
+                className="p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                title="Search Wikipedia"
+              >
+                <FiSearch />
+              </motion.button>
 
-                {isDeveloper && (
-                  <>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={handleVoiceInput}
-                      className={`p-3 rounded-lg ${
-                        isListening ? 'bg-red-600' : 'bg-gray-800'
-                      } text-white hover:bg-gray-700 transition-colors`}
-                      title={isListening ? "Stop Listening" : "Start Voice Input"}
-                    >
-                      <FiMic />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="p-3 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-                      title="Upload Image"
-                    >
-                      <FiImage />
-                    </motion.button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleImageUpload}
-                      accept="image/*"
-                      style={{ display: 'none' }}
-                    />
-                  </>
-                )}
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handlePOS}
-                  className="p-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-                >
-                  POS
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleSummarization}
-                  className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Summarize
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleNER}
-                  className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-                >
-                  NER
-                </motion.button>
-              </div>
+              {isDeveloper && (
+                <>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleVoiceInput}
+                    className={`p-3 rounded-lg ${
+                      isListening ? 'bg-red-600' : 'bg-gray-800'
+                    } text-white hover:bg-gray-700 transition-colors`}
+                    title={isListening ? "Stop Listening" : "Start Voice Input"}
+                  >
+                    <FiMic />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-3 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                    title="Upload Image"
+                  >
+                    <FiImage />
+                  </motion.button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                  />
+                </>
+              )}
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handlePOS}
+                className="p-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                POS
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSummarization}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                Summarize
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNER}
+                className="p-2 rounded bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              >
+                NER
+              </motion.button>
             </div>
           </div>
         </motion.div>
@@ -2384,7 +2393,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
       {/* Custom Input Modal */}
       {showCustomInput && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <motion.div
+                <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -2418,12 +2427,12 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
               >
                 Send
               </motion.button>
-            </div>
+                    </div>
           </motion.div>
         </div>
-      )}
+                    )}
 
-    </div>
+                  </div>
   );
 };
 
