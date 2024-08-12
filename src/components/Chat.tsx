@@ -1181,11 +1181,17 @@ interface TrainingProgress {
 
 
 const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
-  const LoadingSpinner: React.FC = () => (
+  interface LoadingSpinnerProps {
+    size?: number;
+    color?: string;
+  }
+
+  const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 60, color = "#ffffff" }) => (
     <motion.div
       className="loading-dots"
       animate={{ opacity: [0.5, 1, 0.5] }}
       transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+      style={{ fontSize: `${size / 10}px`, color: color }}
     >
       <span>.</span>
       <span>.</span>
