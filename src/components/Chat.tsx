@@ -20,7 +20,6 @@ import {
 } from 'react-icons/fi';
 import { Message as ImportedMessage } from '../types';
 import logo from '../assets/GMTStudio_.png';
-
 interface ChatProps {
   selectedChat: { title: string } | null;
 }
@@ -826,7 +825,7 @@ interface BestHyperparameters {
   dropoutRate: number;
 }
 
-const layerSizesOptions = [[25, 25, 10], [25, 20, 10], [25, 15, 10]];
+const layerSizesOptions = [[25,45,10],[25, 25, 10], [25, 20, 10], [25, 15, 10]];
 const learningRateOptions = [0.005, 0.05];
 const dropoutRateOptions = [0.3, 0.5];
 
@@ -852,7 +851,7 @@ for (const layerSizes of layerSizesOptions) {
       neuralNetwork.train(
         trainingData.map((data) => data.input),
         trainingData.map((data) => data.target),
-        50
+        10
       );
 
       const accuracy = calculateAccuracy(neuralNetwork, trainingData);
@@ -1280,7 +1279,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           true
         );
 
-        const totalEpochs = 500; // Reduced to 750 epochs
+        const totalEpochs = 250; // Reduced to 250 epochs
 
         for (let epoch = 0; epoch <= totalEpochs; epoch++) {
           const loss = finalNeuralNetwork.train(
@@ -1302,7 +1301,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
         setTrainingProgress({ epoch: totalEpochs, loss: 0, accuracy: 1 });
 
         // Add a 2-second delay after training is complete
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         setTrainingStatus('complete');
       } catch (error) {
@@ -1900,13 +1899,13 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                 transition={{ delay: 0.3 }}
               >
                 <p className="text-lg mb-2">Training Progress:</p>
-                <p>Epoch: <span className="font-semibold">{trainingProgress.epoch}/500</span></p>
+                <p>Epoch: <span className="font-semibold">{trainingProgress.epoch}/250</span></p>
                 <p>Loss: <span className="font-semibold">{trainingProgress.loss.toFixed(4)}</span></p>
                 <p>
                   Accuracy: <span className="font-semibold">{(trainingProgress.accuracy * 100).toFixed(2)}%</span>
                 </p>
                 <div className="w-full bg-gray-700 rounded-full h-2.5 mt-2">
-                  <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(trainingProgress.epoch / 500) * 100}%` }}></div>
+                  <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${(trainingProgress.epoch / 250) * 100}%` }}></div>
             </div>
               </motion.div>
             )}
