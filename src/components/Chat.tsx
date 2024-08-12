@@ -20,6 +20,7 @@ import {
 } from 'react-icons/fi';
 import { Message as ImportedMessage } from '../types';
 import logo from '../assets/GMTStudio_.png';
+
 interface ChatProps {
   selectedChat: { title: string } | null;
 }
