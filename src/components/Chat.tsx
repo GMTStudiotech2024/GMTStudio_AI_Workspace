@@ -1855,7 +1855,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   return (
     <div
     className={`flex flex-col h-screen w-full ${
-      darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
+      darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-400  text-gray-800'
     } transition-colors duration-300`}
   >
       <AnimatePresence>
