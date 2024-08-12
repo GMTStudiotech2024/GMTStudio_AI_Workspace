@@ -1548,7 +1548,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
 
       let response = '';
       if (summary) {
-        response = `It seems that you want to know about "${inputValue}" ${generateSummaryResponse(summary)}`;
+        response = ` ${generateSummaryResponse(summary)}`;
         
         if (searchMemory.length > 1) {
           response += ` Interestingly, this relates to our previous searches. ${generateAnalysis(searchMemory)}`;
