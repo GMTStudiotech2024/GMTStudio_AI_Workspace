@@ -412,7 +412,7 @@ class EnhancedNeuralNetwork {
       case 'swish':
       case 'mish':
       case 'gelu':
-        return Math.random() * Math.sqrt(2 / fanIn);
+        return Math.random() * Math.sqrt(3 / fanIn);
       default:
         return Math.random() * Math.sqrt(2 / (fanIn + fanOut));
     }
@@ -1036,7 +1036,7 @@ const generateDontUnderstandResponse = (): string => {
     "I'm having trouble understanding what you mean. Can you try asking in a different way?",
     "I apologize, but I'm not sure how to respond to that. Is there another way you could phrase your question?",
     "I'm afraid I don't have enough information to answer that. Could you provide more context or ask a different question?",
-    "That's a bit beyond my current capabilities. Is there something else I can help you with?",
+    "That's a bit beyond my current capabilities. Is there something else I can help with?",
   ];
   return responses[Math.floor(Math.random() * responses.length)];
 };
