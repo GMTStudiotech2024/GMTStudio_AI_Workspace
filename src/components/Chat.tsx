@@ -1036,7 +1036,7 @@ const generateDontUnderstandResponse = (): string => {
     "I'm having trouble understanding what you mean. Can you try asking in a different way?",
     "I apologize, but I'm not sure how to respond to that. Is there another way you could phrase your question?",
     "I'm afraid I don't have enough information to answer that. Could you provide more context or ask a different question?",
-    "That's a bit beyond my current capabilities. Is there something else I can help you with?",
+    "That's a bit beyond my current capabilities. Is there something else I can help with?",
   ];
   return responses[Math.floor(Math.random() * responses.length)];
 };
@@ -1770,30 +1770,108 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
     }
   };
 
-  const performSummarization = async (text: string): Promise<string> => {
-    const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
-    const summary = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
-    return summary;
+  const performSummarization = (text: string): string => {
+    const sentences = getSentences(text);
+    const wordFrequencies = getWordCounts(text);
+    const filteredFrequencies = filterStopWords(wordFrequencies);
+    const sortedWords = sortByFreqThenDropFreq(filteredFrequencies);
+
+    const maxSummarySize = 3;
+    const summarySentences = new Set<string>();
+
+    // Add the first sentence to the summary
+    if (sentences.length > 0) {
+      summarySentences.add(formatFirstSentence(sentences[0], sentences));
+    }
+
+    // Select sentences based on word frequency
+    for (const word of sortedWords) {
+      const matchingSentence = search(sentences, word);
+      if (matchingSentence && !summarySentences.has(matchingSentence)) {
+        summarySentences.add(matchingSentence);
+        if (summarySentences.size >= maxSummarySize) {
+          break;
+        }
+      }
+    }
+
+    return Array.from(summarySentences).join(' ');
+  };
+
+  const getSentences = (text: string): string[] => {
+    const cleanedText = text.replace(/Mr\.|Ms\.|Dr\.|Jan\.|Feb\.|Mar\.|Apr\.|Jun\.|Jul\.|Aug\.|Sep\.|Sept\.|Oct\.|Nov\.|Dec\.|St\.|Prof\.|Mrs\.|Gen\.|Corp\.|Sr\.|Jr\.|cm\.|Ltd\.|Col\.|vs\.|Capt\.|Univ\.|Sgt\.|ft\.|in\.|Ave\.|Lt\.|etc\.|mm\./g, match => match.replace('.', ''))
+      .replace(/([A-Z])\./g, '$1')
+      .replace(/\n/g, ' ');
+
+    return cleanedText.match(/[^.!?]+[.!?]+/g) || [];
+  };
+
+  const getWordCounts = (text: string): Map<string, number> => {
+    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+    const wordCounts = new Map<string, number>();
+    for (const word of words) {
+      wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
+    }
+    return wordCounts;
+  };
+
+  const filterStopWords = (wordCounts: Map<string, number>): Map<string, number> => {
+    const stopWords = new Set(['a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'has', 'he', 'in', 'is', 'it',
+      'its', 'of', 'on', 'that', 'the', 'to', 'was', 'were', 'will', 'with']);
+    
+    for (const word of stopWords) {
+      wordCounts.delete(word);
+    }
+    return wordCounts;
+  };
+
+  const sortByFreqThenDropFreq = (wordFrequencies: Map<string, number>): string[] => {
+    return Array.from(wordFrequencies.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(entry => entry[0]);
+  };
+
+  const search = (sentences: string[], word: string): string | undefined => {
+    return sentences.find(sentence => sentence.toLowerCase().includes(word.toLowerCase()));
+  };
+
+  const formatFirstSentence = (firstSentence: string, sentences: string[]): string => {
+    const datePattern = /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\s\d{1,2}\s(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{4}\s\d{1,2}\.\d{2}(\sEST|\sPST)/;
+    
+    firstSentence = firstSentence.replace('Last modified on', '').replace(datePattern, '');
+
+    const bbcArticles = 'Share this with Email Facebook Messenger Messenger Twitter Pinterest WhatsApp LinkedIn Copy this link These are external links and will open in a new window';
+    const guardianArticles = 'We use cookies to improve your experience on our site and to show you personalised advertising';
+
+    if (firstSentence.includes(bbcArticles)) {
+      firstSentence = firstSentence.replace(bbcArticles, '');
+    }
+
+    if (firstSentence.includes('First published on') || firstSentence.includes(guardianArticles)) {
+      firstSentence = firstSentence.replace('First published on', '');
+      firstSentence = sentences[2] || firstSentence;
+    }
+
+    if (firstSentence.includes('MailOnline')) {
+      const words = firstSentence.split(' ');
+      const commentsIndex = words.indexOf('comments');
+      if (commentsIndex !== -1) {
+        firstSentence = words.slice(commentsIndex + 1).join(' ').trim();
+      }
+    }
+
+    return firstSentence.trim();
   };
 
   const handleSummarization = () => {
     if (inputValue) {
       setIsTyping(true);
-      performSummarization(inputValue)
-        .then((summaryResult: string) => {
-          simulateTyping(`Text Summary:\n${summaryResult}`);
-          setInputValue('');
-        })
-        .catch((error: Error) => {
-          console.error('Error in summarization:', error);
-          simulateTyping('An error occurred during summarization.');
-        })
-        .finally(() => {
-          setIsTyping(false);
-        });
+      const summaryResult = performSummarization(inputValue);
+      simulateTyping(`Text Summary:\n${summaryResult}`);
+      setInputValue('');
+      setIsTyping(false);
     }
   };
-
 
   const handleVoiceInput = () => {
     if ('webkitSpeechRecognition' in window) {
