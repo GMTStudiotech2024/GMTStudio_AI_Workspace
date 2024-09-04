@@ -713,8 +713,17 @@ const trainingData = [
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
   { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-    
-
+  // New training data
+  { input: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] },
+  { input: [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 1, 0, 0, 0, 0, 0] },
+  { input: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 1, 0, 1, 0, 0, 0, 0, 0, 0] },
+  { input: [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 1, 0, 0, 1, 0, 0, 0, 0] },
+  { input: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0] },
+  { input: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], target: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0] },
 ];
 
 // Best Hyperparameters
@@ -938,8 +947,8 @@ const generateThankYouResponse = (): string => {
 
 const generateDontUnderstandResponse = (): string => {
   const responses = [
-    "I'm sorry, but I don't understand your input. Could you please rephrase or ask something else?",
-    "I'm having trouble understanding what you mean. Can you try asking in a different way?",
+    "Why are you being lazy ? lazy will make your math get C in the test and F in the English class",
+    "I afraid that I can't help you with that, you know, i don't have large data set to learn from, but you have, stop making you grade looks like C inside the trash can",
     "I apologize, but I'm not sure how to respond to that. Is there another way you could phrase your question?",
     "I'm afraid I don't have enough information to answer that. Could you provide more context or ask a different question?",
     "That's a bit beyond my current capabilities. Is there something else I can help with?",
@@ -966,7 +975,6 @@ const enhancedMachineLearning = (input: string): string => {
   const topics = ['weather', 'news', 'sports', 'technology', 'movies', 'music', 'books'];
 
 
-  // Create a more detailed input vector
   const inputVector = [
     greetings.some(word => inputLower.includes(word)) ? 1 : 0,
     farewells.some(word => inputLower.includes(word)) ? 1 : 0,
@@ -978,6 +986,7 @@ const enhancedMachineLearning = (input: string): string => {
     mathKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
     helpKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
     thankYouKeywords.some(word => inputLower.includes(word)) ? 1 : 0,
+    ...topics.map(topic => inputLower.includes(topic) ? 1 : 0)
   ];
 
   const predictedClass = finalNeuralNetwork.predict(inputVector);
