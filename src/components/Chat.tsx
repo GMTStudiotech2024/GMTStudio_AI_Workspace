@@ -597,7 +597,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
   return (
     <div
       className={`flex flex-col h-screen w-full ${
-        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-800'
+        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
       } transition-colors duration-300`}
     >
       <AnimatePresence>
@@ -626,7 +626,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
             <p className="text-xl mb-6">This process will take approximately 15 seconds.</p>
             {trainingProgress && (
               <motion.div
-                className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg max-w-md mx-auto"
+                className="mt-6 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg max-w-md mx-auto"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -644,9 +644,9 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   <span>Accuracy:</span>
                   <span className="font-semibold">{(trainingProgress.accuracy * 100).toFixed(2)}%</span>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-4">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <motion.div
-                    className="bg-blue-600 h-4 rounded-full"
+                    className="bg-blue-500 h-2 rounded-full"
                     style={{ width: `${(trainingProgress.epoch / 250) * 100}%` }}
                     initial={{ width: 0 }}
                     animate={{ width: `${(trainingProgress.epoch / 250) * 100}%` }}
@@ -686,7 +686,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex justify-between items-center p-4 border-b border-gray-700">
+          <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
             <h1 className="text-3xl font-bold pl-10">
               {selectedChat ? selectedChat.title : 'New Chat'} - {selectedModel}
             </h1>
@@ -696,26 +696,26 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowSettings(true)}
-                  className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+                  className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   title="Settings"
                 >
-                  <FiSettings className="text-gray-400 text-2xl" />
+                  <FiSettings className="text-gray-600 dark:text-gray-400 text-2xl" />
                 </motion.button>
               )}
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={handleClearChat}
-                className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 title="Clear Chat"
               >
-                <FiEdit className="text-gray-400 text-2xl" />
+                <FiEdit className="text-gray-600 dark:text-gray-400 text-2xl" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
                 {darkMode ? (
@@ -747,7 +747,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     Welcome to GMTStudio AI Studio
                   </motion.h2>
                   <motion.p
-                    className="text-xl mb-8 text-center text-gray-300 max-w-lg"
+                    className="text-xl mb-8 text-center text-gray-600 dark:text-gray-300 max-w-lg"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
@@ -764,7 +764,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                       {suggestions.map((suggestion, index) => (
                         <motion.button
                           key={index}
-                          whileHover={{ scale: 1.05, backgroundColor: "#4A5568" }}
+                          whileHover={{ scale: 1.05, backgroundColor: "#F3F4F6" }}
                           whileTap={{ scale: 0.95 }}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -773,7 +773,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                             setInputValue(suggestion.text);
                             handleSendMessage();
                           }}
-                          className="flex items-center justify-start space-x-3 bg-gray-800 text-white rounded-lg px-6 py-4 text-sm transition-all duration-200 shadow-lg hover:shadow-xl border border-gray-700"
+                          className="flex items-center justify-start space-x-3 bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-2xl px-6 py-4 text-sm transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700"
                         >
                           <div className="text-3xl">{suggestion.icon}</div>
                           <span className="flex-1 text-left font-medium">{suggestion.text}</span>
@@ -787,10 +787,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1 }}
                   >
-                    <p className="text-gray-400 mb-2">You can use advanced Search by typing in the topic you want to know about and clicking the search button next to the send button.</p>
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">You can use advanced Search by typing in the topic you want to know about and clicking the search button next to the send button.</p>
                     <button
                       onClick={() => setShowCustomInput(true)}
-                      className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-semibold text-lg"
+                      className="text-blue-500 hover:text-blue-600 transition-colors duration-200 font-semibold text-lg"
                     >
                       Ask a custom question
                     </button>
@@ -810,7 +810,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                             setInputValue(suggestion.text);
                             handleSendMessage();
                           }}
-                          className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg px-4 py-3 text-lg transition-colors duration-200"
+                          className="flex items-center space-x-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white rounded-2xl px-4 py-3 text-lg transition-colors duration-200 shadow-sm hover:shadow-md"
                         >
                           {suggestion.icon}
                           <span>{suggestion.text}</span>
@@ -833,10 +833,10 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                       }`}
                     >
                       <div
-                        className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-4 rounded-lg shadow-md ${
+                        className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl p-4 rounded-2xl shadow-md ${
                           message.sender === 'user'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-700 text-white'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-white'
                         }`}
                       >
                         <p className="text-sm mb-2 font-semibold">{message.sender === 'user' ? 'You' : 'AI'}</p>
@@ -854,7 +854,7 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => message.confirmationType === 'math' ? handleMathCalculation() : handleSummary()}
-                              className="p-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors"
+                              className="p-2 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors"
                             >
                               <FiCheck className="text-xl" />
                             </motion.button>
@@ -862,14 +862,14 @@ const Chat: React.FC<ChatProps> = ({ selectedChat }) => {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={proceedWithNormalMessage}
-                              className="p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors"
+                              className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
                             >
                               <FiX className="text-xl" />
                             </motion.button>
                           </div>
                         )}
                         {message.sender === 'bot' && (
-                          <div className="mt-3 text-xs text-gray-400">
+                          <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
                             {isDeveloper ? (
                               <>
                                 <p>
